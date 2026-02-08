@@ -345,6 +345,41 @@
     font-size: 14px;
   }
 
+  /* Date Group Header */
+  .date-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 4px 6px;
+    margin-top: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+  }
+
+  .date-header:first-child {
+    margin-top: 0;
+  }
+
+  .date-header-line {
+    flex: 1;
+    height: 1px;
+    background: #e2e8f0;
+  }
+
+  .date-header-label {
+    white-space: nowrap;
+  }
+
+  .date-header-label.is-overdue {
+    color: #dc2626;
+  }
+
+  .date-header-label.is-today {
+    color: #ea580c;
+    font-weight: 700;
+  }
+
   /* ===== Footer Toolbar ===== */
   .footer-bar {
     display: flex;
@@ -493,6 +528,26 @@
     return parts[1] + '/' + parts[2];
   }
 
+  function formatDateFull(dateStr) {
+    if (!dateStr) return '未设定日期';
+    var today = todayStr();
+    var parts = dateStr.split('-');
+    var weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+    var d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+    var weekday = '周' + weekdays[d.getDay()];
+    var label = parts[0] + '年' + parseInt(parts[1]) + '月' + parseInt(parts[2]) + '日 ' + weekday;
+    if (dateStr === today) label = '今天 - ' + label;
+    return label;
+  }
+
+  function dateHeaderClass(dateStr) {
+    if (!dateStr) return '';
+    var today = todayStr();
+    if (dateStr < today) return 'is-overdue';
+    if (dateStr === today) return 'is-today';
+    return '';
+  }
+
   function dueDateClass(dateStr, done) {
     if (!dateStr || done) return 'due-future';
     var today = todayStr();
@@ -531,10 +586,44 @@
 
     if (filtered.length === 0) {
       listEl.innerHTML = '<li class="empty">没有匹配的待办事项</li>';
+      var remaining = todos.filter(function (t) { return !t.done; }).length;
+      statsEl.textContent = remaining + ' 项未完成 / 共 ' + todos.length + ' 项';
+      return;
     }
 
-    filtered.forEach(function (todo) {
+    // Sort filtered items by dueDate (items with date first, sorted ascending; no-date items last)
+    var sorted = filtered.slice().sort(function (a, b) {
+      var da = a.dueDate || '\uffff';
+      var db = b.dueDate || '\uffff';
+      if (da < db) return -1;
+      if (da > db) return 1;
+      return 0;
+    });
+
+    // Group by date and render with date headers
+    var lastDate = null;
+
+    sorted.forEach(function (todo) {
       var realIndex = todos.indexOf(todo);
+      var dateKey = todo.dueDate || '';
+
+      // Insert date header when date changes
+      if (dateKey !== lastDate) {
+        lastDate = dateKey;
+        var header = document.createElement('li');
+        header.className = 'date-header';
+
+        var label = document.createElement('span');
+        label.className = 'date-header-label ' + dateHeaderClass(dateKey);
+        label.textContent = formatDateFull(dateKey);
+
+        var line = document.createElement('span');
+        line.className = 'date-header-line';
+
+        header.appendChild(label);
+        header.appendChild(line);
+        listEl.appendChild(header);
+      }
 
       var li = document.createElement('li');
       li.className = 'todo-item';
@@ -580,16 +669,6 @@
       catBadge.className = 'cat-badge cat-' + todo.category;
       catBadge.textContent = CATEGORIES[todo.category] || '其他';
       meta.appendChild(catBadge);
-
-      // Due date badge
-      if (todo.dueDate) {
-        var dueBadge = document.createElement('span');
-        var cls = dueDateClass(todo.dueDate, todo.done);
-        dueBadge.className = 'due-badge ' + cls;
-        var label = cls === 'due-overdue' ? '已过期 ' : cls === 'due-today' ? '今天 ' : '';
-        dueBadge.textContent = label + formatDate(todo.dueDate);
-        meta.appendChild(dueBadge);
-      }
 
       content.appendChild(text);
       content.appendChild(meta);
