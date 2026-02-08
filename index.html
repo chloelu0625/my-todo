@@ -85,14 +85,29 @@
   .drag-handle:hover { color: #94a3b8; }
   .drag-handle:active { cursor: grabbing; }
 
-  .check-btn {
-    width: 22px; height: 22px; border-radius: 50%; border: 2px solid #cbd5e1; background: #fff;
-    cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-    transition: border-color 0.2s, background 0.2s;
+  .todo-checkbox {
+    width: 18px; height: 18px; cursor: pointer; flex-shrink: 0; accent-color: #7c3aed;
   }
-  .check-btn:hover { border-color: #34d399; }
-  .check-btn.done { border-color: #34d399; background: #34d399; }
-  .check-btn.done::after { content:""; width:9px; height:5px; border-left:2px solid #fff; border-bottom:2px solid #fff; transform:rotate(-45deg) translateY(-1px); }
+  .complete-btn {
+    padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 500; cursor: pointer;
+    border: 1.5px solid #d1d5db; background: #fff; color: #64748b; transition: all 0.2s; flex-shrink: 0; white-space: nowrap;
+  }
+  .complete-btn:hover { border-color: #34d399; color: #16a34a; background: #f0fdf4; }
+  .complete-btn.is-done { border-color: #bbf7d0; background: #dcfce7; color: #16a34a; }
+
+  .select-bar {
+    display: flex; gap: 8px; align-items: center; padding: 8px 12px; margin-bottom: 10px;
+    background: #f5f3ff; border: 1.5px solid #e9d5ff; border-radius: 10px; flex-wrap: wrap;
+  }
+  .select-bar .select-count { font-size: 13px; font-weight: 600; color: #7c3aed; margin-right: 4px; }
+  .select-bar .select-action {
+    padding: 4px 12px; border: 1.5px solid #c4b5fd; border-radius: 6px; background: #faf5ff;
+    font-size: 11px; cursor: pointer; color: #7c3aed; font-weight: 500; transition: all 0.2s;
+  }
+  .select-bar .select-action:hover { background: #ede9fe; border-color: #a78bfa; }
+  .select-bar .select-action.danger { border-color: #fca5a5; color: #dc2626; background: #fef2f2; }
+  .select-bar .select-action.danger:hover { background: #fee2e2; }
+  .select-bar .select-cancel { background: none; border: none; color: #94a3b8; font-size: 12px; cursor: pointer; margin-left: auto; }
 
   .item-content { flex: 1; min-width: 0; }
   .todo-text { font-size: 14px; color: #334155; word-break: break-word; transition: color 0.2s; }
@@ -253,6 +268,7 @@
       </select>
     </div>
 
+    <div id="selectBar" class="select-bar" style="display:none"></div>
     <ul class="todo-list" id="todoList"></ul>
     <div class="stats" id="stats"></div>
 
@@ -261,7 +277,8 @@
       <h2>&#x2728; AI 助手</h2>
       <div id="aiKeyArea"></div>
       <div class="ai-bar">
-        <button class="ai-btn" id="aiBreakdownBtn" title="输入一个大任务，AI 拆分为子任务">&#127919; 拆解任务</button>
+        <button class="ai-btn" id="aiBreakdownBtn" title="拆解选中任务或输入新任务">&#127919; 拆解任务</button>
+        <button class="ai-btn" id="aiExecuteBtn" title="AI 生成选中任务的执行步骤">&#9889; 任务执行</button>
         <button class="ai-btn" id="aiPlanBtn" title="AI 根据待办生成今日规划">&#128197; 每日规划</button>
         <button class="ai-btn" id="aiAutoBtn" title="添加时 AI 自动推荐分类和日期">&#x1F3AF; 智能添加</button>
       </div>
@@ -304,13 +321,16 @@
   var aiKeyArea = document.getElementById('aiKeyArea');
   var aiResultEl = document.getElementById('aiResult');
   var aiBreakdownBtn = document.getElementById('aiBreakdownBtn');
+  var aiExecuteBtn = document.getElementById('aiExecuteBtn');
   var aiPlanBtn = document.getElementById('aiPlanBtn');
   var aiAutoBtn = document.getElementById('aiAutoBtn');
+  var selectBar = document.getElementById('selectBar');
 
   var currentFilter = 'all';
   var dragSrcIndex = null;
   var editingId = null;
   var smartAddMode = false;
+  var selectedIds = new Set();
 
   var CATEGORIES = { work: '工作', life: '生活', study: '学习', other: '其他' };
   var CAT_KEYS = ['work', 'life', 'study', 'other'];
@@ -521,17 +541,29 @@
 
   // ===== AI Feature 1: Task Breakdown =====
   function aiBreakdown() {
+    var sel = getSelectedTodos();
+    if (sel.length > 0) { aiBreakdownSelected(); return; }
     var task = prompt('请输入要拆解的大任务：');
     if (!task) return;
+    doBreakdown(task);
+  }
 
+  function aiBreakdownSelected() {
+    var sel = getSelectedTodos();
+    if (sel.length === 0) { alert('请先勾选要拆解的任务'); return; }
+    var taskText = sel.map(function(t) { return t.text; }).join('、');
+    doBreakdown(taskText);
+  }
+
+  function doBreakdown(task) {
     aiBreakdownBtn.disabled = true;
     aiBreakdownBtn.classList.add('loading');
     aiBreakdownBtn.textContent = '拆解中...';
 
     var today = todayStr();
-    var p = '你是一个任务管理助手。用户输入了一个大任务，请将其拆解为3-7个具体的子任务。\n\n' +
+    var p = '你是一个任务管理助手。用户输入了一个大任务（可能包含多个），请将其拆解为3-7个具体的子任务。\n\n' +
       '今天日期: ' + today + '\n' +
-      '大任务: ' + task + '\n\n' +
+      '任务: ' + task + '\n\n' +
       '请以JSON数组格式返回，每个子任务包含:\n' +
       '- text: 子任务描述（简洁，中文）\n' +
       '- category: 分类（work/life/study/other 之一）\n' +
@@ -562,28 +594,61 @@
         html += '</div>';
         aiResultEl.innerHTML = html;
 
-        // Bind add buttons
         aiResultEl.querySelectorAll('.ai-add-btn').forEach(function(btn) {
           btn.addEventListener('click', function() {
             var idx = parseInt(this.getAttribute('data-idx'));
             var t = tasks[idx];
             todos.push({
-              id: Date.now() + idx,
-              text: t.text,
-              done: false,
-              category: t.category || 'other',
-              dueDate: t.dueDate || '',
+              id: Date.now() + idx, text: t.text, done: false,
+              category: t.category || 'other', dueDate: t.dueDate || '',
               createdAt: new Date().toISOString()
             });
             save(); render();
-            this.textContent = '已添加';
-            this.disabled = true;
-            this.style.background = '#94a3b8';
+            this.textContent = '已添加'; this.disabled = true; this.style.background = '#94a3b8';
           });
         });
       } catch(e) {
         aiResultEl.innerHTML = '<div class="ai-result">' + text + '</div>';
       }
+    });
+  }
+
+  // ===== AI Feature: Task Execution =====
+  function aiExecuteSelected() {
+    var sel = getSelectedTodos();
+    if (sel.length === 0) { alert('请先勾选要执行的任务'); return; }
+
+    aiExecuteBtn.disabled = true;
+    aiExecuteBtn.classList.add('loading');
+    aiExecuteBtn.textContent = '分析中...';
+
+    var today = todayStr();
+    var taskList = sel.map(function(t, i) {
+      return (i+1) + '. ' + t.text +
+        ' [分类:' + (CATEGORIES[t.category]||'其他') + ']' +
+        (t.dueDate ? ' [截止:' + t.dueDate + ']' : '');
+    }).join('\n');
+
+    var p = '你是一个任务执行顾问。用户选中了以下待办任务，请为每个任务生成具体的执行步骤和建议。\n\n' +
+      '今天日期: ' + today + '\n\n' +
+      '选中的任务:\n' + taskList + '\n\n' +
+      '请为每个任务生成:\n' +
+      '1. 3-5个具体执行步骤（可操作的行动）\n' +
+      '2. 预估所需时间\n' +
+      '3. 需要的工具或资源\n' +
+      '4. 注意事项或技巧\n\n' +
+      '用中文回答，格式清晰，使用 emoji 让内容更生动。每个任务用标题分隔。';
+
+    callAI(p, function(text, err) {
+      aiExecuteBtn.disabled = false;
+      aiExecuteBtn.classList.remove('loading');
+      aiExecuteBtn.textContent = '\u26A1 任务执行';
+
+      if (err) { alert('AI 错误: ' + err); return; }
+
+      document.getElementById('aiModalTitle').textContent = '⚡ 任务执行方案';
+      document.getElementById('aiModalContent').textContent = text;
+      document.getElementById('aiModal').classList.add('show');
     });
   }
 
@@ -722,6 +787,39 @@
     });
   }
 
+  // ===== Selection =====
+  function getSelectedTodos() {
+    return todos.filter(function(t) { return selectedIds.has(t.id); });
+  }
+
+  function renderSelectBar() {
+    var count = selectedIds.size;
+    if (count === 0) { selectBar.style.display = 'none'; return; }
+    selectBar.style.display = 'flex';
+    selectBar.innerHTML =
+      '<span class="select-count">已选 ' + count + ' 项</span>' +
+      '<button class="select-action" id="selBreakdown">&#127919; 拆解</button>' +
+      '<button class="select-action" id="selExecute">&#9889; 执行</button>' +
+      '<button class="select-action" id="selDone">&#x2705; 全部完成</button>' +
+      '<button class="select-action danger" id="selDelete">&#x2715; 删除</button>' +
+      '<button class="select-cancel" id="selClear">取消选择</button>';
+    document.getElementById('selBreakdown').addEventListener('click', function() { aiBreakdownSelected(); });
+    document.getElementById('selExecute').addEventListener('click', function() { aiExecuteSelected(); });
+    document.getElementById('selDone').addEventListener('click', function() {
+      getSelectedTodos().forEach(function(t) { t.done = true; });
+      selectedIds.clear(); save(); render();
+    });
+    document.getElementById('selDelete').addEventListener('click', function() {
+      if (!confirm('确定删除选中的 ' + count + ' 项？')) return;
+      var ids = new Set(selectedIds);
+      todos = todos.filter(function(t) { return !ids.has(t.id); });
+      selectedIds.clear(); save(); render();
+    });
+    document.getElementById('selClear').addEventListener('click', function() {
+      selectedIds.clear(); render();
+    });
+  }
+
   // ===== Render =====
   function render() {
     listEl.innerHTML = '';
@@ -776,27 +874,39 @@
         li.addEventListener('drop', handleDrop);
         li.addEventListener('dragend', handleDragEnd);
 
+        var chk = document.createElement('input');
+        chk.type = 'checkbox';
+        chk.className = 'todo-checkbox';
+        chk.checked = selectedIds.has(todo.id);
+        (function(tid) {
+          chk.addEventListener('change', function() {
+            if (this.checked) selectedIds.add(tid); else selectedIds.delete(tid);
+            renderSelectBar();
+          });
+        })(todo.id);
+
         var handle = document.createElement('span');
         handle.className = 'drag-handle';
         handle.textContent = '\u2807';
 
-        var check = document.createElement('button');
-        check.className = 'check-btn' + (todo.done ? ' done' : '');
-        check.addEventListener('click', function() { todo.done = !todo.done; save(); render(); });
-
         var content = document.createElement('div');
         content.className = 'item-content';
-        var text = document.createElement('span');
-        text.className = 'todo-text' + (todo.done ? ' done' : '');
-        text.textContent = todo.text;
+        var textSpan = document.createElement('span');
+        textSpan.className = 'todo-text' + (todo.done ? ' done' : '');
+        textSpan.textContent = todo.text;
         var meta = document.createElement('div');
         meta.className = 'item-meta';
-        var cb = document.createElement('span');
-        cb.className = 'cat-badge cat-' + todo.category;
-        cb.textContent = CATEGORIES[todo.category] || '其他';
-        meta.appendChild(cb);
-        content.appendChild(text);
+        var catBadge = document.createElement('span');
+        catBadge.className = 'cat-badge cat-' + todo.category;
+        catBadge.textContent = CATEGORIES[todo.category] || '其他';
+        meta.appendChild(catBadge);
+        content.appendChild(textSpan);
         content.appendChild(meta);
+
+        var compBtn = document.createElement('button');
+        compBtn.className = 'complete-btn' + (todo.done ? ' is-done' : '');
+        compBtn.textContent = todo.done ? '已完成' : '完成';
+        compBtn.addEventListener('click', function() { todo.done = !todo.done; save(); render(); });
 
         var eb = document.createElement('button');
         eb.className = 'edit-btn';
@@ -806,11 +916,12 @@
         var db = document.createElement('button');
         db.className = 'del-btn';
         db.innerHTML = '&#x2715;';
-        db.addEventListener('click', function() { todos.splice(realIndex, 1); save(); render(); });
+        db.addEventListener('click', function() { todos.splice(realIndex, 1); selectedIds.delete(todo.id); save(); render(); });
 
+        li.appendChild(chk);
         li.appendChild(handle);
-        li.appendChild(check);
         li.appendChild(content);
+        li.appendChild(compBtn);
         li.appendChild(eb);
         li.appendChild(db);
       } else {
@@ -834,6 +945,7 @@
 
     var remaining = todos.filter(function(t){return !t.done;}).length;
     statsEl.textContent = remaining + ' 项未完成 / 共 ' + todos.length + ' 项';
+    renderSelectBar();
   }
 
   // ===== Add Todo =====
@@ -910,6 +1022,7 @@
   importFile.addEventListener('change', function() { if(this.files&&this.files[0]){importData(this.files[0]);this.value='';} });
 
   aiBreakdownBtn.addEventListener('click', aiBreakdown);
+  aiExecuteBtn.addEventListener('click', function() { aiExecuteSelected(); });
   aiPlanBtn.addEventListener('click', aiDailyPlan);
   aiAutoBtn.addEventListener('click', toggleSmartAdd);
 
