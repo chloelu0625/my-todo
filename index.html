@@ -16,469 +16,193 @@
     padding: 40px 16px;
   }
 
-  .container {
-    width: 100%;
-    max-width: 580px;
-    align-self: flex-start;
-  }
+  .container { width: 100%; max-width: 580px; align-self: flex-start; }
 
   .card {
     background: #fff;
     border-radius: 16px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255,255,255,0.6);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6);
     padding: 32px 28px;
   }
 
-  h1 {
-    font-size: 26px;
-    font-weight: 700;
-    color: #1e293b;
-    text-align: center;
-    margin-bottom: 24px;
-  }
+  h1 { font-size: 26px; font-weight: 700; color: #1e293b; text-align: center; margin-bottom: 24px; }
 
   /* ===== Input Row ===== */
-  .input-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 12px;
-    flex-wrap: wrap;
-  }
-
+  .input-row { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
   .input-row input[type="text"] {
-    flex: 1;
-    min-width: 160px;
-    padding: 10px 14px;
-    border: 2px solid #e2e8f0;
-    border-radius: 10px;
-    font-size: 15px;
-    outline: none;
-    transition: border-color 0.2s;
+    flex: 1; min-width: 160px; padding: 10px 14px; border: 2px solid #e2e8f0;
+    border-radius: 10px; font-size: 15px; outline: none; transition: border-color 0.2s;
   }
-
-  .input-row input[type="text"]:focus {
-    border-color: #60a5fa;
-  }
-
+  .input-row input[type="text"]:focus { border-color: #60a5fa; }
   .input-row input[type="date"] {
-    padding: 10px 10px;
-    border: 2px solid #e2e8f0;
-    border-radius: 10px;
-    font-size: 13px;
-    outline: none;
-    transition: border-color 0.2s;
-    color: #64748b;
-    max-width: 150px;
+    padding: 10px 10px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 13px;
+    outline: none; transition: border-color 0.2s; color: #64748b; max-width: 150px;
   }
-
-  .input-row input[type="date"]:focus {
-    border-color: #60a5fa;
-  }
-
+  .input-row input[type="date"]:focus { border-color: #60a5fa; }
   .input-row select {
-    padding: 10px 10px;
-    border: 2px solid #e2e8f0;
-    border-radius: 10px;
-    font-size: 13px;
-    outline: none;
-    background: #fff;
-    cursor: pointer;
-    color: #64748b;
-    transition: border-color 0.2s;
+    padding: 10px 10px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 13px;
+    outline: none; background: #fff; cursor: pointer; color: #64748b; transition: border-color 0.2s;
   }
-
-  .input-row select:focus {
-    border-color: #60a5fa;
-  }
-
+  .input-row select:focus { border-color: #60a5fa; }
   .input-row .add-btn {
-    padding: 10px 18px;
-    background: #3b82f6;
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s;
-    white-space: nowrap;
+    padding: 10px 18px; background: #3b82f6; color: #fff; border: none; border-radius: 10px;
+    font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.2s; white-space: nowrap;
   }
-
-  .input-row .add-btn:hover {
-    background: #2563eb;
-  }
+  .input-row .add-btn:hover { background: #2563eb; }
 
   /* ===== Filter Toolbar ===== */
-  .toolbar {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-
+  .toolbar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
   .toolbar .search-input {
-    flex: 1;
-    min-width: 120px;
-    padding: 7px 12px;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 8px;
-    font-size: 13px;
-    outline: none;
-    transition: border-color 0.2s;
+    flex: 1; min-width: 120px; padding: 7px 12px; border: 1.5px solid #e2e8f0;
+    border-radius: 8px; font-size: 13px; outline: none; transition: border-color 0.2s;
   }
-
-  .toolbar .search-input:focus {
-    border-color: #60a5fa;
-  }
-
-  .filter-btns {
-    display: flex;
-    gap: 4px;
-  }
-
+  .toolbar .search-input:focus { border-color: #60a5fa; }
+  .filter-btns { display: flex; gap: 4px; }
   .filter-btn {
-    padding: 5px 12px;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 8px;
-    background: #fff;
-    font-size: 12px;
-    cursor: pointer;
-    color: #64748b;
-    transition: all 0.2s;
-    white-space: nowrap;
+    padding: 5px 12px; border: 1.5px solid #e2e8f0; border-radius: 8px; background: #fff;
+    font-size: 12px; cursor: pointer; color: #64748b; transition: all 0.2s; white-space: nowrap;
   }
-
-  .filter-btn:hover {
-    border-color: #93c5fd;
-    color: #3b82f6;
-  }
-
-  .filter-btn.active {
-    background: #3b82f6;
-    color: #fff;
-    border-color: #3b82f6;
-  }
-
+  .filter-btn:hover { border-color: #93c5fd; color: #3b82f6; }
+  .filter-btn.active { background: #3b82f6; color: #fff; border-color: #3b82f6; }
   .toolbar select {
-    padding: 5px 8px;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 8px;
-    font-size: 12px;
-    background: #fff;
-    cursor: pointer;
-    color: #64748b;
-    outline: none;
+    padding: 5px 8px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 12px;
+    background: #fff; cursor: pointer; color: #64748b; outline: none;
   }
 
   /* ===== Todo List ===== */
-  .todo-list {
-    list-style: none;
-  }
-
+  .todo-list { list-style: none; }
   .todo-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 4px;
-    border-bottom: 1px solid #f1f5f9;
-    animation: fadeIn 0.25s ease;
-    transition: opacity 0.2s, background 0.15s;
-    border-radius: 8px;
+    display: flex; align-items: center; gap: 10px; padding: 12px 4px;
+    border-bottom: 1px solid #f1f5f9; animation: fadeIn 0.25s ease;
+    transition: opacity 0.2s, background 0.15s; border-radius: 8px;
   }
+  .todo-item:last-child { border-bottom: none; }
+  .todo-item.dragging { opacity: 0.4; background: #f0f9ff; }
+  .todo-item.drag-over { border-top: 2px solid #3b82f6; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
 
-  .todo-item:last-child {
-    border-bottom: none;
-  }
+  .drag-handle { cursor: grab; color: #cbd5e1; font-size: 14px; user-select: none; flex-shrink: 0; padding: 2px; transition: color 0.2s; line-height: 1; }
+  .drag-handle:hover { color: #94a3b8; }
+  .drag-handle:active { cursor: grabbing; }
 
-  .todo-item.dragging {
-    opacity: 0.4;
-    background: #f0f9ff;
-  }
-
-  .todo-item.drag-over {
-    border-top: 2px solid #3b82f6;
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-6px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  /* Drag Handle */
-  .drag-handle {
-    cursor: grab;
-    color: #cbd5e1;
-    font-size: 14px;
-    user-select: none;
-    flex-shrink: 0;
-    padding: 2px;
-    transition: color 0.2s;
-    line-height: 1;
-  }
-
-  .drag-handle:hover {
-    color: #94a3b8;
-  }
-
-  .drag-handle:active {
-    cursor: grabbing;
-  }
-
-  /* Checkbox */
   .check-btn {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    border: 2px solid #cbd5e1;
-    background: #fff;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
+    width: 22px; height: 22px; border-radius: 50%; border: 2px solid #cbd5e1; background: #fff;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     transition: border-color 0.2s, background 0.2s;
   }
+  .check-btn:hover { border-color: #34d399; }
+  .check-btn.done { border-color: #34d399; background: #34d399; }
+  .check-btn.done::after { content:""; width:9px; height:5px; border-left:2px solid #fff; border-bottom:2px solid #fff; transform:rotate(-45deg) translateY(-1px); }
 
-  .check-btn:hover {
-    border-color: #34d399;
-  }
+  .item-content { flex: 1; min-width: 0; }
+  .todo-text { font-size: 14px; color: #334155; word-break: break-word; transition: color 0.2s; }
+  .todo-text.done { text-decoration: line-through; color: #94a3b8; }
+  .item-meta { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; align-items: center; }
 
-  .check-btn.done {
-    border-color: #34d399;
-    background: #34d399;
-  }
+  .cat-badge { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 11px; font-weight: 500; line-height: 1.6; }
+  .cat-work { background: #dbeafe; color: #2563eb; }
+  .cat-life { background: #dcfce7; color: #16a34a; }
+  .cat-study { background: #f3e8ff; color: #9333ea; }
+  .cat-other { background: #f1f5f9; color: #64748b; }
 
-  .check-btn.done::after {
-    content: "";
-    width: 9px;
-    height: 5px;
-    border-left: 2px solid #fff;
-    border-bottom: 2px solid #fff;
-    transform: rotate(-45deg) translateY(-1px);
-  }
-
-  /* Item Content */
-  .item-content {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .todo-text {
-    font-size: 14px;
-    color: #334155;
-    word-break: break-word;
-    transition: color 0.2s;
-  }
-
-  .todo-text.done {
-    text-decoration: line-through;
-    color: #94a3b8;
-  }
-
-  .item-meta {
-    display: flex;
-    gap: 6px;
-    margin-top: 4px;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-
-  /* Category Badge */
-  .cat-badge {
-    display: inline-block;
-    padding: 1px 8px;
-    border-radius: 10px;
-    font-size: 11px;
-    font-weight: 500;
-    line-height: 1.6;
-  }
-
-  .cat-work   { background: #dbeafe; color: #2563eb; }
-  .cat-life   { background: #dcfce7; color: #16a34a; }
-  .cat-study  { background: #f3e8ff; color: #9333ea; }
-  .cat-other  { background: #f1f5f9; color: #64748b; }
-
-  /* Due Date Badge */
-  .due-badge {
-    display: inline-block;
-    padding: 1px 8px;
-    border-radius: 10px;
-    font-size: 11px;
-    font-weight: 500;
-    line-height: 1.6;
-  }
-
+  .due-badge { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 11px; font-weight: 500; line-height: 1.6; }
   .due-overdue { background: #fee2e2; color: #dc2626; }
-  .due-today   { background: #ffedd5; color: #ea580c; }
-  .due-future  { background: #f1f5f9; color: #64748b; }
+  .due-today { background: #ffedd5; color: #ea580c; }
+  .due-future { background: #f1f5f9; color: #64748b; }
 
-  /* Delete Button */
-  .del-btn {
-    background: none;
-    border: none;
-    color: #cbd5e1;
-    font-size: 16px;
-    cursor: pointer;
-    padding: 4px;
-    line-height: 1;
-    transition: color 0.2s;
-    flex-shrink: 0;
-  }
+  .del-btn, .edit-btn { background: none; border: none; color: #cbd5e1; cursor: pointer; padding: 4px; line-height: 1; transition: color 0.2s; flex-shrink: 0; }
+  .del-btn { font-size: 16px; }
+  .del-btn:hover { color: #f87171; }
+  .edit-btn { font-size: 14px; }
+  .edit-btn:hover { color: #60a5fa; }
 
-  .del-btn:hover {
-    color: #f87171;
-  }
+  /* Inline Edit */
+  .edit-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; width: 100%; }
+  .edit-row input[type="text"] { flex:1; min-width:100px; padding:6px 10px; border:1.5px solid #93c5fd; border-radius:6px; font-size:14px; outline:none; }
+  .edit-row input[type="date"] { padding:6px 8px; border:1.5px solid #93c5fd; border-radius:6px; font-size:12px; outline:none; max-width:140px; }
+  .edit-row select { padding:6px 8px; border:1.5px solid #93c5fd; border-radius:6px; font-size:12px; outline:none; background:#fff; }
+  .edit-row .save-edit-btn { padding:5px 12px; background:#34d399; color:#fff; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; }
+  .edit-row .cancel-edit-btn { padding:5px 12px; background:#e2e8f0; color:#64748b; border:none; border-radius:6px; font-size:12px; cursor:pointer; }
 
-  /* Edit Button */
-  .edit-btn {
-    background: none;
-    border: none;
-    color: #cbd5e1;
-    font-size: 14px;
-    cursor: pointer;
-    padding: 4px;
-    line-height: 1;
-    transition: color 0.2s;
-    flex-shrink: 0;
-  }
-
-  .edit-btn:hover {
-    color: #60a5fa;
-  }
-
-  /* Inline Edit Mode */
-  .edit-row {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-    align-items: center;
-    width: 100%;
-  }
-
-  .edit-row input[type="text"] {
-    flex: 1;
-    min-width: 100px;
-    padding: 6px 10px;
-    border: 1.5px solid #93c5fd;
-    border-radius: 6px;
-    font-size: 14px;
-    outline: none;
-  }
-
-  .edit-row input[type="date"] {
-    padding: 6px 8px;
-    border: 1.5px solid #93c5fd;
-    border-radius: 6px;
-    font-size: 12px;
-    outline: none;
-    max-width: 140px;
-  }
-
-  .edit-row select {
-    padding: 6px 8px;
-    border: 1.5px solid #93c5fd;
-    border-radius: 6px;
-    font-size: 12px;
-    outline: none;
-    background: #fff;
-  }
-
-  .edit-row .save-edit-btn {
-    padding: 5px 12px;
-    background: #34d399;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-  }
-
-  .edit-row .cancel-edit-btn {
-    padding: 5px 12px;
-    background: #e2e8f0;
-    color: #64748b;
-    border: none;
-    border-radius: 6px;
-    font-size: 12px;
-    cursor: pointer;
-  }
-
-  /* ===== Stats ===== */
-  .stats {
-    text-align: center;
-    margin-top: 16px;
-    font-size: 13px;
-    color: #94a3b8;
-  }
-
-  .empty {
-    text-align: center;
-    padding: 32px 0;
-    color: #cbd5e1;
-    font-size: 14px;
-  }
+  /* Stats & Empty */
+  .stats { text-align: center; margin-top: 16px; font-size: 13px; color: #94a3b8; }
+  .empty { text-align: center; padding: 32px 0; color: #cbd5e1; font-size: 14px; }
 
   /* Date Group Header */
-  .date-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 4px 6px;
-    margin-top: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #64748b;
-  }
+  .date-header { display: flex; align-items: center; gap: 10px; padding: 10px 4px 6px; margin-top: 8px; font-size: 13px; font-weight: 600; color: #64748b; }
+  .date-header:first-child { margin-top: 0; }
+  .date-header-line { flex: 1; height: 1px; background: #e2e8f0; }
+  .date-header-label { white-space: nowrap; }
+  .date-header-label.is-overdue { color: #dc2626; }
+  .date-header-label.is-today { color: #ea580c; font-weight: 700; }
 
-  .date-header:first-child {
-    margin-top: 0;
-  }
-
-  .date-header-line {
-    flex: 1;
-    height: 1px;
-    background: #e2e8f0;
-  }
-
-  .date-header-label {
-    white-space: nowrap;
-  }
-
-  .date-header-label.is-overdue {
-    color: #dc2626;
-  }
-
-  .date-header-label.is-today {
-    color: #ea580c;
-    font-weight: 700;
-  }
-
-  /* ===== Footer Toolbar ===== */
-  .footer-bar {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    margin-top: 16px;
-    padding-top: 14px;
-    border-top: 1px solid #f1f5f9;
-  }
-
+  /* ===== Footer ===== */
+  .footer-bar { display: flex; justify-content: center; gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px solid #f1f5f9; flex-wrap: wrap; }
   .footer-btn {
-    padding: 6px 14px;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 8px;
-    background: #fff;
-    font-size: 12px;
-    cursor: pointer;
-    color: #64748b;
-    transition: all 0.2s;
+    padding: 6px 14px; border: 1.5px solid #e2e8f0; border-radius: 8px; background: #fff;
+    font-size: 12px; cursor: pointer; color: #64748b; transition: all 0.2s;
   }
+  .footer-btn:hover { border-color: #93c5fd; color: #3b82f6; }
 
-  .footer-btn:hover {
-    border-color: #93c5fd;
-    color: #3b82f6;
+  /* ===== AI Section ===== */
+  .ai-section {
+    margin-top: 20px; padding-top: 16px; border-top: 2px solid #e0f2fe;
+  }
+  .ai-section h2 {
+    font-size: 15px; font-weight: 700; color: #7c3aed; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
+  }
+  .ai-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  .ai-btn {
+    padding: 7px 14px; border: 1.5px solid #c4b5fd; border-radius: 8px; background: #faf5ff;
+    font-size: 12px; cursor: pointer; color: #7c3aed; font-weight: 500; transition: all 0.2s;
+  }
+  .ai-btn:hover { background: #ede9fe; border-color: #a78bfa; }
+  .ai-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .ai-btn.loading { animation: pulse 1.2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
+
+  .ai-key-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+  .ai-key-row input {
+    flex: 1; padding: 7px 12px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 12px; outline: none;
+  }
+  .ai-key-row input:focus { border-color: #a78bfa; }
+  .ai-key-row button {
+    padding: 7px 14px; background: #7c3aed; color: #fff; border: none; border-radius: 8px;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+  }
+  .ai-key-hint { font-size: 11px; color: #94a3b8; margin-bottom: 10px; }
+  .ai-key-hint a { color: #7c3aed; }
+
+  .ai-result {
+    background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 10px; padding: 14px 16px;
+    font-size: 13px; line-height: 1.7; color: #334155; white-space: pre-wrap; max-height: 350px;
+    overflow-y: auto; margin-top: 8px;
+  }
+  .ai-result .ai-task-item {
+    display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid #f3e8ff;
+  }
+  .ai-result .ai-task-item:last-child { border-bottom: none; }
+  .ai-add-btn {
+    padding: 3px 10px; background: #7c3aed; color: #fff; border: none; border-radius: 6px;
+    font-size: 11px; cursor: pointer; white-space: nowrap; flex-shrink: 0;
+  }
+  .ai-add-btn:hover { background: #6d28d9; }
+
+  /* ===== Modal ===== */
+  .modal-overlay {
+    display: none; position: fixed; top:0; left:0; right:0; bottom:0;
+    background: rgba(0,0,0,0.4); z-index: 1000; align-items: center; justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-box {
+    background: #fff; border-radius: 14px; padding: 28px; width: 90%; max-width: 480px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2); max-height: 80vh; overflow-y: auto;
+  }
+  .modal-box h3 { font-size: 18px; margin-bottom: 14px; color: #7c3aed; }
+  .modal-box .ai-result { max-height: 50vh; }
+  .modal-close {
+    display: block; margin: 14px auto 0; padding: 8px 24px; background: #e2e8f0; border: none;
+    border-radius: 8px; font-size: 13px; cursor: pointer; color: #64748b;
   }
 
   /* ===== Responsive ===== */
@@ -495,7 +219,6 @@
   <div class="card">
     <h1>&#128221; 待办事项</h1>
 
-    <!-- Add Row -->
     <div class="input-row">
       <input id="todoInput" type="text" placeholder="添加新的待办事项..." autocomplete="off">
       <input id="dueDateInput" type="date" title="截止日期">
@@ -508,7 +231,6 @@
       <button class="add-btn" id="addBtn">添加</button>
     </div>
 
-    <!-- Filter Toolbar -->
     <div class="toolbar">
       <input class="search-input" id="searchInput" type="text" placeholder="搜索..." autocomplete="off">
       <div class="filter-btns">
@@ -525,45 +247,67 @@
       </select>
     </div>
 
-    <!-- List -->
     <ul class="todo-list" id="todoList"></ul>
     <div class="stats" id="stats"></div>
 
-    <!-- Footer: Export / Import -->
+    <!-- AI Section -->
+    <div class="ai-section">
+      <h2>&#x2728; AI 助手</h2>
+      <div id="aiKeyArea"></div>
+      <div class="ai-bar">
+        <button class="ai-btn" id="aiBreakdownBtn" title="输入一个大任务，AI 拆分为子任务">&#127919; 拆解任务</button>
+        <button class="ai-btn" id="aiPlanBtn" title="AI 根据待办生成今日规划">&#128197; 每日规划</button>
+        <button class="ai-btn" id="aiAutoBtn" title="添加时 AI 自动推荐分类和日期">&#x1F3AF; 智能添加</button>
+      </div>
+      <div id="aiResult"></div>
+    </div>
+
     <div class="footer-bar">
-      <button class="footer-btn" id="exportBtn">&#128230; 导出数据</button>
-      <button class="footer-btn" id="importBtn">&#128229; 导入数据</button>
+      <button class="footer-btn" id="exportBtn">&#128230; 导出</button>
+      <button class="footer-btn" id="importBtn">&#128229; 导入</button>
       <input type="file" id="importFile" accept=".json" style="display:none">
     </div>
+  </div>
+</div>
+
+<!-- AI Plan Modal -->
+<div class="modal-overlay" id="aiModal">
+  <div class="modal-box">
+    <h3 id="aiModalTitle">AI 规划</h3>
+    <div class="ai-result" id="aiModalContent"></div>
+    <button class="modal-close" onclick="document.getElementById('aiModal').classList.remove('show')">关闭</button>
   </div>
 </div>
 
 <script>
 (function () {
   var STORAGE_KEY = 'my_todo_items';
+  var AI_KEY_STORAGE = 'my_todo_gemini_key';
 
-  var input       = document.getElementById('todoInput');
+  var input = document.getElementById('todoInput');
   var dueDateInput = document.getElementById('dueDateInput');
   var categoryInput = document.getElementById('categoryInput');
-  var addBtn      = document.getElementById('addBtn');
-  var listEl      = document.getElementById('todoList');
-  var statsEl     = document.getElementById('stats');
+  var addBtn = document.getElementById('addBtn');
+  var listEl = document.getElementById('todoList');
+  var statsEl = document.getElementById('stats');
   var searchInput = document.getElementById('searchInput');
-  var catFilter   = document.getElementById('catFilter');
-  var exportBtn   = document.getElementById('exportBtn');
-  var importBtn   = document.getElementById('importBtn');
-  var importFile  = document.getElementById('importFile');
+  var catFilter = document.getElementById('catFilter');
+  var exportBtn = document.getElementById('exportBtn');
+  var importBtn = document.getElementById('importBtn');
+  var importFile = document.getElementById('importFile');
+  var aiKeyArea = document.getElementById('aiKeyArea');
+  var aiResultEl = document.getElementById('aiResult');
+  var aiBreakdownBtn = document.getElementById('aiBreakdownBtn');
+  var aiPlanBtn = document.getElementById('aiPlanBtn');
+  var aiAutoBtn = document.getElementById('aiAutoBtn');
 
   var currentFilter = 'all';
-  var dragSrcIndex  = null;
-  var editingId     = null;
+  var dragSrcIndex = null;
+  var editingId = null;
+  var smartAddMode = false;
 
-  var CATEGORIES = {
-    work:  '工作',
-    life:  '生活',
-    study: '学习',
-    other: '其他'
-  };
+  var CATEGORIES = { work: '工作', life: '生活', study: '学习', other: '其他' };
+  var CAT_KEYS = ['work', 'life', 'study', 'other'];
 
   // ===== Data =====
   var todos = load();
@@ -573,7 +317,6 @@
     if (!raw) return [];
     try {
       var items = JSON.parse(raw);
-      // Migrate old format
       return items.map(function (item, i) {
         if (!item.id) item.id = Date.now() + i;
         if (!item.category) item.category = 'other';
@@ -581,69 +324,281 @@
         if (!item.createdAt) item.createdAt = new Date().toISOString();
         return item;
       });
-    } catch (e) {
-      return [];
-    }
+    } catch (e) { return []; }
   }
 
-  function save() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
-  }
+  function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(todos)); }
 
   // ===== Date Helpers =====
   function todayStr() {
     var d = new Date();
-    var mm = String(d.getMonth() + 1).padStart(2, '0');
-    var dd = String(d.getDate()).padStart(2, '0');
-    return d.getFullYear() + '-' + mm + '-' + dd;
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
   }
-
-  function formatDate(dateStr) {
-    if (!dateStr) return '';
-    var parts = dateStr.split('-');
-    return parts[1] + '/' + parts[2];
-  }
-
-  function formatDateFull(dateStr) {
-    if (!dateStr) return '未设定日期';
-    var today = todayStr();
-    var parts = dateStr.split('-');
-    var weekdays = ['日', '一', '二', '三', '四', '五', '六'];
-    var d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-    var weekday = '周' + weekdays[d.getDay()];
-    var label = parts[0] + '年' + parseInt(parts[1]) + '月' + parseInt(parts[2]) + '日 ' + weekday;
-    if (dateStr === today) label = '今天 - ' + label;
+  function formatDate(s) { if (!s) return ''; var p=s.split('-'); return p[1]+'/'+p[2]; }
+  function formatDateFull(s) {
+    if (!s) return '未设定日期';
+    var today = todayStr(), p = s.split('-');
+    var wd = ['日','一','二','三','四','五','六'];
+    var d = new Date(+p[0], +p[1]-1, +p[2]);
+    var label = p[0]+'年'+parseInt(p[1])+'月'+parseInt(p[2])+'日 周'+wd[d.getDay()];
+    if (s === today) label = '今天 - ' + label;
     return label;
   }
+  function dateHeaderClass(s) { if(!s) return ''; var t=todayStr(); if(s<t) return 'is-overdue'; if(s===t) return 'is-today'; return ''; }
+  function dueDateClass(s,done) { if(!s||done) return 'due-future'; var t=todayStr(); if(s<t) return 'due-overdue'; if(s===t) return 'due-today'; return 'due-future'; }
 
-  function dateHeaderClass(dateStr) {
-    if (!dateStr) return '';
-    var today = todayStr();
-    if (dateStr < today) return 'is-overdue';
-    if (dateStr === today) return 'is-today';
-    return '';
+  // ===== AI Key Management =====
+  function getAIKey() { return localStorage.getItem(AI_KEY_STORAGE) || ''; }
+  function setAIKey(k) { localStorage.setItem(AI_KEY_STORAGE, k); }
+
+  function renderKeyArea() {
+    var key = getAIKey();
+    if (key) {
+      aiKeyArea.innerHTML = '<div class="ai-key-hint">Gemini API Key 已配置 &#x2705; <a href="#" id="changeKeyLink">修改</a></div>';
+      document.getElementById('changeKeyLink').addEventListener('click', function(e) {
+        e.preventDefault();
+        setAIKey('');
+        renderKeyArea();
+      });
+    } else {
+      aiKeyArea.innerHTML =
+        '<div class="ai-key-row"><input type="password" id="aiKeyInput" placeholder="输入 Gemini API Key...">' +
+        '<button id="aiKeySave">保存</button></div>' +
+        '<div class="ai-key-hint">免费获取: <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a></div>';
+      document.getElementById('aiKeySave').addEventListener('click', function() {
+        var v = document.getElementById('aiKeyInput').value.trim();
+        if (v) { setAIKey(v); renderKeyArea(); }
+      });
+    }
   }
 
-  function dueDateClass(dateStr, done) {
-    if (!dateStr || done) return 'due-future';
+  // ===== Gemini API Call =====
+  function callGemini(prompt, callback) {
+    var key = getAIKey();
+    if (!key) { alert('请先配置 Gemini API Key（免费）'); return; }
+
+    var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + key;
+    var body = JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.7 }
+    });
+
+    fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: body
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.error) {
+        callback(null, data.error.message || 'API 错误');
+        return;
+      }
+      var text = '';
+      try { text = data.candidates[0].content.parts[0].text; } catch(e) {}
+      callback(text, null);
+    })
+    .catch(function(err) { callback(null, err.message); });
+  }
+
+  // ===== AI Feature 1: Task Breakdown =====
+  function aiBreakdown() {
+    var task = prompt('请输入要拆解的大任务：');
+    if (!task) return;
+
+    aiBreakdownBtn.disabled = true;
+    aiBreakdownBtn.classList.add('loading');
+    aiBreakdownBtn.textContent = '拆解中...';
+
     var today = todayStr();
-    if (dateStr < today) return 'due-overdue';
-    if (dateStr === today) return 'due-today';
-    return 'due-future';
+    var p = '你是一个任务管理助手。用户输入了一个大任务，请将其拆解为3-7个具体的子任务。\n\n' +
+      '今天日期: ' + today + '\n' +
+      '大任务: ' + task + '\n\n' +
+      '请以JSON数组格式返回，每个子任务包含:\n' +
+      '- text: 子任务描述（简洁，中文）\n' +
+      '- category: 分类（work/life/study/other 之一）\n' +
+      '- dueDate: 建议截止日期（YYYY-MM-DD格式，根据合理性安排）\n\n' +
+      '只返回JSON数组，不要其他内容。示例:\n' +
+      '[{"text":"调研竞品","category":"work","dueDate":"2026-02-10"}]';
+
+    callGemini(p, function(text, err) {
+      aiBreakdownBtn.disabled = false;
+      aiBreakdownBtn.classList.remove('loading');
+      aiBreakdownBtn.textContent = '\u{1F3AF} 拆解任务';
+
+      if (err) { aiResultEl.innerHTML = '<div class="ai-result">错误: ' + err + '</div>'; return; }
+
+      try {
+        var match = text.match(/\[[\s\S]*\]/);
+        var tasks = JSON.parse(match[0]);
+        var html = '<div class="ai-result">';
+        html += '<div style="font-weight:600;margin-bottom:8px;color:#7c3aed">AI 拆解: ' + task + '</div>';
+        tasks.forEach(function(t, i) {
+          html += '<div class="ai-task-item">' +
+            '<span style="flex:1">' + (i+1) + '. ' + t.text +
+            ' <span class="cat-badge cat-' + (t.category||'other') + '">' + (CATEGORIES[t.category]||'其他') + '</span>' +
+            (t.dueDate ? ' <span class="due-badge due-future">' + formatDate(t.dueDate) + '</span>' : '') +
+            '</span>' +
+            '<button class="ai-add-btn" data-idx="' + i + '">+ 添加</button></div>';
+        });
+        html += '</div>';
+        aiResultEl.innerHTML = html;
+
+        // Bind add buttons
+        aiResultEl.querySelectorAll('.ai-add-btn').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            var idx = parseInt(this.getAttribute('data-idx'));
+            var t = tasks[idx];
+            todos.push({
+              id: Date.now() + idx,
+              text: t.text,
+              done: false,
+              category: t.category || 'other',
+              dueDate: t.dueDate || '',
+              createdAt: new Date().toISOString()
+            });
+            save(); render();
+            this.textContent = '已添加';
+            this.disabled = true;
+            this.style.background = '#94a3b8';
+          });
+        });
+      } catch(e) {
+        aiResultEl.innerHTML = '<div class="ai-result">' + text + '</div>';
+      }
+    });
+  }
+
+  // ===== AI Feature 2: Daily Plan =====
+  function aiDailyPlan() {
+    var pending = todos.filter(function(t) { return !t.done; });
+    if (pending.length === 0) { alert('没有未完成的待办事项'); return; }
+
+    aiPlanBtn.disabled = true;
+    aiPlanBtn.classList.add('loading');
+    aiPlanBtn.textContent = '规划中...';
+
+    var today = todayStr();
+    var todoList = pending.map(function(t) {
+      return '- ' + t.text + ' [分类:' + (CATEGORIES[t.category]||'其他') + ']' +
+        (t.dueDate ? ' [截止:' + t.dueDate + ']' : ' [无截止日期]');
+    }).join('\n');
+
+    var p = '你是一个时间管理专家。根据用户的待办事项列表，生成一份今日行动计划。\n\n' +
+      '今天日期: ' + today + '\n\n' +
+      '待办事项:\n' + todoList + '\n\n' +
+      '请生成:\n' +
+      '1. 今日优先级排序（考虑截止日期紧迫性）\n' +
+      '2. 建议的时间安排（上午/下午/晚上）\n' +
+      '3. 一句话激励\n\n' +
+      '用中文回答，格式清晰，使用 emoji 让内容更生动。';
+
+    callGemini(p, function(text, err) {
+      aiPlanBtn.disabled = false;
+      aiPlanBtn.classList.remove('loading');
+      aiPlanBtn.textContent = '\u{1F4C5} 每日规划';
+
+      if (err) { alert('AI 错误: ' + err); return; }
+
+      document.getElementById('aiModalTitle').textContent = '📋 今日规划';
+      document.getElementById('aiModalContent').textContent = text;
+      document.getElementById('aiModal').classList.add('show');
+    });
+  }
+
+  // ===== AI Feature 3: Smart Add =====
+  function toggleSmartAdd() {
+    smartAddMode = !smartAddMode;
+    aiAutoBtn.style.background = smartAddMode ? '#7c3aed' : '';
+    aiAutoBtn.style.color = smartAddMode ? '#fff' : '';
+    aiAutoBtn.style.borderColor = smartAddMode ? '#7c3aed' : '';
+    if (smartAddMode) {
+      aiResultEl.innerHTML = '<div class="ai-result" style="padding:8px 12px;font-size:12px">智能添加已开启 — 输入待办后点"添加"，AI 会自动推荐分类和截止日期</div>';
+    } else {
+      aiResultEl.innerHTML = '';
+    }
+  }
+
+  function smartAddTodo(text) {
+    var today = todayStr();
+    var p = '用户要添加一个待办事项。请根据内容推荐分类和截止日期。\n\n' +
+      '今天日期: ' + today + '\n' +
+      '待办内容: ' + text + '\n\n' +
+      '可选分类: work(工作), life(生活), study(学习), other(其他)\n\n' +
+      '请以JSON格式返回:\n{"category":"work","dueDate":"2026-02-10","reason":"简短理由"}\n\n' +
+      '只返回JSON，不要其他内容。如果无法判断日期就留空字符串。';
+
+    // Add the todo immediately with defaults
+    var newTodo = {
+      id: Date.now(),
+      text: text,
+      done: false,
+      category: categoryInput.value,
+      dueDate: dueDateInput.value || '',
+      createdAt: new Date().toISOString()
+    };
+    todos.push(newTodo);
+    input.value = '';
+    dueDateInput.value = '';
+    save(); render();
+    input.focus();
+
+    // Then call AI to suggest improvements
+    aiResultEl.innerHTML = '<div class="ai-result" style="padding:8px 12px;font-size:12px;animation:pulse 1.2s ease-in-out infinite">AI 分析中...</div>';
+
+    callGemini(p, function(result, err) {
+      if (err || !result) {
+        aiResultEl.innerHTML = '<div class="ai-result" style="padding:8px 12px;font-size:12px">智能添加已开启</div>';
+        return;
+      }
+      try {
+        var match = result.match(/\{[\s\S]*\}/);
+        var suggestion = JSON.parse(match[0]);
+        var cat = suggestion.category || 'other';
+        var date = suggestion.dueDate || '';
+        var reason = suggestion.reason || '';
+
+        // Check if suggestion differs from current
+        var changed = (cat !== newTodo.category) || (date && !newTodo.dueDate);
+        if (!changed) {
+          aiResultEl.innerHTML = '<div class="ai-result" style="padding:8px 12px;font-size:12px">AI 确认: 当前分类和日期合理 &#x2705;</div>';
+          return;
+        }
+
+        var html = '<div class="ai-result" style="padding:10px 14px;font-size:13px">';
+        html += '<div style="font-weight:600;color:#7c3aed;margin-bottom:6px">AI 建议 "' + text + '":</div>';
+        html += '<div>分类: <span class="cat-badge cat-' + cat + '">' + (CATEGORIES[cat]||'其他') + '</span>';
+        if (date) html += '  截止: <span class="due-badge due-future">' + date + '</span>';
+        html += '</div>';
+        if (reason) html += '<div style="margin-top:4px;color:#64748b;font-size:12px">' + reason + '</div>';
+        html += '<div style="margin-top:8px"><button class="ai-add-btn" id="aiApplySuggestion">采纳建议</button> ';
+        html += '<button class="ai-add-btn" id="aiDismissSuggestion" style="background:#94a3b8">忽略</button></div>';
+        html += '</div>';
+        aiResultEl.innerHTML = html;
+
+        document.getElementById('aiApplySuggestion').addEventListener('click', function() {
+          newTodo.category = cat;
+          if (date) newTodo.dueDate = date;
+          save(); render();
+          aiResultEl.innerHTML = '<div class="ai-result" style="padding:8px 12px;font-size:12px">已采纳 &#x2705; 智能添加已开启</div>';
+        });
+        document.getElementById('aiDismissSuggestion').addEventListener('click', function() {
+          aiResultEl.innerHTML = '<div class="ai-result" style="padding:8px 12px;font-size:12px">智能添加已开启</div>';
+        });
+      } catch(e) {
+        aiResultEl.innerHTML = '<div class="ai-result" style="padding:8px 12px;font-size:12px">智能添加已开启</div>';
+      }
+    });
   }
 
   // ===== Filtering =====
   function getFiltered() {
     var search = searchInput.value.trim().toLowerCase();
     var cat = catFilter.value;
-
-    return todos.filter(function (todo) {
-      // Status filter
+    return todos.filter(function(todo) {
       if (currentFilter === 'active' && todo.done) return false;
       if (currentFilter === 'done' && !todo.done) return false;
-      // Category filter
       if (cat !== 'all' && todo.category !== cat) return false;
-      // Text search
       if (search && todo.text.toLowerCase().indexOf(search) === -1) return false;
       return true;
     });
@@ -659,190 +614,107 @@
       statsEl.textContent = '';
       return;
     }
-
     if (filtered.length === 0) {
       listEl.innerHTML = '<li class="empty">没有匹配的待办事项</li>';
-      var remaining = todos.filter(function (t) { return !t.done; }).length;
-      statsEl.textContent = remaining + ' 项未完成 / 共 ' + todos.length + ' 项';
+      var r = todos.filter(function(t){return !t.done;}).length;
+      statsEl.textContent = r + ' 项未完成 / 共 ' + todos.length + ' 项';
       return;
     }
 
-    // Sort filtered items by dueDate (items with date first, sorted ascending; no-date items last)
-    var sorted = filtered.slice().sort(function (a, b) {
-      var da = a.dueDate || '\uffff';
-      var db = b.dueDate || '\uffff';
-      if (da < db) return -1;
-      if (da > db) return 1;
-      return 0;
+    var sorted = filtered.slice().sort(function(a,b) {
+      var da = a.dueDate || '\uffff', db = b.dueDate || '\uffff';
+      return da < db ? -1 : da > db ? 1 : 0;
     });
 
-    // Group by date and render with date headers
     var lastDate = null;
-
-    sorted.forEach(function (todo) {
+    sorted.forEach(function(todo) {
       var realIndex = todos.indexOf(todo);
       var dateKey = todo.dueDate || '';
 
-      // Insert date header when date changes
       if (dateKey !== lastDate) {
         lastDate = dateKey;
         var header = document.createElement('li');
         header.className = 'date-header';
-
-        var label = document.createElement('span');
-        label.className = 'date-header-label ' + dateHeaderClass(dateKey);
-        label.textContent = formatDateFull(dateKey);
-
-        var line = document.createElement('span');
-        line.className = 'date-header-line';
-
-        header.appendChild(label);
-        header.appendChild(line);
+        var lbl = document.createElement('span');
+        lbl.className = 'date-header-label ' + dateHeaderClass(dateKey);
+        lbl.textContent = formatDateFull(dateKey);
+        var ln = document.createElement('span');
+        ln.className = 'date-header-line';
+        header.appendChild(lbl);
+        header.appendChild(ln);
         listEl.appendChild(header);
       }
 
       var li = document.createElement('li');
       li.className = 'todo-item';
       li.setAttribute('data-index', realIndex);
-
       var isEditing = editingId === todo.id;
 
       if (!isEditing) {
         li.setAttribute('draggable', 'true');
-
-        // Drag events
         li.addEventListener('dragstart', handleDragStart);
         li.addEventListener('dragover', handleDragOver);
         li.addEventListener('dragleave', handleDragLeave);
         li.addEventListener('drop', handleDrop);
         li.addEventListener('dragend', handleDragEnd);
 
-        // Drag handle
         var handle = document.createElement('span');
         handle.className = 'drag-handle';
         handle.textContent = '\u2807';
-        handle.title = '拖拽排序';
 
-        // Checkbox
         var check = document.createElement('button');
         check.className = 'check-btn' + (todo.done ? ' done' : '');
-        check.title = todo.done ? '取消完成' : '标记完成';
-        check.addEventListener('click', function () {
-          todo.done = !todo.done;
-          save();
-          render();
-        });
+        check.addEventListener('click', function() { todo.done = !todo.done; save(); render(); });
 
-        // Content wrapper
         var content = document.createElement('div');
         content.className = 'item-content';
-
         var text = document.createElement('span');
         text.className = 'todo-text' + (todo.done ? ' done' : '');
         text.textContent = todo.text;
-
         var meta = document.createElement('div');
         meta.className = 'item-meta';
-
-        var catBadge = document.createElement('span');
-        catBadge.className = 'cat-badge cat-' + todo.category;
-        catBadge.textContent = CATEGORIES[todo.category] || '其他';
-        meta.appendChild(catBadge);
-
+        var cb = document.createElement('span');
+        cb.className = 'cat-badge cat-' + todo.category;
+        cb.textContent = CATEGORIES[todo.category] || '其他';
+        meta.appendChild(cb);
         content.appendChild(text);
         content.appendChild(meta);
 
-        // Edit button
-        var editBtn = document.createElement('button');
-        editBtn.className = 'edit-btn';
-        editBtn.title = '编辑';
-        editBtn.innerHTML = '&#9998;';
-        editBtn.addEventListener('click', function () {
-          editingId = todo.id;
-          render();
-        });
+        var eb = document.createElement('button');
+        eb.className = 'edit-btn';
+        eb.innerHTML = '&#9998;';
+        eb.addEventListener('click', function() { editingId = todo.id; render(); });
 
-        // Delete
-        var del = document.createElement('button');
-        del.className = 'del-btn';
-        del.title = '删除';
-        del.innerHTML = '&#x2715;';
-        del.addEventListener('click', function () {
-          todos.splice(realIndex, 1);
-          save();
-          render();
-        });
+        var db = document.createElement('button');
+        db.className = 'del-btn';
+        db.innerHTML = '&#x2715;';
+        db.addEventListener('click', function() { todos.splice(realIndex, 1); save(); render(); });
 
         li.appendChild(handle);
         li.appendChild(check);
         li.appendChild(content);
-        li.appendChild(editBtn);
-        li.appendChild(del);
+        li.appendChild(eb);
+        li.appendChild(db);
       } else {
-        // ---- Inline edit mode ----
-        var editRow = document.createElement('div');
-        editRow.className = 'edit-row';
-
-        var editText = document.createElement('input');
-        editText.type = 'text';
-        editText.value = todo.text;
-
-        var editDate = document.createElement('input');
-        editDate.type = 'date';
-        editDate.value = todo.dueDate || '';
-
-        var editCat = document.createElement('select');
-        ['other', 'work', 'life', 'study'].forEach(function (key) {
-          var opt = document.createElement('option');
-          opt.value = key;
-          opt.textContent = CATEGORIES[key];
-          if (todo.category === key) opt.selected = true;
-          editCat.appendChild(opt);
-        });
-
-        var saveBtn = document.createElement('button');
-        saveBtn.className = 'save-edit-btn';
-        saveBtn.textContent = '保存';
-        saveBtn.addEventListener('click', function () {
-          var newText = editText.value.trim();
-          if (!newText) return;
-          todo.text = newText;
-          todo.dueDate = editDate.value || '';
-          todo.category = editCat.value;
-          editingId = null;
-          save();
-          render();
-        });
-
-        var cancelBtn = document.createElement('button');
-        cancelBtn.className = 'cancel-edit-btn';
-        cancelBtn.textContent = '取消';
-        cancelBtn.addEventListener('click', function () {
-          editingId = null;
-          render();
-        });
-
-        editText.addEventListener('keydown', function (e) {
-          if (e.key === 'Enter') saveBtn.click();
-          if (e.key === 'Escape') cancelBtn.click();
-        });
-
-        editRow.appendChild(editText);
-        editRow.appendChild(editDate);
-        editRow.appendChild(editCat);
-        editRow.appendChild(saveBtn);
-        editRow.appendChild(cancelBtn);
-        li.appendChild(editRow);
-
-        // Auto focus the text input after render
-        setTimeout(function () { editText.focus(); editText.select(); }, 0);
+        var er = document.createElement('div');
+        er.className = 'edit-row';
+        var et = document.createElement('input'); et.type='text'; et.value=todo.text;
+        var ed = document.createElement('input'); ed.type='date'; ed.value=todo.dueDate||'';
+        var ec = document.createElement('select');
+        CAT_KEYS.forEach(function(k){ var o=document.createElement('option'); o.value=k; o.textContent=CATEGORIES[k]; if(todo.category===k) o.selected=true; ec.appendChild(o); });
+        var sb = document.createElement('button'); sb.className='save-edit-btn'; sb.textContent='保存';
+        sb.addEventListener('click', function(){ var v=et.value.trim(); if(!v)return; todo.text=v; todo.dueDate=ed.value||''; todo.category=ec.value; editingId=null; save(); render(); });
+        var cb2 = document.createElement('button'); cb2.className='cancel-edit-btn'; cb2.textContent='取消';
+        cb2.addEventListener('click', function(){ editingId=null; render(); });
+        et.addEventListener('keydown', function(e){ if(e.key==='Enter') sb.click(); if(e.key==='Escape') cb2.click(); });
+        er.appendChild(et); er.appendChild(ed); er.appendChild(ec); er.appendChild(sb); er.appendChild(cb2);
+        li.appendChild(er);
+        setTimeout(function(){ et.focus(); et.select(); }, 0);
       }
-
       listEl.appendChild(li);
     });
 
-    // Stats
-    var remaining = todos.filter(function (t) { return !t.done; }).length;
+    var remaining = todos.filter(function(t){return !t.done;}).length;
     statsEl.textContent = remaining + ' 项未完成 / 共 ' + todos.length + ' 项';
   }
 
@@ -850,139 +722,80 @@
   function addTodo() {
     var text = input.value.trim();
     if (!text) return;
-    todos.push({
-      id: Date.now(),
-      text: text,
-      done: false,
-      category: categoryInput.value,
-      dueDate: dueDateInput.value || '',
-      createdAt: new Date().toISOString()
-    });
-    input.value = '';
-    dueDateInput.value = '';
-    save();
-    render();
-    input.focus();
-  }
 
-  // ===== Drag & Drop =====
-  function handleDragStart(e) {
-    dragSrcIndex = parseInt(this.getAttribute('data-index'));
-    this.classList.add('dragging');
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', dragSrcIndex);
-  }
-
-  function handleDragOver(e) {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    this.classList.add('drag-over');
-  }
-
-  function handleDragLeave() {
-    this.classList.remove('drag-over');
-  }
-
-  function handleDrop(e) {
-    e.preventDefault();
-    this.classList.remove('drag-over');
-    var targetIndex = parseInt(this.getAttribute('data-index'));
-    if (dragSrcIndex === null || dragSrcIndex === targetIndex) return;
-
-    var item = todos.splice(dragSrcIndex, 1)[0];
-    todos.splice(targetIndex, 0, item);
-    save();
-    render();
-  }
-
-  function handleDragEnd() {
-    this.classList.remove('dragging');
-    dragSrcIndex = null;
-    // Clean up any lingering drag-over classes
-    var items = listEl.querySelectorAll('.todo-item');
-    for (var i = 0; i < items.length; i++) {
-      items[i].classList.remove('drag-over');
+    if (smartAddMode) {
+      smartAddTodo(text);
+    } else {
+      todos.push({
+        id: Date.now(), text: text, done: false,
+        category: categoryInput.value, dueDate: dueDateInput.value || '',
+        createdAt: new Date().toISOString()
+      });
+      input.value = '';
+      dueDateInput.value = '';
+      save(); render();
+      input.focus();
     }
   }
 
+  // ===== Drag & Drop =====
+  function handleDragStart(e) { dragSrcIndex=parseInt(this.getAttribute('data-index')); this.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain',dragSrcIndex); }
+  function handleDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect='move'; this.classList.add('drag-over'); }
+  function handleDragLeave() { this.classList.remove('drag-over'); }
+  function handleDrop(e) { e.preventDefault(); this.classList.remove('drag-over'); var t=parseInt(this.getAttribute('data-index')); if(dragSrcIndex===null||dragSrcIndex===t) return; var item=todos.splice(dragSrcIndex,1)[0]; todos.splice(t,0,item); save(); render(); }
+  function handleDragEnd() { this.classList.remove('dragging'); dragSrcIndex=null; listEl.querySelectorAll('.todo-item').forEach(function(i){i.classList.remove('drag-over');}); }
+
   // ===== Export / Import =====
   function exportData() {
-    var json = JSON.stringify(todos, null, 2);
-    var blob = new Blob([json], { type: 'application/json' });
+    var blob = new Blob([JSON.stringify(todos,null,2)], {type:'application/json'});
     var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url;
-    a.download = 'my-todo-backup.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    var a = document.createElement('a'); a.href=url; a.download='my-todo-backup.json';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
   }
-
   function importData(file) {
     var reader = new FileReader();
-    reader.onload = function (e) {
+    reader.onload = function(e) {
       try {
         var data = JSON.parse(e.target.result);
-        if (!Array.isArray(data)) {
-          alert('无效的数据格式');
-          return;
-        }
+        if (!Array.isArray(data)) { alert('无效的数据格式'); return; }
         if (!confirm('导入将替换当前所有数据，确定继续吗？')) return;
-        todos = data.map(function (item, i) {
-          if (!item.id) item.id = Date.now() + i;
-          if (!item.category) item.category = 'other';
-          if (item.dueDate === undefined) item.dueDate = '';
-          if (!item.createdAt) item.createdAt = new Date().toISOString();
-          if (item.done === undefined) item.done = false;
-          if (!item.text) item.text = '';
-          return item;
+        todos = data.map(function(item,i) {
+          if(!item.id) item.id=Date.now()+i; if(!item.category) item.category='other';
+          if(item.dueDate===undefined) item.dueDate=''; if(!item.createdAt) item.createdAt=new Date().toISOString();
+          if(item.done===undefined) item.done=false; if(!item.text) item.text=''; return item;
         });
-        save();
-        render();
+        save(); render();
         alert('导入成功！共 ' + todos.length + ' 条记录');
-      } catch (err) {
-        alert('文件解析失败：' + err.message);
-      }
+      } catch(err) { alert('文件解析失败：' + err.message); }
     };
     reader.readAsText(file);
   }
 
   // ===== Event Listeners =====
   addBtn.addEventListener('click', addTodo);
-  input.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') addTodo();
-  });
+  input.addEventListener('keydown', function(e) { if(e.key==='Enter') addTodo(); });
 
-  // Filter buttons
-  var filterBtns = document.querySelectorAll('.filter-btn');
-  filterBtns.forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      filterBtns.forEach(function (b) { b.classList.remove('active'); });
+  document.querySelectorAll('.filter-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
       btn.classList.add('active');
       currentFilter = btn.getAttribute('data-filter');
       render();
     });
   });
 
-  // Search
   searchInput.addEventListener('input', render);
-
-  // Category filter
   catFilter.addEventListener('change', render);
 
-  // Export / Import
   exportBtn.addEventListener('click', exportData);
-  importBtn.addEventListener('click', function () {
-    importFile.click();
-  });
-  importFile.addEventListener('change', function () {
-    if (this.files && this.files[0]) {
-      importData(this.files[0]);
-      this.value = '';
-    }
-  });
+  importBtn.addEventListener('click', function() { importFile.click(); });
+  importFile.addEventListener('change', function() { if(this.files&&this.files[0]){importData(this.files[0]);this.value='';} });
 
+  aiBreakdownBtn.addEventListener('click', aiBreakdown);
+  aiPlanBtn.addEventListener('click', aiDailyPlan);
+  aiAutoBtn.addEventListener('click', toggleSmartAdd);
+
+  renderKeyArea();
   render();
 })();
 </script>
