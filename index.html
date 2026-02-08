@@ -348,26 +348,32 @@
   function dueDateClass(s,done) { if(!s||done) return 'due-future'; var t=todayStr(); if(s<t) return 'due-overdue'; if(s===t) return 'due-today'; return 'due-future'; }
 
   // ===== AI Key Management =====
-  function getAIKey() { return localStorage.getItem(AI_KEY_STORAGE) || ''; }
+  var DEFAULT_AI_KEY = 'AIzaSyDjV0fThBp8bWui4bl2Ed2JT7ZpMzdcudU';
+  function getAIKey() { return localStorage.getItem(AI_KEY_STORAGE) || DEFAULT_AI_KEY; }
   function setAIKey(k) { localStorage.setItem(AI_KEY_STORAGE, k); }
 
   function renderKeyArea() {
-    var key = getAIKey();
-    if (key) {
-      aiKeyArea.innerHTML = '<div class="ai-key-hint">Gemini API Key 已配置 &#x2705; <a href="#" id="changeKeyLink">修改</a></div>';
-      document.getElementById('changeKeyLink').addEventListener('click', function(e) {
+    var customKey = localStorage.getItem(AI_KEY_STORAGE);
+    if (customKey) {
+      aiKeyArea.innerHTML = '<div class="ai-key-hint">使用自定义 API Key &#x2705; <a href="#" id="resetKeyLink">恢复默认</a></div>';
+      document.getElementById('resetKeyLink').addEventListener('click', function(e) {
         e.preventDefault();
-        setAIKey('');
+        localStorage.removeItem(AI_KEY_STORAGE);
         renderKeyArea();
       });
     } else {
-      aiKeyArea.innerHTML =
-        '<div class="ai-key-row"><input type="password" id="aiKeyInput" placeholder="输入 Gemini API Key...">' +
-        '<button id="aiKeySave">保存</button></div>' +
-        '<div class="ai-key-hint">免费获取: <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a></div>';
-      document.getElementById('aiKeySave').addEventListener('click', function() {
-        var v = document.getElementById('aiKeyInput').value.trim();
-        if (v) { setAIKey(v); renderKeyArea(); }
+      aiKeyArea.innerHTML = '<div class="ai-key-hint">AI 已就绪 &#x2705; <a href="#" id="useCustomKeyLink">使用自定义 Key</a></div>';
+      document.getElementById('useCustomKeyLink').addEventListener('click', function(e) {
+        e.preventDefault();
+        aiKeyArea.innerHTML =
+          '<div class="ai-key-row"><input type="password" id="aiKeyInput" placeholder="输入自定义 Gemini API Key...">' +
+          '<button id="aiKeySave">保存</button> <button id="aiKeyCancel" style="background:#e2e8f0;color:#64748b;border:none;padding:7px 14px;border-radius:8px;font-size:12px;cursor:pointer">取消</button></div>' +
+          '<div class="ai-key-hint">免费获取: <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a></div>';
+        document.getElementById('aiKeySave').addEventListener('click', function() {
+          var v = document.getElementById('aiKeyInput').value.trim();
+          if (v) { setAIKey(v); renderKeyArea(); }
+        });
+        document.getElementById('aiKeyCancel').addEventListener('click', function() { renderKeyArea(); });
       });
     }
   }
@@ -375,7 +381,7 @@
   // ===== Gemini API Call =====
   function callGemini(prompt, callback) {
     var key = getAIKey();
-    if (!key) { alert('请先配置 Gemini API Key（免费）'); return; }
+    if (!key) { alert('API Key 不可用，请刷新页面重试'); return; }
 
     var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + key;
     var body = JSON.stringify({
