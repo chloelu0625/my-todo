@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>待办事项</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: linear-gradient(135deg, #e0f2fe 0%, #f0fdf4 50%, #fef9c3 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 40px 16px;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 580px;
+    align-self: flex-start;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255,255,255,0.6);
+    padding: 32px 28px;
+  }
+
+  h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #1e293b;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  /* ===== Input Row ===== */
+  .input-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .input-row input[type="text"] {
+    flex: 1;
+    min-width: 160px;
+    padding: 10px 14px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .input-row input[type="text"]:focus {
+    border-color: #60a5fa;
+  }
+
+  .input-row input[type="date"] {
+    padding: 10px 10px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+    color: #64748b;
+    max-width: 150px;
+  }
+
+  .input-row input[type="date"]:focus {
+    border-color: #60a5fa;
+  }
+
+  .input-row select {
+    padding: 10px 10px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 13px;
+    outline: none;
+    background: #fff;
+    cursor: pointer;
+    color: #64748b;
+    transition: border-color 0.2s;
+  }
+
+  .input-row select:focus {
+    border-color: #60a5fa;
+  }
+
+  .input-row .add-btn {
+    padding: 10px 18px;
+    background: #3b82f6;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+
+  .input-row .add-btn:hover {
+    background: #2563eb;
+  }
+
+  /* ===== Filter Toolbar ===== */
+  .toolbar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .toolbar .search-input {
+    flex: 1;
+    min-width: 120px;
+    padding: 7px 12px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .toolbar .search-input:focus {
+    border-color: #60a5fa;
+  }
+
+  .filter-btns {
+    display: flex;
+    gap: 4px;
+  }
+
+  .filter-btn {
+    padding: 5px 12px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    background: #fff;
+    font-size: 12px;
+    cursor: pointer;
+    color: #64748b;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .filter-btn:hover {
+    border-color: #93c5fd;
+    color: #3b82f6;
+  }
+
+  .filter-btn.active {
+    background: #3b82f6;
+    color: #fff;
+    border-color: #3b82f6;
+  }
+
+  .toolbar select {
+    padding: 5px 8px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 12px;
+    background: #fff;
+    cursor: pointer;
+    color: #64748b;
+    outline: none;
+  }
+
+  /* ===== Todo List ===== */
+  .todo-list {
+    list-style: none;
+  }
+
+  .todo-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 4px;
+    border-bottom: 1px solid #f1f5f9;
+    animation: fadeIn 0.25s ease;
+    transition: opacity 0.2s, background 0.15s;
+    border-radius: 8px;
+  }
+
+  .todo-item:last-child {
+    border-bottom: none;
+  }
+
+  .todo-item.dragging {
+    opacity: 0.4;
+    background: #f0f9ff;
+  }
+
+  .todo-item.drag-over {
+    border-top: 2px solid #3b82f6;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Drag Handle */
+  .drag-handle {
+    cursor: grab;
+    color: #cbd5e1;
+    font-size: 14px;
+    user-select: none;
+    flex-shrink: 0;
+    padding: 2px;
+    transition: color 0.2s;
+    line-height: 1;
+  }
+
+  .drag-handle:hover {
+    color: #94a3b8;
+  }
+
+  .drag-handle:active {
+    cursor: grabbing;
+  }
+
+  /* Checkbox */
+  .check-btn {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid #cbd5e1;
+    background: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .check-btn:hover {
+    border-color: #34d399;
+  }
+
+  .check-btn.done {
+    border-color: #34d399;
+    background: #34d399;
+  }
+
+  .check-btn.done::after {
+    content: "";
+    width: 9px;
+    height: 5px;
+    border-left: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+    transform: rotate(-45deg) translateY(-1px);
+  }
+
+  /* Item Content */
+  .item-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .todo-text {
+    font-size: 14px;
+    color: #334155;
+    word-break: break-word;
+    transition: color 0.2s;
+  }
+
+  .todo-text.done {
+    text-decoration: line-through;
+    color: #94a3b8;
+  }
+
+  .item-meta {
+    display: flex;
+    gap: 6px;
+    margin-top: 4px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  /* Category Badge */
+  .cat-badge {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.6;
+  }
+
+  .cat-work   { background: #dbeafe; color: #2563eb; }
+  .cat-life   { background: #dcfce7; color: #16a34a; }
+  .cat-study  { background: #f3e8ff; color: #9333ea; }
+  .cat-other  { background: #f1f5f9; color: #64748b; }
+
+  /* Due Date Badge */
+  .due-badge {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.6;
+  }
+
+  .due-overdue { background: #fee2e2; color: #dc2626; }
+  .due-today   { background: #ffedd5; color: #ea580c; }
+  .due-future  { background: #f1f5f9; color: #64748b; }
+
+  /* Delete Button */
+  .del-btn {
+    background: none;
+    border: none;
+    color: #cbd5e1;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+    transition: color 0.2s;
+    flex-shrink: 0;
+  }
+
+  .del-btn:hover {
+    color: #f87171;
+  }
+
+  /* ===== Stats ===== */
+  .stats {
+    text-align: center;
+    margin-top: 16px;
+    font-size: 13px;
+    color: #94a3b8;
+  }
+
+  .empty {
+    text-align: center;
+    padding: 32px 0;
+    color: #cbd5e1;
+    font-size: 14px;
+  }
+
+  /* ===== Footer Toolbar ===== */
+  .footer-bar {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid #f1f5f9;
+  }
+
+  .footer-btn {
+    padding: 6px 14px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    background: #fff;
+    font-size: 12px;
+    cursor: pointer;
+    color: #64748b;
+    transition: all 0.2s;
+  }
+
+  .footer-btn:hover {
+    border-color: #93c5fd;
+    color: #3b82f6;
+  }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 480px) {
+    body { padding: 16px 8px; }
+    .card { padding: 20px 16px; }
+    .input-row input[type="date"] { max-width: 130px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="card">
+    <h1>&#128221; 待办事项</h1>
+
+    <!-- Add Row -->
+    <div class="input-row">
+      <input id="todoInput" type="text" placeholder="添加新的待办事项..." autocomplete="off">
+      <input id="dueDateInput" type="date" title="截止日期">
+      <select id="categoryInput" title="分类">
+        <option value="other">其他</option>
+        <option value="work">工作</option>
+        <option value="life">生活</option>
+        <option value="study">学习</option>
+      </select>
+      <button class="add-btn" id="addBtn">添加</button>
+    </div>
+
+    <!-- Filter Toolbar -->
+    <div class="toolbar">
+      <input class="search-input" id="searchInput" type="text" placeholder="搜索..." autocomplete="off">
+      <div class="filter-btns">
+        <button class="filter-btn active" data-filter="all">全部</button>
+        <button class="filter-btn" data-filter="active">未完成</button>
+        <button class="filter-btn" data-filter="done">已完成</button>
+      </div>
+      <select id="catFilter" title="按分类筛选">
+        <option value="all">全部分类</option>
+        <option value="work">工作</option>
+        <option value="life">生活</option>
+        <option value="study">学习</option>
+        <option value="other">其他</option>
+      </select>
+    </div>
+
+    <!-- List -->
+    <ul class="todo-list" id="todoList"></ul>
+    <div class="stats" id="stats"></div>
+
+    <!-- Footer: Export / Import -->
+    <div class="footer-bar">
+      <button class="footer-btn" id="exportBtn">&#128230; 导出数据</button>
+      <button class="footer-btn" id="importBtn">&#128229; 导入数据</button>
+      <input type="file" id="importFile" accept=".json" style="display:none">
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var STORAGE_KEY = 'my_todo_items';
+
+  var input       = document.getElementById('todoInput');
+  var dueDateInput = document.getElementById('dueDateInput');
+  var categoryInput = document.getElementById('categoryInput');
+  var addBtn      = document.getElementById('addBtn');
+  var listEl      = document.getElementById('todoList');
+  var statsEl     = document.getElementById('stats');
+  var searchInput = document.getElementById('searchInput');
+  var catFilter   = document.getElementById('catFilter');
+  var exportBtn   = document.getElementById('exportBtn');
+  var importBtn   = document.getElementById('importBtn');
+  var importFile  = document.getElementById('importFile');
+
+  var currentFilter = 'all';
+  var dragSrcIndex  = null;
+
+  var CATEGORIES = {
+    work:  '工作',
+    life:  '生活',
+    study: '学习',
+    other: '其他'
+  };
+
+  // ===== Data =====
+  var todos = load();
+
+  function load() {
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    try {
+      var items = JSON.parse(raw);
+      // Migrate old format
+      return items.map(function (item, i) {
+        if (!item.id) item.id = Date.now() + i;
+        if (!item.category) item.category = 'other';
+        if (item.dueDate === undefined) item.dueDate = '';
+        if (!item.createdAt) item.createdAt = new Date().toISOString();
+        return item;
+      });
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function save() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
+  }
+
+  // ===== Date Helpers =====
+  function todayStr() {
+    var d = new Date();
+    var mm = String(d.getMonth() + 1).padStart(2, '0');
+    var dd = String(d.getDate()).padStart(2, '0');
+    return d.getFullYear() + '-' + mm + '-' + dd;
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return '';
+    var parts = dateStr.split('-');
+    return parts[1] + '/' + parts[2];
+  }
+
+  function dueDateClass(dateStr, done) {
+    if (!dateStr || done) return 'due-future';
+    var today = todayStr();
+    if (dateStr < today) return 'due-overdue';
+    if (dateStr === today) return 'due-today';
+    return 'due-future';
+  }
+
+  // ===== Filtering =====
+  function getFiltered() {
+    var search = searchInput.value.trim().toLowerCase();
+    var cat = catFilter.value;
+
+    return todos.filter(function (todo) {
+      // Status filter
+      if (currentFilter === 'active' && todo.done) return false;
+      if (currentFilter === 'done' && !todo.done) return false;
+      // Category filter
+      if (cat !== 'all' && todo.category !== cat) return false;
+      // Text search
+      if (search && todo.text.toLowerCase().indexOf(search) === -1) return false;
+      return true;
+    });
+  }
+
+  // ===== Render =====
+  function render() {
+    listEl.innerHTML = '';
+    var filtered = getFiltered();
+
+    if (todos.length === 0) {
+      listEl.innerHTML = '<li class="empty">暂无待办事项，添加一个吧</li>';
+      statsEl.textContent = '';
+      return;
+    }
+
+    if (filtered.length === 0) {
+      listEl.innerHTML = '<li class="empty">没有匹配的待办事项</li>';
+    }
+
+    filtered.forEach(function (todo) {
+      var realIndex = todos.indexOf(todo);
+
+      var li = document.createElement('li');
+      li.className = 'todo-item';
+      li.setAttribute('draggable', 'true');
+      li.setAttribute('data-index', realIndex);
+
+      // Drag events
+      li.addEventListener('dragstart', handleDragStart);
+      li.addEventListener('dragover', handleDragOver);
+      li.addEventListener('dragleave', handleDragLeave);
+      li.addEventListener('drop', handleDrop);
+      li.addEventListener('dragend', handleDragEnd);
+
+      // Drag handle
+      var handle = document.createElement('span');
+      handle.className = 'drag-handle';
+      handle.textContent = '\u2807';
+      handle.title = '拖拽排序';
+
+      // Checkbox
+      var check = document.createElement('button');
+      check.className = 'check-btn' + (todo.done ? ' done' : '');
+      check.title = todo.done ? '取消完成' : '标记完成';
+      check.addEventListener('click', function () {
+        todo.done = !todo.done;
+        save();
+        render();
+      });
+
+      // Content wrapper
+      var content = document.createElement('div');
+      content.className = 'item-content';
+
+      var text = document.createElement('span');
+      text.className = 'todo-text' + (todo.done ? ' done' : '');
+      text.textContent = todo.text;
+
+      var meta = document.createElement('div');
+      meta.className = 'item-meta';
+
+      // Category badge
+      var catBadge = document.createElement('span');
+      catBadge.className = 'cat-badge cat-' + todo.category;
+      catBadge.textContent = CATEGORIES[todo.category] || '其他';
+      meta.appendChild(catBadge);
+
+      // Due date badge
+      if (todo.dueDate) {
+        var dueBadge = document.createElement('span');
+        var cls = dueDateClass(todo.dueDate, todo.done);
+        dueBadge.className = 'due-badge ' + cls;
+        var label = cls === 'due-overdue' ? '已过期 ' : cls === 'due-today' ? '今天 ' : '';
+        dueBadge.textContent = label + formatDate(todo.dueDate);
+        meta.appendChild(dueBadge);
+      }
+
+      content.appendChild(text);
+      content.appendChild(meta);
+
+      // Delete
+      var del = document.createElement('button');
+      del.className = 'del-btn';
+      del.title = '删除';
+      del.innerHTML = '&#x2715;';
+      del.addEventListener('click', function () {
+        todos.splice(realIndex, 1);
+        save();
+        render();
+      });
+
+      li.appendChild(handle);
+      li.appendChild(check);
+      li.appendChild(content);
+      li.appendChild(del);
+      listEl.appendChild(li);
+    });
+
+    // Stats
+    var remaining = todos.filter(function (t) { return !t.done; }).length;
+    statsEl.textContent = remaining + ' 项未完成 / 共 ' + todos.length + ' 项';
+  }
+
+  // ===== Add Todo =====
+  function addTodo() {
+    var text = input.value.trim();
+    if (!text) return;
+    todos.push({
+      id: Date.now(),
+      text: text,
+      done: false,
+      category: categoryInput.value,
+      dueDate: dueDateInput.value || '',
+      createdAt: new Date().toISOString()
+    });
+    input.value = '';
+    dueDateInput.value = '';
+    save();
+    render();
+    input.focus();
+  }
+
+  // ===== Drag & Drop =====
+  function handleDragStart(e) {
+    dragSrcIndex = parseInt(this.getAttribute('data-index'));
+    this.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', dragSrcIndex);
+  }
+
+  function handleDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    this.classList.add('drag-over');
+  }
+
+  function handleDragLeave() {
+    this.classList.remove('drag-over');
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    this.classList.remove('drag-over');
+    var targetIndex = parseInt(this.getAttribute('data-index'));
+    if (dragSrcIndex === null || dragSrcIndex === targetIndex) return;
+
+    var item = todos.splice(dragSrcIndex, 1)[0];
+    todos.splice(targetIndex, 0, item);
+    save();
+    render();
+  }
+
+  function handleDragEnd() {
+    this.classList.remove('dragging');
+    dragSrcIndex = null;
+    // Clean up any lingering drag-over classes
+    var items = listEl.querySelectorAll('.todo-item');
+    for (var i = 0; i < items.length; i++) {
+      items[i].classList.remove('drag-over');
+    }
+  }
+
+  // ===== Export / Import =====
+  function exportData() {
+    var json = JSON.stringify(todos, null, 2);
+    var blob = new Blob([json], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'my-todo-backup.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function importData(file) {
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      try {
+        var data = JSON.parse(e.target.result);
+        if (!Array.isArray(data)) {
+          alert('无效的数据格式');
+          return;
+        }
+        if (!confirm('导入将替换当前所有数据，确定继续吗？')) return;
+        todos = data.map(function (item, i) {
+          if (!item.id) item.id = Date.now() + i;
+          if (!item.category) item.category = 'other';
+          if (item.dueDate === undefined) item.dueDate = '';
+          if (!item.createdAt) item.createdAt = new Date().toISOString();
+          if (item.done === undefined) item.done = false;
+          if (!item.text) item.text = '';
+          return item;
+        });
+        save();
+        render();
+        alert('导入成功！共 ' + todos.length + ' 条记录');
+      } catch (err) {
+        alert('文件解析失败：' + err.message);
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // ===== Event Listeners =====
+  addBtn.addEventListener('click', addTodo);
+  input.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') addTodo();
+  });
+
+  // Filter buttons
+  var filterBtns = document.querySelectorAll('.filter-btn');
+  filterBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      filterBtns.forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      currentFilter = btn.getAttribute('data-filter');
+      render();
+    });
+  });
+
+  // Search
+  searchInput.addEventListener('input', render);
+
+  // Category filter
+  catFilter.addEventListener('change', render);
+
+  // Export / Import
+  exportBtn.addEventListener('click', exportData);
+  importBtn.addEventListener('click', function () {
+    importFile.click();
+  });
+  importFile.addEventListener('change', function () {
+    if (this.files && this.files[0]) {
+      importData(this.files[0]);
+      this.value = '';
+    }
+  });
+
+  render();
+})();
+</script>
+
+</body>
+</html>
