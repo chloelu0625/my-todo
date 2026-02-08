@@ -330,6 +330,81 @@
     color: #f87171;
   }
 
+  /* Edit Button */
+  .edit-btn {
+    background: none;
+    border: none;
+    color: #cbd5e1;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+    transition: color 0.2s;
+    flex-shrink: 0;
+  }
+
+  .edit-btn:hover {
+    color: #60a5fa;
+  }
+
+  /* Inline Edit Mode */
+  .edit-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+    width: 100%;
+  }
+
+  .edit-row input[type="text"] {
+    flex: 1;
+    min-width: 100px;
+    padding: 6px 10px;
+    border: 1.5px solid #93c5fd;
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+  }
+
+  .edit-row input[type="date"] {
+    padding: 6px 8px;
+    border: 1.5px solid #93c5fd;
+    border-radius: 6px;
+    font-size: 12px;
+    outline: none;
+    max-width: 140px;
+  }
+
+  .edit-row select {
+    padding: 6px 8px;
+    border: 1.5px solid #93c5fd;
+    border-radius: 6px;
+    font-size: 12px;
+    outline: none;
+    background: #fff;
+  }
+
+  .edit-row .save-edit-btn {
+    padding: 5px 12px;
+    background: #34d399;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .edit-row .cancel-edit-btn {
+    padding: 5px 12px;
+    background: #e2e8f0;
+    color: #64748b;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
   /* ===== Stats ===== */
   .stats {
     text-align: center;
@@ -481,6 +556,7 @@
 
   var currentFilter = 'all';
   var dragSrcIndex  = null;
+  var editingId     = null;
 
   var CATEGORIES = {
     work:  '工作',
@@ -627,67 +703,141 @@
 
       var li = document.createElement('li');
       li.className = 'todo-item';
-      li.setAttribute('draggable', 'true');
       li.setAttribute('data-index', realIndex);
 
-      // Drag events
-      li.addEventListener('dragstart', handleDragStart);
-      li.addEventListener('dragover', handleDragOver);
-      li.addEventListener('dragleave', handleDragLeave);
-      li.addEventListener('drop', handleDrop);
-      li.addEventListener('dragend', handleDragEnd);
+      var isEditing = editingId === todo.id;
 
-      // Drag handle
-      var handle = document.createElement('span');
-      handle.className = 'drag-handle';
-      handle.textContent = '\u2807';
-      handle.title = '拖拽排序';
+      if (!isEditing) {
+        li.setAttribute('draggable', 'true');
 
-      // Checkbox
-      var check = document.createElement('button');
-      check.className = 'check-btn' + (todo.done ? ' done' : '');
-      check.title = todo.done ? '取消完成' : '标记完成';
-      check.addEventListener('click', function () {
-        todo.done = !todo.done;
-        save();
-        render();
-      });
+        // Drag events
+        li.addEventListener('dragstart', handleDragStart);
+        li.addEventListener('dragover', handleDragOver);
+        li.addEventListener('dragleave', handleDragLeave);
+        li.addEventListener('drop', handleDrop);
+        li.addEventListener('dragend', handleDragEnd);
 
-      // Content wrapper
-      var content = document.createElement('div');
-      content.className = 'item-content';
+        // Drag handle
+        var handle = document.createElement('span');
+        handle.className = 'drag-handle';
+        handle.textContent = '\u2807';
+        handle.title = '拖拽排序';
 
-      var text = document.createElement('span');
-      text.className = 'todo-text' + (todo.done ? ' done' : '');
-      text.textContent = todo.text;
+        // Checkbox
+        var check = document.createElement('button');
+        check.className = 'check-btn' + (todo.done ? ' done' : '');
+        check.title = todo.done ? '取消完成' : '标记完成';
+        check.addEventListener('click', function () {
+          todo.done = !todo.done;
+          save();
+          render();
+        });
 
-      var meta = document.createElement('div');
-      meta.className = 'item-meta';
+        // Content wrapper
+        var content = document.createElement('div');
+        content.className = 'item-content';
 
-      // Category badge
-      var catBadge = document.createElement('span');
-      catBadge.className = 'cat-badge cat-' + todo.category;
-      catBadge.textContent = CATEGORIES[todo.category] || '其他';
-      meta.appendChild(catBadge);
+        var text = document.createElement('span');
+        text.className = 'todo-text' + (todo.done ? ' done' : '');
+        text.textContent = todo.text;
 
-      content.appendChild(text);
-      content.appendChild(meta);
+        var meta = document.createElement('div');
+        meta.className = 'item-meta';
 
-      // Delete
-      var del = document.createElement('button');
-      del.className = 'del-btn';
-      del.title = '删除';
-      del.innerHTML = '&#x2715;';
-      del.addEventListener('click', function () {
-        todos.splice(realIndex, 1);
-        save();
-        render();
-      });
+        var catBadge = document.createElement('span');
+        catBadge.className = 'cat-badge cat-' + todo.category;
+        catBadge.textContent = CATEGORIES[todo.category] || '其他';
+        meta.appendChild(catBadge);
 
-      li.appendChild(handle);
-      li.appendChild(check);
-      li.appendChild(content);
-      li.appendChild(del);
+        content.appendChild(text);
+        content.appendChild(meta);
+
+        // Edit button
+        var editBtn = document.createElement('button');
+        editBtn.className = 'edit-btn';
+        editBtn.title = '编辑';
+        editBtn.innerHTML = '&#9998;';
+        editBtn.addEventListener('click', function () {
+          editingId = todo.id;
+          render();
+        });
+
+        // Delete
+        var del = document.createElement('button');
+        del.className = 'del-btn';
+        del.title = '删除';
+        del.innerHTML = '&#x2715;';
+        del.addEventListener('click', function () {
+          todos.splice(realIndex, 1);
+          save();
+          render();
+        });
+
+        li.appendChild(handle);
+        li.appendChild(check);
+        li.appendChild(content);
+        li.appendChild(editBtn);
+        li.appendChild(del);
+      } else {
+        // ---- Inline edit mode ----
+        var editRow = document.createElement('div');
+        editRow.className = 'edit-row';
+
+        var editText = document.createElement('input');
+        editText.type = 'text';
+        editText.value = todo.text;
+
+        var editDate = document.createElement('input');
+        editDate.type = 'date';
+        editDate.value = todo.dueDate || '';
+
+        var editCat = document.createElement('select');
+        ['other', 'work', 'life', 'study'].forEach(function (key) {
+          var opt = document.createElement('option');
+          opt.value = key;
+          opt.textContent = CATEGORIES[key];
+          if (todo.category === key) opt.selected = true;
+          editCat.appendChild(opt);
+        });
+
+        var saveBtn = document.createElement('button');
+        saveBtn.className = 'save-edit-btn';
+        saveBtn.textContent = '保存';
+        saveBtn.addEventListener('click', function () {
+          var newText = editText.value.trim();
+          if (!newText) return;
+          todo.text = newText;
+          todo.dueDate = editDate.value || '';
+          todo.category = editCat.value;
+          editingId = null;
+          save();
+          render();
+        });
+
+        var cancelBtn = document.createElement('button');
+        cancelBtn.className = 'cancel-edit-btn';
+        cancelBtn.textContent = '取消';
+        cancelBtn.addEventListener('click', function () {
+          editingId = null;
+          render();
+        });
+
+        editText.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') saveBtn.click();
+          if (e.key === 'Escape') cancelBtn.click();
+        });
+
+        editRow.appendChild(editText);
+        editRow.appendChild(editDate);
+        editRow.appendChild(editCat);
+        editRow.appendChild(saveBtn);
+        editRow.appendChild(cancelBtn);
+        li.appendChild(editRow);
+
+        // Auto focus the text input after render
+        setTimeout(function () { editText.focus(); editText.select(); }, 0);
+      }
+
       listEl.appendChild(li);
     });
 
