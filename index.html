@@ -49,6 +49,23 @@
     font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.2s; white-space: nowrap;
   }
   .input-row .add-btn:hover { background: #2563eb; }
+  .mic-btn {
+    padding: 10px 14px; background: #f1f5f9; border: 2px solid #e2e8f0; border-radius: 10px;
+    font-size: 16px; cursor: pointer; transition: all 0.2s; line-height: 1; flex-shrink: 0;
+  }
+  .mic-btn:hover { background: #e2e8f0; }
+  .mic-btn.listening { background: #fee2e2; border-color: #fca5a5; animation: pulse 1s ease-in-out infinite; }
+  .mic-btn.unsupported { opacity: 0.3; cursor: not-allowed; }
+  .speak-btn {
+    background: none; border: none; font-size: 16px; cursor: pointer; padding: 2px 6px;
+    opacity: 0.5; transition: opacity 0.2s; vertical-align: middle;
+  }
+  .speak-btn:hover { opacity: 1; }
+  .speak-btn.speaking { opacity: 1; animation: pulse 1s ease-in-out infinite; }
+  .voice-hint {
+    font-size: 11px; color: #f87171; text-align: center; margin-top: -6px; margin-bottom: 8px;
+    animation: fadeIn 0.3s ease;
+  }
 
   /* ===== Filter Toolbar ===== */
   .toolbar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
@@ -237,7 +254,9 @@
         <option value="study">学习</option>
       </select>
       <button class="add-btn" id="addBtn">添加</button>
+      <button class="mic-btn" id="micBtn" title="语音输入">&#127908;</button>
     </div>
+    <div class="voice-hint" id="voiceHint" style="display:none"></div>
 
     <div class="toolbar">
       <input class="search-input" id="searchInput" type="text" placeholder="搜索..." autocomplete="off">
@@ -283,9 +302,11 @@
 <!-- AI Plan Modal -->
 <div class="modal-overlay" id="aiModal">
   <div class="modal-box">
-    <h3 id="aiModalTitle">AI 规划</h3>
+    <h3 id="aiModalTitle">AI 规划 <button class="speak-btn" id="modalSpeakBtn" title="朗读">&#128264;</button></h3>
     <div class="ai-result" id="aiModalContent"></div>
-    <button class="modal-close" onclick="document.getElementById('aiModal').classList.remove('show')">关闭</button>
+    <div style="display:flex;gap:8px;justify-content:center;margin-top:14px">
+      <button class="modal-close" onclick="document.getElementById('aiModal').classList.remove('show');speechSynthesis.cancel()">关闭</button>
+    </div>
   </div>
 </div>
 
@@ -306,6 +327,9 @@
   var importFile = document.getElementById('importFile');
   var aiKeyArea = document.getElementById('aiKeyArea');
   var aiResultEl = document.getElementById('aiResult');
+  var micBtn = document.getElementById('micBtn');
+  var voiceHint = document.getElementById('voiceHint');
+  var modalSpeakBtn = document.getElementById('modalSpeakBtn');
   var aiBreakdownBtn = document.getElementById('aiBreakdownBtn');
   var aiExecuteBtn = document.getElementById('aiExecuteBtn');
   var aiPlanBtn = document.getElementById('aiPlanBtn');
@@ -889,9 +913,95 @@
     reader.readAsText(file);
   }
 
+  // ===== Voice Input (Speech Recognition) =====
+  var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var recognition = null;
+  var isListening = false;
+
+  if (SpeechRecognition) {
+    recognition = new SpeechRecognition();
+    recognition.lang = 'zh-CN';
+    recognition.continuous = false;
+    recognition.interimResults = true;
+
+    recognition.onstart = function() {
+      isListening = true;
+      micBtn.classList.add('listening');
+      voiceHint.style.display = 'block';
+      voiceHint.textContent = '正在聆听...';
+    };
+
+    recognition.onresult = function(event) {
+      var transcript = '';
+      for (var i = event.resultIndex; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      input.value = transcript;
+      if (event.results[event.results.length - 1].isFinal) {
+        voiceHint.textContent = '识别完成: "' + transcript + '"';
+        setTimeout(function() { voiceHint.style.display = 'none'; }, 2000);
+      }
+    };
+
+    recognition.onerror = function(event) {
+      isListening = false;
+      micBtn.classList.remove('listening');
+      if (event.error === 'not-allowed') {
+        voiceHint.textContent = '请允许麦克风权限';
+      } else if (event.error === 'no-speech') {
+        voiceHint.textContent = '未检测到语音，请重试';
+      } else {
+        voiceHint.textContent = '语音识别出错: ' + event.error;
+      }
+      setTimeout(function() { voiceHint.style.display = 'none'; }, 3000);
+    };
+
+    recognition.onend = function() {
+      isListening = false;
+      micBtn.classList.remove('listening');
+    };
+  } else {
+    micBtn.classList.add('unsupported');
+    micBtn.title = '您的浏览器不支持语音输入';
+  }
+
+  function toggleVoice() {
+    if (!recognition) { alert('您的浏览器不支持语音输入，请使用 Chrome'); return; }
+    if (isListening) {
+      recognition.stop();
+    } else {
+      recognition.start();
+    }
+  }
+
+  // ===== Text-to-Speech =====
+  function speakText(text) {
+    if (!window.speechSynthesis) { alert('您的浏览器不支持语音朗读'); return; }
+    speechSynthesis.cancel();
+    var utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'zh-CN';
+    utterance.rate = 1.0;
+    utterance.onstart = function() { modalSpeakBtn.classList.add('speaking'); modalSpeakBtn.innerHTML = '&#128266;'; };
+    utterance.onend = function() { modalSpeakBtn.classList.remove('speaking'); modalSpeakBtn.innerHTML = '&#128264;'; };
+    utterance.onerror = function() { modalSpeakBtn.classList.remove('speaking'); modalSpeakBtn.innerHTML = '&#128264;'; };
+    speechSynthesis.speak(utterance);
+  }
+
   // ===== Event Listeners =====
   addBtn.addEventListener('click', addTodo);
   input.addEventListener('keydown', function(e) { if(e.key==='Enter') addTodo(); });
+  micBtn.addEventListener('click', toggleVoice);
+
+  modalSpeakBtn.addEventListener('click', function() {
+    if (speechSynthesis.speaking) {
+      speechSynthesis.cancel();
+      modalSpeakBtn.classList.remove('speaking');
+      modalSpeakBtn.innerHTML = '&#128264;';
+    } else {
+      var text = document.getElementById('aiModalContent').textContent;
+      if (text) speakText(text);
+    }
+  });
 
   document.querySelectorAll('.filter-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
