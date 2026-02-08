@@ -459,7 +459,7 @@
 
     aiExecuteBtn.disabled = true;
     aiExecuteBtn.classList.add('loading');
-    aiExecuteBtn.textContent = '分析中...';
+    aiExecuteBtn.textContent = '执行中...';
 
     var today = todayStr();
     var taskList = sel.map(function(t, i) {
@@ -468,15 +468,19 @@
         (t.dueDate ? ' [截止:' + t.dueDate + ']' : '');
     }).join('\n');
 
-    var p = '你是一个任务执行顾问。用户选中了以下待办任务，请为每个任务生成具体的执行步骤和建议。\n\n' +
+    var p = '你是一个全能工作助手。用户选中了以下待办任务，请直接帮用户完成这些任务，产出实际可用的工作成果。\n\n' +
       '今天日期: ' + today + '\n\n' +
-      '选中的任务:\n' + taskList + '\n\n' +
-      '请为每个任务生成:\n' +
-      '1. 3-5个具体执行步骤（可操作的行动）\n' +
-      '2. 预估所需时间\n' +
-      '3. 需要的工具或资源\n' +
-      '4. 注意事项或技巧\n\n' +
-      '用中文回答，格式清晰，使用 emoji 让内容更生动。每个任务用标题分隔。';
+      '需要执行的任务:\n' + taskList + '\n\n' +
+      '重要要求：不要告诉用户"你应该怎么做"，而是直接产出成果。例如：\n' +
+      '- 如果任务是"写周报" → 直接写出一份周报\n' +
+      '- 如果任务是"准备会议议程" → 直接写出议程内容\n' +
+      '- 如果任务是"调研XX" → 直接给出调研报告\n' +
+      '- 如果任务是"写邮件给XX" → 直接写出邮件全文\n' +
+      '- 如果任务是"做PPT大纲" → 直接写出完整大纲\n' +
+      '- 如果任务是"制定计划" → 直接写出详细计划\n' +
+      '- 如果任务是"整理资料" → 直接给出整理好的框架和内容\n\n' +
+      '对于每个任务，先用标题标明任务名，然后直接给出完整的工作成果（可以直接复制使用的程度）。\n' +
+      '用中文回答，内容专业、详实，格式清晰。如果任务描述信息不足，请基于合理假设补充完整。';
 
     callAI(p, function(text, err) {
       aiExecuteBtn.disabled = false;
@@ -485,7 +489,7 @@
 
       if (err) { alert('AI 错误: ' + err); return; }
 
-      document.getElementById('aiModalTitle').textContent = '⚡ 任务执行方案';
+      document.getElementById('aiModalTitle').textContent = '⚡ 任务执行结果';
       document.getElementById('aiModalContent').textContent = text;
       document.getElementById('aiModal').classList.add('show');
     });
