@@ -913,7 +913,7 @@
     reader.readAsText(file);
   }
 
-  // ===== Voice Input (Speech Recognition) =====
+  // ===== Voice Input (Speech Recognition + AI Parse) =====
   var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   var recognition = null;
   var isListening = false;
@@ -938,14 +938,16 @@
       }
       input.value = transcript;
       if (event.results[event.results.length - 1].isFinal) {
-        voiceHint.textContent = '识别完成: "' + transcript + '"';
-        setTimeout(function() { voiceHint.style.display = 'none'; }, 2000);
+        voiceHint.textContent = 'AI 解析中...';
+        voiceHint.style.color = '#7c3aed';
+        parseVoiceInput(transcript);
       }
     };
 
     recognition.onerror = function(event) {
       isListening = false;
       micBtn.classList.remove('listening');
+      voiceHint.style.color = '#f87171';
       if (event.error === 'not-allowed') {
         voiceHint.textContent = '请允许麦克风权限';
       } else if (event.error === 'no-speech') {
@@ -953,7 +955,7 @@
       } else {
         voiceHint.textContent = '语音识别出错: ' + event.error;
       }
-      setTimeout(function() { voiceHint.style.display = 'none'; }, 3000);
+      setTimeout(function() { voiceHint.style.display = 'none'; voiceHint.style.color = ''; }, 3000);
     };
 
     recognition.onend = function() {
@@ -972,6 +974,85 @@
     } else {
       recognition.start();
     }
+  }
+
+  function parseVoiceInput(transcript) {
+    var today = todayStr();
+    var d = new Date();
+    var tomorrow = new Date(d); tomorrow.setDate(d.getDate()+1);
+    var dayAfter = new Date(d); dayAfter.setDate(d.getDate()+2);
+    function fmt(dt) { return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0'); }
+
+    var p = '你是一个待办事项解析助手。用户通过语音输入了一段话，请提取待办事项信息。\n\n' +
+      '今天日期: ' + today + '（' + fmt(d) + '）\n' +
+      '明天日期: ' + fmt(tomorrow) + '\n' +
+      '后天日期: ' + fmt(dayAfter) + '\n\n' +
+      '用户说: "' + transcript + '"\n\n' +
+      '请提取并返回JSON（可能包含多个待办）:\n' +
+      '{"items":[{"text":"任务描述","dueDate":"YYYY-MM-DD","category":"work/life/study/other"}]}\n\n' +
+      '规则:\n' +
+      '- text: 简洁的任务描述，去掉时间词（今天、明天、后天、下周等）\n' +
+      '- dueDate: 根据语音中的时间词推算具体日期。"今天"=' + today + '，"明天"=' + fmt(tomorrow) + '，"后天"=' + fmt(dayAfter) + '。"下周X"请计算具体日期。没提到时间就留空字符串\n' +
+      '- category: work(工作/开会/项目/汇报), life(生活/买/吃/运动), study(学习/看书/课程), other(其他)\n' +
+      '- 如果用户说了多个任务，拆分为多个items\n\n' +
+      '只返回JSON，不要其他内容。';
+
+    callAI(p, function(text, err) {
+      if (err) {
+        voiceHint.style.color = '#f87171';
+        voiceHint.textContent = '解析失败，已填入原文';
+        setTimeout(function() { voiceHint.style.display = 'none'; voiceHint.style.color = ''; }, 2500);
+        return;
+      }
+
+      try {
+        var match = text.match(/\{[\s\S]*\}/);
+        var result = JSON.parse(match[0]);
+        var items = result.items || [];
+        if (items.length === 0) throw new Error('empty');
+
+        items.forEach(function(item, i) {
+          todos.push({
+            id: Date.now() + i,
+            text: item.text || transcript,
+            done: false,
+            category: item.category || 'other',
+            dueDate: item.dueDate || '',
+            createdAt: new Date().toISOString(),
+            parentId: null
+          });
+        });
+        input.value = '';
+        save(); render();
+
+        var summary = items.map(function(item) {
+          var s = '"' + item.text + '"';
+          if (item.dueDate) {
+            if (item.dueDate === today) s += ' 今天';
+            else if (item.dueDate === fmt(tomorrow)) s += ' 明天';
+            else if (item.dueDate === fmt(dayAfter)) s += ' 后天';
+            else s += ' ' + item.dueDate;
+          }
+          s += ' [' + (CATEGORIES[item.category] || '其他') + ']';
+          return s;
+        }).join('；');
+
+        voiceHint.style.color = '#16a34a';
+        voiceHint.textContent = '已添加: ' + summary;
+        setTimeout(function() { voiceHint.style.display = 'none'; voiceHint.style.color = ''; }, 4000);
+      } catch(e) {
+        // Fallback: add as-is
+        todos.push({
+          id: Date.now(), text: transcript, done: false,
+          category: 'other', dueDate: '', createdAt: new Date().toISOString(), parentId: null
+        });
+        input.value = '';
+        save(); render();
+        voiceHint.style.color = '#ea580c';
+        voiceHint.textContent = '已添加原文: "' + transcript + '"';
+        setTimeout(function() { voiceHint.style.display = 'none'; voiceHint.style.color = ''; }, 3000);
+      }
+    });
   }
 
   // ===== Text-to-Speech =====
