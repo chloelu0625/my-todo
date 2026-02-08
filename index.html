@@ -109,6 +109,9 @@
   .select-bar .select-action.danger:hover { background: #fee2e2; }
   .select-bar .select-cancel { background: none; border: none; color: #94a3b8; font-size: 12px; cursor: pointer; margin-left: auto; }
 
+  .todo-item.subtask { margin-left: 28px; border-left: 2px solid #e9d5ff; padding-left: 12px; }
+  .todo-item.subtask .todo-text { font-size: 13px; }
+
   .item-content { flex: 1; min-width: 0; }
   .todo-text { font-size: 14px; color: #334155; word-break: break-word; transition: color 0.2s; }
   .todo-text.done { text-decoration: line-through; color: #94a3b8; }
@@ -331,6 +334,7 @@
         if (!item.category) item.category = 'other';
         if (item.dueDate === undefined) item.dueDate = '';
         if (!item.createdAt) item.createdAt = new Date().toISOString();
+        if (item.parentId === undefined) item.parentId = null;
         return item;
       });
     } catch (e) { return []; }
@@ -384,17 +388,18 @@
     if (sel.length > 0) { aiBreakdownSelected(); return; }
     var task = prompt('请输入要拆解的大任务：');
     if (!task) return;
-    doBreakdown(task);
+    doBreakdown(task, null);
   }
 
   function aiBreakdownSelected() {
     var sel = getSelectedTodos();
     if (sel.length === 0) { alert('请先勾选要拆解的任务'); return; }
     var taskText = sel.map(function(t) { return t.text; }).join('、');
-    doBreakdown(taskText);
+    var parentId = sel.length === 1 ? sel[0].id : null;
+    doBreakdown(taskText, parentId);
   }
 
-  function doBreakdown(task) {
+  function doBreakdown(task, parentId) {
     aiBreakdownBtn.disabled = true;
     aiBreakdownBtn.classList.add('loading');
     aiBreakdownBtn.textContent = '拆解中...';
@@ -433,17 +438,33 @@
         html += '</div>';
         aiResultEl.innerHTML = html;
 
-        aiResultEl.querySelectorAll('.ai-add-btn').forEach(function(btn) {
+        // "全部添加" button
+        var addAllHtml = '<div style="margin-top:8px;text-align:right"><button class="ai-add-btn" id="aiAddAll">全部添加为子任务</button></div>';
+        aiResultEl.querySelector('.ai-result').insertAdjacentHTML('beforeend', addAllHtml);
+
+        function addSubtask(idx, btnEl) {
+          var t = tasks[idx];
+          todos.push({
+            id: Date.now() + idx, text: t.text, done: false,
+            category: t.category || 'other', dueDate: t.dueDate || '',
+            createdAt: new Date().toISOString(), parentId: parentId || null
+          });
+          if (btnEl) { btnEl.textContent = '已添加'; btnEl.disabled = true; btnEl.style.background = '#94a3b8'; }
+        }
+
+        aiResultEl.querySelectorAll('.ai-add-btn[data-idx]').forEach(function(btn) {
           btn.addEventListener('click', function() {
-            var idx = parseInt(this.getAttribute('data-idx'));
-            var t = tasks[idx];
-            todos.push({
-              id: Date.now() + idx, text: t.text, done: false,
-              category: t.category || 'other', dueDate: t.dueDate || '',
-              createdAt: new Date().toISOString()
-            });
+            addSubtask(parseInt(this.getAttribute('data-idx')), this);
             save(); render();
-            this.textContent = '已添加'; this.disabled = true; this.style.background = '#94a3b8';
+          });
+        });
+
+        document.getElementById('aiAddAll').addEventListener('click', function() {
+          tasks.forEach(function(t, i) { addSubtask(i, null); });
+          save(); render();
+          this.textContent = '已全部添加'; this.disabled = true; this.style.background = '#94a3b8';
+          aiResultEl.querySelectorAll('.ai-add-btn[data-idx]').forEach(function(b) {
+            b.textContent = '已添加'; b.disabled = true; b.style.background = '#94a3b8';
           });
         });
       } catch(e) {
@@ -561,7 +582,8 @@
       done: false,
       category: categoryInput.value,
       dueDate: dueDateInput.value || '',
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      parentId: null
     };
     todos.push(newTodo);
     input.value = '';
@@ -655,7 +677,7 @@
     document.getElementById('selDelete').addEventListener('click', function() {
       if (!confirm('确定删除选中的 ' + count + ' 项？')) return;
       var ids = new Set(selectedIds);
-      todos = todos.filter(function(t) { return !ids.has(t.id); });
+      todos = todos.filter(function(t) { return !ids.has(t.id) && !ids.has(t.parentId); });
       selectedIds.clear(); save(); render();
     });
     document.getElementById('selClear').addEventListener('click', function() {
@@ -680,14 +702,23 @@
       return;
     }
 
-    var sorted = filtered.slice().sort(function(a,b) {
+    // Separate parents and subtasks
+    var parents = filtered.filter(function(t) { return !t.parentId; });
+    var childMap = {};
+    filtered.forEach(function(t) {
+      if (t.parentId) {
+        if (!childMap[t.parentId]) childMap[t.parentId] = [];
+        childMap[t.parentId].push(t);
+      }
+    });
+
+    var sorted = parents.slice().sort(function(a,b) {
       var da = a.dueDate || '\uffff', db = b.dueDate || '\uffff';
       return da < db ? -1 : da > db ? 1 : 0;
     });
 
     var lastDate = null;
     sorted.forEach(function(todo) {
-      var realIndex = todos.indexOf(todo);
       var dateKey = todo.dueDate || '';
 
       if (dateKey !== lastDate) {
@@ -704,8 +735,17 @@
         listEl.appendChild(header);
       }
 
+      // Render parent
+      appendTodoLi(todo, false);
+      // Render subtasks
+      var children = childMap[todo.id] || [];
+      children.forEach(function(child) { appendTodoLi(child, true); });
+    });
+
+    function appendTodoLi(todo, isSubtask) {
+      var realIndex = todos.indexOf(todo);
       var li = document.createElement('li');
-      li.className = 'todo-item';
+      li.className = 'todo-item' + (isSubtask ? ' subtask' : '');
       li.setAttribute('data-index', realIndex);
       var isEditing = editingId === todo.id;
 
@@ -759,7 +799,11 @@
         var db = document.createElement('button');
         db.className = 'del-btn';
         db.innerHTML = '&#x2715;';
-        db.addEventListener('click', function() { todos.splice(realIndex, 1); selectedIds.delete(todo.id); save(); render(); });
+        db.addEventListener('click', function() {
+          var tid = todo.id;
+          todos = todos.filter(function(t) { return t.id !== tid && t.parentId !== tid; });
+          selectedIds.delete(tid); save(); render();
+        });
 
         li.appendChild(chk);
         li.appendChild(handle);
@@ -784,7 +828,7 @@
         setTimeout(function(){ et.focus(); et.select(); }, 0);
       }
       listEl.appendChild(li);
-    });
+    }
 
     var remaining = todos.filter(function(t){return !t.done;}).length;
     statsEl.textContent = remaining + ' 项未完成 / 共 ' + todos.length + ' 项';
@@ -802,7 +846,7 @@
       todos.push({
         id: Date.now(), text: text, done: false,
         category: categoryInput.value, dueDate: dueDateInput.value || '',
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(), parentId: null
       });
       input.value = '';
       dueDateInput.value = '';
@@ -835,7 +879,8 @@
         todos = data.map(function(item,i) {
           if(!item.id) item.id=Date.now()+i; if(!item.category) item.category='other';
           if(item.dueDate===undefined) item.dueDate=''; if(!item.createdAt) item.createdAt=new Date().toISOString();
-          if(item.done===undefined) item.done=false; if(!item.text) item.text=''; return item;
+          if(item.done===undefined) item.done=false; if(!item.text) item.text='';
+          if(item.parentId===undefined) item.parentId=null; return item;
         });
         save(); render();
         alert('导入成功！共 ' + todos.length + ' 条记录');
