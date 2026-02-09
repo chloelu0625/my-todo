@@ -297,35 +297,6 @@
     border-radius: 8px; font-size: 13px; cursor: pointer; color: #64748b;
   }
 
-  /* ===== Config Modal ===== */
-  .config-overlay {
-    display: none; position: fixed; top:0; left:0; right:0; bottom:0;
-    background: rgba(0,0,0,0.4); z-index: 3000; align-items: center; justify-content: center;
-  }
-  .config-overlay.show { display: flex; }
-  .config-box {
-    background: #fff; border-radius: 14px; padding: 28px; width: 90%; max-width: 420px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-  }
-  .config-box h3 { font-size: 16px; margin-bottom: 14px; color: #1e293b; }
-  .config-field { margin-bottom: 14px; }
-  .config-field label { display: block; font-size: 13px; font-weight: 500; color: #64748b; margin-bottom: 5px; }
-  .config-field input {
-    width: 100%; padding: 8px 12px; border: 2px solid #e2e8f0; border-radius: 8px;
-    font-size: 13px; outline: none; font-family: monospace;
-  }
-  .config-field input:focus { border-color: #60a5fa; }
-  .config-save {
-    padding: 10px 20px; background: #3b82f6; color: #fff; border: none; border-radius: 8px;
-    font-size: 14px; font-weight: 600; cursor: pointer; margin-right: 8px;
-  }
-  .config-save:hover { background: #2563eb; }
-  .config-cancel {
-    padding: 10px 20px; background: #e2e8f0; color: #64748b; border: none; border-radius: 8px;
-    font-size: 14px; cursor: pointer;
-  }
-  .config-hint { font-size: 11px; color: #94a3b8; margin-bottom: 16px; line-height: 1.6; }
-
   /* ===== Responsive ===== */
   @media (max-width: 480px) {
     body { padding: 16px 8px; }
@@ -358,31 +329,6 @@
       <div class="auth-error" id="authError"></div>
     </div>
     <div class="auth-loading hidden" id="authLoading">正在检查登录状态...</div>
-  </div>
-</div>
-
-<!-- Supabase Config Modal -->
-<div class="config-overlay" id="configOverlay">
-  <div class="config-box">
-    <h3>Supabase 配置</h3>
-    <p class="config-hint">
-      请输入你的 Supabase 项目信息。<br>
-      在 <a href="https://supabase.com" target="_blank">supabase.com</a> 创建项目后，<br>
-      前往 Settings &rarr; API 获取以下信息。
-    </p>
-    <div class="config-field">
-      <label>Project URL</label>
-      <input type="text" id="configUrl" placeholder="https://xxxxx.supabase.co">
-    </div>
-    <div class="config-field">
-      <label>Anon Public Key</label>
-      <input type="text" id="configKey" placeholder="eyJhbGciOi...">
-    </div>
-    <div>
-      <button class="config-save" id="configSave">保存并连接</button>
-      <button class="config-cancel" id="configCancel">取消</button>
-    </div>
-    <div class="auth-error" id="configError"></div>
   </div>
 </div>
 
@@ -482,76 +428,10 @@
 <script>
 (function () {
   // ===== Supabase Configuration =====
-  var SUPABASE_CONFIG_KEY = 'my_todo_supabase_config';
-  var supabaseClient = null;
+  var SUPABASE_URL = 'https://cokplvhmunogtjubuuud.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNva3BsdmhtdW5vZ3RqdWJ1dXVkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2MjE2NzksImV4cCI6MjA4NjE5NzY3OX0.dLYyQzWk8r-CLaitelSPrgQZPnrRwpRaGJ3SIeJKeGs';
+  var supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   var currentUser = null;
-
-  function getSupabaseConfig() {
-    try {
-      var raw = localStorage.getItem(SUPABASE_CONFIG_KEY);
-      if (!raw) return null;
-      var config = JSON.parse(raw);
-      if (config.url && config.key) return config;
-      return null;
-    } catch(e) { return null; }
-  }
-
-  function saveSupabaseConfig(url, key) {
-    localStorage.setItem(SUPABASE_CONFIG_KEY, JSON.stringify({ url: url, key: key }));
-  }
-
-  function initSupabase() {
-    var config = getSupabaseConfig();
-    if (!config) return false;
-    try {
-      supabaseClient = supabase.createClient(config.url, config.key);
-      return true;
-    } catch(e) {
-      console.error('Supabase init error:', e);
-      return false;
-    }
-  }
-
-  // ===== Config Modal =====
-  var configOverlay = document.getElementById('configOverlay');
-  var configUrl = document.getElementById('configUrl');
-  var configKey = document.getElementById('configKey');
-  var configSave = document.getElementById('configSave');
-  var configCancel = document.getElementById('configCancel');
-  var configError = document.getElementById('configError');
-
-  function showConfigModal() {
-    var config = getSupabaseConfig();
-    if (config) {
-      configUrl.value = config.url;
-      configKey.value = config.key;
-    }
-    configError.textContent = '';
-    configOverlay.classList.add('show');
-  }
-
-  configSave.addEventListener('click', function() {
-    var url = configUrl.value.trim();
-    var key = configKey.value.trim();
-    if (!url || !key) { configError.textContent = '请填写完整信息'; return; }
-    if (!url.startsWith('https://') || !url.includes('.supabase.co')) {
-      configError.textContent = 'URL 格式不正确，应类似 https://xxxxx.supabase.co';
-      return;
-    }
-    saveSupabaseConfig(url, key);
-    if (initSupabase()) {
-      configOverlay.classList.remove('show');
-      checkAuth();
-    } else {
-      configError.textContent = '初始化失败，请检查配置';
-    }
-  });
-
-  configCancel.addEventListener('click', function() {
-    if (getSupabaseConfig()) {
-      configOverlay.classList.remove('show');
-    }
-  });
 
   // ===== Auth =====
   var authOverlay = document.getElementById('authOverlay');
@@ -653,11 +533,6 @@
   }
 
   async function checkAuth() {
-    if (!supabaseClient) {
-      showConfigModal();
-      return;
-    }
-
     authForm.classList.add('hidden');
     authLoading.classList.remove('hidden');
 
@@ -1558,12 +1433,8 @@
 
   renderKeyArea();
 
-  // ===== Init: check config & auth =====
-  if (initSupabase()) {
-    checkAuth();
-  } else {
-    showConfigModal();
-  }
+  // ===== Init =====
+  checkAuth();
 })();
 </script>
 
