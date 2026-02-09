@@ -1380,6 +1380,7 @@
   var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   var recognition = null;
   var isListening = false;
+  var voiceBaseText = '';
 
   if (SpeechRecognition) {
     recognition = new SpeechRecognition();
@@ -1389,6 +1390,7 @@
 
     recognition.onstart = function() {
       isListening = true;
+      voiceBaseText = smartAddText.value;
       smartMicBtn.classList.add('listening');
       smartParseHint.textContent = '正在聆听...';
       smartParseHint.style.color = '#7c3aed';
@@ -1399,13 +1401,13 @@
       for (var i = event.resultIndex; i < event.results.length; i++) {
         transcript += event.results[i][0].transcript;
       }
-      var current = smartAddText.value;
-      if (current && !current.endsWith('\n') && !current.endsWith('，') && !current.endsWith('。')) {
-        smartAddText.value = current + '，' + transcript;
-      } else {
-        smartAddText.value = current + transcript;
+      var sep = '';
+      if (voiceBaseText && !voiceBaseText.endsWith('\n') && !voiceBaseText.endsWith('，') && !voiceBaseText.endsWith('。')) {
+        sep = '，';
       }
+      smartAddText.value = voiceBaseText + sep + transcript;
       if (event.results[event.results.length - 1].isFinal) {
+        voiceBaseText = smartAddText.value;
         smartParseHint.textContent = '语音已录入，点击 "AI 解析" 生成待办';
         smartParseHint.style.color = '#16a34a';
       }
