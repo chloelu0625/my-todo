@@ -195,6 +195,16 @@
 
   .todo-item.subtask { margin-left: 28px; border-left: 2px solid #e9d5ff; padding-left: 12px; }
   .todo-item.subtask .todo-text { font-size: 13px; }
+  .subtask-actions {
+    margin-left: 28px; border-left: 2px solid #e9d5ff; padding: 6px 12px;
+    display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
+  }
+  .subtask-actions .sub-action-btn {
+    padding: 3px 10px; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff;
+    font-size: 11px; cursor: pointer; color: #64748b; transition: all 0.2s;
+  }
+  .subtask-actions .sub-action-btn:hover { border-color: #93c5fd; color: #3b82f6; }
+  .subtask-actions .sub-action-btn.danger:hover { border-color: #fca5a5; color: #dc2626; }
 
   .item-content { flex: 1; min-width: 0; }
   .todo-text { font-size: 14px; color: #334155; word-break: break-word; transition: color 0.2s; }
@@ -1132,7 +1142,56 @@
       appendTodoLi(todo, false);
       var children = childMap[todo.id] || [];
       children.forEach(function(child) { appendTodoLi(child, true); });
+      if (children.length > 0) {
+        appendSubtaskActions(todo.id, children);
+      }
     });
+
+    function appendSubtaskActions(parentId, children) {
+      var bar = document.createElement('li');
+      bar.className = 'subtask-actions';
+
+      var selAllBtn = document.createElement('button');
+      selAllBtn.className = 'sub-action-btn';
+      selAllBtn.textContent = '\u2610 全选';
+      selAllBtn.addEventListener('click', function() {
+        var allSelected = children.every(function(c) { return selectedIds.has(c.id); });
+        children.forEach(function(c) {
+          if (allSelected) selectedIds.delete(c.id); else selectedIds.add(c.id);
+        });
+        render();
+      });
+
+      var doneAllBtn = document.createElement('button');
+      doneAllBtn.className = 'sub-action-btn';
+      doneAllBtn.textContent = '\u2705 全部完成';
+      doneAllBtn.addEventListener('click', async function() {
+        for (var i = 0; i < children.length; i++) {
+          children[i].done = true;
+          await updateTodoDB(children[i].id, { done: true });
+        }
+        render();
+      });
+
+      var delAllBtn = document.createElement('button');
+      delAllBtn.className = 'sub-action-btn danger';
+      delAllBtn.textContent = '\u2715 全部删除';
+      delAllBtn.addEventListener('click', async function() {
+        if (!confirm('确定删除全部 ' + children.length + ' 个子任务？')) return;
+        for (var i = 0; i < children.length; i++) {
+          await deleteTodoDB(children[i].id);
+        }
+        var childIds = new Set(children.map(function(c) { return c.id; }));
+        todos = todos.filter(function(t) { return !childIds.has(t.id); });
+        childIds.forEach(function(id) { selectedIds.delete(id); });
+        render();
+      });
+
+      bar.appendChild(selAllBtn);
+      bar.appendChild(doneAllBtn);
+      bar.appendChild(delAllBtn);
+      listEl.appendChild(bar);
+    }
 
     function appendTodoLi(todo, isSubtask) {
       var realIndex = todos.indexOf(todo);
