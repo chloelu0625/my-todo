@@ -786,7 +786,9 @@
         });
 
         document.getElementById('aiAddAll').addEventListener('click', async function() {
+          var btns = aiResultEl.querySelectorAll('.ai-add-btn[data-idx]');
           for (var i = 0; i < tasks.length; i++) {
+            if (btns[i] && btns[i].disabled) continue;
             await addSubtask(i, null);
           }
           render();
@@ -1003,7 +1005,9 @@
     });
 
     document.getElementById('smartAddAllBtn').addEventListener('click', async function() {
+      var btns = smartAddResult.querySelectorAll('.ai-add-btn[data-sidx]');
       for (var i = 0; i < items.length; i++) {
+        if (btns[i] && btns[i].disabled) continue;
         var item = items[i];
         var newTodo = {
           id: Date.now() + i, text: item.text, done: false,
