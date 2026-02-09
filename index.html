@@ -35,6 +35,7 @@
     z-index: 2000; display: flex; align-items: center; justify-content: center;
   }
   .auth-overlay.hidden { display: none; }
+  .hidden { display: none !important; }
   .auth-box {
     background: #fff; border-radius: 16px; padding: 36px 32px; width: 90%; max-width: 400px;
     box-shadow: 0 8px 30px rgba(0,0,0,0.1);
@@ -326,7 +327,7 @@
       <button class="auth-tab active" id="loginTab">登录</button>
       <button class="auth-tab" id="registerTab">注册</button>
     </div>
-    <div id="authForm">
+    <div id="authForm" class="hidden">
       <div class="auth-field">
         <label for="authEmail">邮箱</label>
         <input type="email" id="authEmail" placeholder="your@email.com" autocomplete="email">
@@ -338,7 +339,7 @@
       <button class="auth-submit" id="authSubmit">登录</button>
       <div class="auth-error" id="authError"></div>
     </div>
-    <div class="auth-loading hidden" id="authLoading">正在检查登录状态...</div>
+    <div class="auth-loading" id="authLoading">正在检查登录状态...</div>
   </div>
 </div>
 
