@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>待办事项</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -27,55 +26,6 @@
   }
 
   h1 { font-size: 26px; font-weight: 700; color: #1e293b; text-align: center; margin-bottom: 24px; }
-
-  /* ===== Auth Overlay ===== */
-  .auth-overlay {
-    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background: linear-gradient(135deg, #e0f2fe 0%, #f0fdf4 50%, #fef9c3 100%);
-    z-index: 2000; display: flex; align-items: center; justify-content: center;
-  }
-  .auth-overlay.hidden { display: none; }
-  .auth-box {
-    background: #fff; border-radius: 16px; padding: 36px 32px; width: 90%; max-width: 400px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
-  }
-  .auth-box h2 { text-align: center; font-size: 24px; color: #1e293b; margin-bottom: 6px; }
-  .auth-box .auth-subtitle { text-align: center; font-size: 13px; color: #94a3b8; margin-bottom: 20px; }
-  .auth-tabs { display: flex; gap: 0; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; }
-  .auth-tab {
-    flex: 1; padding: 10px; text-align: center; font-size: 14px; font-weight: 600;
-    color: #94a3b8; background: none; border: none; cursor: pointer;
-    border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s;
-  }
-  .auth-tab.active { color: #3b82f6; border-bottom-color: #3b82f6; }
-  .auth-tab:hover { color: #3b82f6; }
-  .auth-field { margin-bottom: 14px; }
-  .auth-field label { display: block; font-size: 13px; font-weight: 500; color: #64748b; margin-bottom: 5px; }
-  .auth-field input {
-    width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px;
-    font-size: 14px; outline: none; transition: border-color 0.2s;
-  }
-  .auth-field input:focus { border-color: #60a5fa; }
-  .auth-submit {
-    width: 100%; padding: 12px; background: #3b82f6; color: #fff; border: none; border-radius: 10px;
-    font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-top: 6px;
-  }
-  .auth-submit:hover { background: #2563eb; }
-  .auth-submit:disabled { opacity: 0.5; cursor: not-allowed; }
-  .auth-error { color: #dc2626; font-size: 13px; margin-top: 10px; text-align: center; min-height: 20px; }
-  .auth-loading { text-align: center; color: #94a3b8; font-size: 14px; padding: 20px 0; }
-
-  /* ===== User Bar ===== */
-  .user-bar {
-    display: flex; align-items: center; justify-content: flex-end; gap: 10px;
-    margin-bottom: 16px; padding: 0 2px;
-  }
-  .user-bar .user-email { font-size: 12px; color: #64748b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px; }
-  .user-bar .logout-btn {
-    padding: 4px 12px; border: 1.5px solid #e2e8f0; border-radius: 6px; background: #fff;
-    font-size: 12px; cursor: pointer; color: #64748b; transition: all 0.2s;
-  }
-  .user-bar .logout-btn:hover { border-color: #fca5a5; color: #dc2626; background: #fef2f2; }
 
   /* ===== Input Row ===== */
   .input-row { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
@@ -297,35 +247,6 @@
     border-radius: 8px; font-size: 13px; cursor: pointer; color: #64748b;
   }
 
-  /* ===== Config Modal ===== */
-  .config-overlay {
-    display: none; position: fixed; top:0; left:0; right:0; bottom:0;
-    background: rgba(0,0,0,0.4); z-index: 3000; align-items: center; justify-content: center;
-  }
-  .config-overlay.show { display: flex; }
-  .config-box {
-    background: #fff; border-radius: 14px; padding: 28px; width: 90%; max-width: 420px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-  }
-  .config-box h3 { font-size: 16px; margin-bottom: 14px; color: #1e293b; }
-  .config-field { margin-bottom: 14px; }
-  .config-field label { display: block; font-size: 13px; font-weight: 500; color: #64748b; margin-bottom: 5px; }
-  .config-field input {
-    width: 100%; padding: 8px 12px; border: 2px solid #e2e8f0; border-radius: 8px;
-    font-size: 13px; outline: none; font-family: monospace;
-  }
-  .config-field input:focus { border-color: #60a5fa; }
-  .config-save {
-    padding: 10px 20px; background: #3b82f6; color: #fff; border: none; border-radius: 8px;
-    font-size: 14px; font-weight: 600; cursor: pointer; margin-right: 8px;
-  }
-  .config-save:hover { background: #2563eb; }
-  .config-cancel {
-    padding: 10px 20px; background: #e2e8f0; color: #64748b; border: none; border-radius: 8px;
-    font-size: 14px; cursor: pointer;
-  }
-  .config-hint { font-size: 11px; color: #94a3b8; margin-bottom: 16px; line-height: 1.6; }
-
   /* ===== Responsive ===== */
   @media (max-width: 480px) {
     body { padding: 16px 8px; }
@@ -336,63 +257,8 @@
 </head>
 <body>
 
-<!-- Auth Overlay -->
-<div class="auth-overlay" id="authOverlay">
-  <div class="auth-box">
-    <h2>&#128221; 待办事项</h2>
-    <p class="auth-subtitle">登录后数据云端同步，多设备访问</p>
-    <div class="auth-tabs">
-      <button class="auth-tab active" id="loginTab">登录</button>
-      <button class="auth-tab" id="registerTab">注册</button>
-    </div>
-    <div id="authForm">
-      <div class="auth-field">
-        <label for="authEmail">邮箱</label>
-        <input type="email" id="authEmail" placeholder="your@email.com" autocomplete="email">
-      </div>
-      <div class="auth-field">
-        <label for="authPassword">密码</label>
-        <input type="password" id="authPassword" placeholder="至少6位密码" autocomplete="current-password">
-      </div>
-      <button class="auth-submit" id="authSubmit">登录</button>
-      <div class="auth-error" id="authError"></div>
-    </div>
-    <div class="auth-loading hidden" id="authLoading">正在检查登录状态...</div>
-  </div>
-</div>
-
-<!-- Supabase Config Modal -->
-<div class="config-overlay" id="configOverlay">
-  <div class="config-box">
-    <h3>Supabase 配置</h3>
-    <p class="config-hint">
-      请输入你的 Supabase 项目信息。<br>
-      在 <a href="https://supabase.com" target="_blank">supabase.com</a> 创建项目后，<br>
-      前往 Settings &rarr; API 获取以下信息。
-    </p>
-    <div class="config-field">
-      <label>Project URL</label>
-      <input type="text" id="configUrl" placeholder="https://xxxxx.supabase.co">
-    </div>
-    <div class="config-field">
-      <label>Anon Public Key</label>
-      <input type="text" id="configKey" placeholder="eyJhbGciOi...">
-    </div>
-    <div>
-      <button class="config-save" id="configSave">保存并连接</button>
-      <button class="config-cancel" id="configCancel">取消</button>
-    </div>
-    <div class="auth-error" id="configError"></div>
-  </div>
-</div>
-
 <div class="container">
   <div class="card">
-    <div class="user-bar" id="userBar" style="display:none">
-      <span class="user-email" id="userEmail"></span>
-      <button class="logout-btn" id="logoutBtn">退出登录</button>
-    </div>
-
     <h1>&#128221; 待办事项</h1>
 
     <div class="input-row">
@@ -481,208 +347,8 @@
 
 <script>
 (function () {
-  // ===== Supabase Configuration =====
-  var SUPABASE_CONFIG_KEY = 'my_todo_supabase_config';
-  var supabaseClient = null;
-  var currentUser = null;
+  var STORAGE_KEY = 'my_todo_items';
 
-  function getSupabaseConfig() {
-    try {
-      var raw = localStorage.getItem(SUPABASE_CONFIG_KEY);
-      if (!raw) return null;
-      var config = JSON.parse(raw);
-      if (config.url && config.key) return config;
-      return null;
-    } catch(e) { return null; }
-  }
-
-  function saveSupabaseConfig(url, key) {
-    localStorage.setItem(SUPABASE_CONFIG_KEY, JSON.stringify({ url: url, key: key }));
-  }
-
-  function initSupabase() {
-    var config = getSupabaseConfig();
-    if (!config) return false;
-    try {
-      supabaseClient = supabase.createClient(config.url, config.key);
-      return true;
-    } catch(e) {
-      console.error('Supabase init error:', e);
-      return false;
-    }
-  }
-
-  // ===== Config Modal =====
-  var configOverlay = document.getElementById('configOverlay');
-  var configUrl = document.getElementById('configUrl');
-  var configKey = document.getElementById('configKey');
-  var configSave = document.getElementById('configSave');
-  var configCancel = document.getElementById('configCancel');
-  var configError = document.getElementById('configError');
-
-  function showConfigModal() {
-    var config = getSupabaseConfig();
-    if (config) {
-      configUrl.value = config.url;
-      configKey.value = config.key;
-    }
-    configError.textContent = '';
-    configOverlay.classList.add('show');
-  }
-
-  configSave.addEventListener('click', function() {
-    var url = configUrl.value.trim();
-    var key = configKey.value.trim();
-    if (!url || !key) { configError.textContent = '请填写完整信息'; return; }
-    if (!url.startsWith('https://') || !url.includes('.supabase.co')) {
-      configError.textContent = 'URL 格式不正确，应类似 https://xxxxx.supabase.co';
-      return;
-    }
-    saveSupabaseConfig(url, key);
-    if (initSupabase()) {
-      configOverlay.classList.remove('show');
-      checkAuth();
-    } else {
-      configError.textContent = '初始化失败，请检查配置';
-    }
-  });
-
-  configCancel.addEventListener('click', function() {
-    if (getSupabaseConfig()) {
-      configOverlay.classList.remove('show');
-    }
-  });
-
-  // ===== Auth =====
-  var authOverlay = document.getElementById('authOverlay');
-  var authLoading = document.getElementById('authLoading');
-  var authForm = document.getElementById('authForm');
-  var loginTab = document.getElementById('loginTab');
-  var registerTab = document.getElementById('registerTab');
-  var authEmail = document.getElementById('authEmail');
-  var authPassword = document.getElementById('authPassword');
-  var authSubmit = document.getElementById('authSubmit');
-  var authError = document.getElementById('authError');
-  var userBar = document.getElementById('userBar');
-  var userEmailEl = document.getElementById('userEmail');
-  var logoutBtn = document.getElementById('logoutBtn');
-
-  var isLoginMode = true;
-
-  loginTab.addEventListener('click', function() {
-    isLoginMode = true;
-    loginTab.classList.add('active');
-    registerTab.classList.remove('active');
-    authSubmit.textContent = '登录';
-    authError.textContent = '';
-  });
-
-  registerTab.addEventListener('click', function() {
-    isLoginMode = false;
-    registerTab.classList.add('active');
-    loginTab.classList.remove('active');
-    authSubmit.textContent = '注册';
-    authError.textContent = '';
-  });
-
-  authPassword.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') authSubmit.click();
-  });
-
-  authSubmit.addEventListener('click', async function() {
-    var email = authEmail.value.trim();
-    var password = authPassword.value;
-    if (!email || !password) { authError.textContent = '请填写邮箱和密码'; return; }
-    if (password.length < 6) { authError.textContent = '密码至少6位'; return; }
-
-    authSubmit.disabled = true;
-    authError.textContent = '';
-
-    try {
-      var result;
-      if (isLoginMode) {
-        result = await supabaseClient.auth.signInWithPassword({ email: email, password: password });
-      } else {
-        result = await supabaseClient.auth.signUp({ email: email, password: password });
-      }
-
-      if (result.error) {
-        var msg = result.error.message;
-        if (msg.includes('Invalid login')) msg = '邮箱或密码错误';
-        else if (msg.includes('already registered')) msg = '该邮箱已注册，请直接登录';
-        else if (msg.includes('Email not confirmed')) msg = '请先前往邮箱验证账号';
-        else if (msg.includes('Password should')) msg = '密码至少6位';
-        authError.textContent = msg;
-      } else if (result.data && result.data.user) {
-        if (!isLoginMode && result.data.user.identities && result.data.user.identities.length === 0) {
-          authError.textContent = '该邮箱已注册，请直接登录';
-        } else if (!isLoginMode && !result.data.session) {
-          authError.textContent = '注册成功！请前往邮箱点击验证链接后登录';
-          authError.style.color = '#16a34a';
-        }
-        // onAuthStateChange will handle the rest
-      }
-    } catch(e) {
-      authError.textContent = '网络错误，请重试';
-    }
-    authSubmit.disabled = false;
-  });
-
-  logoutBtn.addEventListener('click', async function() {
-    if (!supabaseClient) return;
-    await supabaseClient.auth.signOut();
-    // onAuthStateChange will handle UI
-  });
-
-  function showApp(user) {
-    currentUser = user;
-    authOverlay.classList.add('hidden');
-    userBar.style.display = 'flex';
-    userEmailEl.textContent = user.email;
-    loadTodosFromDB();
-  }
-
-  function showAuth() {
-    currentUser = null;
-    todos = [];
-    authOverlay.classList.remove('hidden');
-    authForm.classList.remove('hidden');
-    authLoading.classList.add('hidden');
-    userBar.style.display = 'none';
-    render();
-  }
-
-  async function checkAuth() {
-    if (!supabaseClient) {
-      showConfigModal();
-      return;
-    }
-
-    authForm.classList.add('hidden');
-    authLoading.classList.remove('hidden');
-
-    try {
-      var { data: { session } } = await supabaseClient.auth.getSession();
-      if (session && session.user) {
-        showApp(session.user);
-      } else {
-        showAuth();
-      }
-    } catch(e) {
-      showAuth();
-    }
-
-    // Listen for auth state changes
-    supabaseClient.auth.onAuthStateChange(function(event, session) {
-      if (event === 'SIGNED_IN' && session && session.user) {
-        showApp(session.user);
-      } else if (event === 'SIGNED_OUT') {
-        showAuth();
-      }
-    });
-  }
-
-  // ===== DOM refs =====
   var input = document.getElementById('todoInput');
   var dueDateInput = document.getElementById('dueDateInput');
   var categoryInput = document.getElementById('categoryInput');
@@ -719,77 +385,25 @@
   var CAT_KEYS = ['work', 'life', 'study', 'other'];
 
   // ===== Data =====
-  var todos = [];
+  var todos = load();
 
-  async function loadTodosFromDB() {
-    if (!supabaseClient || !currentUser) return;
+  function load() {
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
     try {
-      var { data, error } = await supabaseClient
-        .from('todos')
-        .select('*')
-        .order('sort_order', { ascending: true });
-      if (error) { console.error('Load error:', error); return; }
-      todos = (data || []).map(function(row) {
-        return {
-          id: row.id,
-          text: row.text,
-          done: row.done || false,
-          category: row.category || 'other',
-          dueDate: row.due_date || '',
-          createdAt: row.created_at || new Date().toISOString(),
-          parentId: row.parent_id || null,
-          sortOrder: row.sort_order || 0
-        };
+      var items = JSON.parse(raw);
+      return items.map(function (item, i) {
+        if (!item.id) item.id = Date.now() + i;
+        if (!item.category) item.category = 'other';
+        if (item.dueDate === undefined) item.dueDate = '';
+        if (!item.createdAt) item.createdAt = new Date().toISOString();
+        if (item.parentId === undefined) item.parentId = null;
+        return item;
       });
-      render();
-    } catch(e) {
-      console.error('Load error:', e);
-    }
+    } catch (e) { return []; }
   }
 
-  async function saveTodoDB(todo) {
-    if (!supabaseClient || !currentUser) return;
-    var row = {
-      id: todo.id,
-      user_id: currentUser.id,
-      text: todo.text,
-      done: todo.done,
-      category: todo.category,
-      due_date: todo.dueDate || '',
-      parent_id: todo.parentId || null,
-      sort_order: todo.sortOrder || 0
-    };
-    var { error } = await supabaseClient.from('todos').upsert(row);
-    if (error) console.error('Save error:', error);
-  }
-
-  async function deleteTodoDB(id) {
-    if (!supabaseClient || !currentUser) return;
-    var { error } = await supabaseClient.from('todos').delete().eq('id', id);
-    if (error) console.error('Delete error:', error);
-  }
-
-  async function updateTodoDB(id, fields) {
-    if (!supabaseClient || !currentUser) return;
-    var dbFields = {};
-    if ('done' in fields) dbFields.done = fields.done;
-    if ('text' in fields) dbFields.text = fields.text;
-    if ('category' in fields) dbFields.category = fields.category;
-    if ('dueDate' in fields) dbFields.due_date = fields.dueDate;
-    if ('parentId' in fields) dbFields.parent_id = fields.parentId;
-    if ('sortOrder' in fields) dbFields.sort_order = fields.sortOrder;
-    var { error } = await supabaseClient.from('todos').update(dbFields).eq('id', id);
-    if (error) console.error('Update error:', error);
-  }
-
-  async function saveAllSortOrders() {
-    if (!supabaseClient || !currentUser) return;
-    var promises = todos.map(function(t, i) {
-      t.sortOrder = i;
-      return supabaseClient.from('todos').update({ sort_order: i }).eq('id', t.id);
-    });
-    await Promise.all(promises);
-  }
+  function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(todos)); }
 
   // ===== Date Helpers =====
   function todayStr() {
@@ -887,34 +501,30 @@
         html += '</div>';
         aiResultEl.innerHTML = html;
 
+        // "全部添加" button
         var addAllHtml = '<div style="margin-top:8px;text-align:right"><button class="ai-add-btn" id="aiAddAll">全部添加为子任务</button></div>';
         aiResultEl.querySelector('.ai-result').insertAdjacentHTML('beforeend', addAllHtml);
 
-        async function addSubtask(idx, btnEl) {
+        function addSubtask(idx, btnEl) {
           var t = tasks[idx];
-          var newTodo = {
+          todos.push({
             id: Date.now() + idx, text: t.text, done: false,
             category: t.category || 'other', dueDate: t.dueDate || '',
-            createdAt: new Date().toISOString(), parentId: parentId || null,
-            sortOrder: todos.length + idx
-          };
-          todos.push(newTodo);
-          await saveTodoDB(newTodo);
+            createdAt: new Date().toISOString(), parentId: parentId || null
+          });
           if (btnEl) { btnEl.textContent = '已添加'; btnEl.disabled = true; btnEl.style.background = '#94a3b8'; }
         }
 
         aiResultEl.querySelectorAll('.ai-add-btn[data-idx]').forEach(function(btn) {
-          btn.addEventListener('click', async function() {
-            await addSubtask(parseInt(this.getAttribute('data-idx')), this);
-            render();
+          btn.addEventListener('click', function() {
+            addSubtask(parseInt(this.getAttribute('data-idx')), this);
+            save(); render();
           });
         });
 
-        document.getElementById('aiAddAll').addEventListener('click', async function() {
-          for (var i = 0; i < tasks.length; i++) {
-            await addSubtask(i, null);
-          }
-          render();
+        document.getElementById('aiAddAll').addEventListener('click', function() {
+          tasks.forEach(function(t, i) { addSubtask(i, null); });
+          save(); render();
           this.textContent = '已全部添加'; this.disabled = true; this.style.background = '#94a3b8';
           aiResultEl.querySelectorAll('.ai-add-btn[data-idx]').forEach(function(b) {
             b.textContent = '已添加'; b.disabled = true; b.style.background = '#94a3b8';
@@ -963,7 +573,7 @@
 
       if (err) { alert('AI 错误: ' + err); return; }
 
-      document.getElementById('aiModalTitle').textContent = '\u26A1 任务执行结果';
+      document.getElementById('aiModalTitle').textContent = '⚡ 任务执行结果';
       document.getElementById('aiModalContent').textContent = text;
       document.getElementById('aiModal').classList.add('show');
     });
@@ -1000,7 +610,7 @@
 
       if (err) { alert('AI 错误: ' + err); return; }
 
-      document.getElementById('aiModalTitle').textContent = '\u{1F4CB} 今日规划';
+      document.getElementById('aiModalTitle').textContent = '📋 今日规划';
       document.getElementById('aiModalContent').textContent = text;
       document.getElementById('aiModal').classList.add('show');
     });
@@ -1111,35 +721,28 @@
     smartParseHint.style.color = '';
 
     smartAddResult.querySelectorAll('.ai-add-btn[data-sidx]').forEach(function(btn) {
-      btn.addEventListener('click', async function() {
+      btn.addEventListener('click', function() {
         var idx = parseInt(this.getAttribute('data-sidx'));
         var item = items[idx];
-        var newTodo = {
+        todos.push({
           id: Date.now() + idx, text: item.text, done: false,
           category: item.category || 'other', dueDate: item.dueDate || '',
-          createdAt: new Date().toISOString(), parentId: null,
-          sortOrder: todos.length
-        };
-        todos.push(newTodo);
-        await saveTodoDB(newTodo);
-        render();
+          createdAt: new Date().toISOString(), parentId: null
+        });
+        save(); render();
         this.textContent = '已添加'; this.disabled = true; this.style.background = '#94a3b8';
       });
     });
 
-    document.getElementById('smartAddAllBtn').addEventListener('click', async function() {
-      for (var i = 0; i < items.length; i++) {
-        var item = items[i];
-        var newTodo = {
+    document.getElementById('smartAddAllBtn').addEventListener('click', function() {
+      items.forEach(function(item, i) {
+        todos.push({
           id: Date.now() + i, text: item.text, done: false,
           category: item.category || 'other', dueDate: item.dueDate || '',
-          createdAt: new Date().toISOString(), parentId: null,
-          sortOrder: todos.length + i
-        };
-        todos.push(newTodo);
-        await saveTodoDB(newTodo);
-      }
-      render();
+          createdAt: new Date().toISOString(), parentId: null
+        });
+      });
+      save(); render();
       this.textContent = '已全部添加'; this.disabled = true; this.style.background = '#94a3b8';
       smartAddResult.querySelectorAll('.ai-add-btn[data-sidx]').forEach(function(b) {
         b.textContent = '已添加'; b.disabled = true; b.style.background = '#94a3b8';
@@ -1178,23 +781,15 @@
       '<button class="select-cancel" id="selClear">取消选择</button>';
     document.getElementById('selBreakdown').addEventListener('click', function() { aiBreakdownSelected(); });
     document.getElementById('selExecute').addEventListener('click', function() { aiExecuteSelected(); });
-    document.getElementById('selDone').addEventListener('click', async function() {
-      var sel = getSelectedTodos();
-      for (var i = 0; i < sel.length; i++) {
-        sel[i].done = true;
-        await updateTodoDB(sel[i].id, { done: true });
-      }
-      selectedIds.clear(); render();
+    document.getElementById('selDone').addEventListener('click', function() {
+      getSelectedTodos().forEach(function(t) { t.done = true; });
+      selectedIds.clear(); save(); render();
     });
-    document.getElementById('selDelete').addEventListener('click', async function() {
+    document.getElementById('selDelete').addEventListener('click', function() {
       if (!confirm('确定删除选中的 ' + count + ' 项？')) return;
       var ids = new Set(selectedIds);
-      var toDelete = todos.filter(function(t) { return ids.has(t.id) || ids.has(t.parentId); });
-      for (var i = 0; i < toDelete.length; i++) {
-        await deleteTodoDB(toDelete[i].id);
-      }
       todos = todos.filter(function(t) { return !ids.has(t.id) && !ids.has(t.parentId); });
-      selectedIds.clear(); render();
+      selectedIds.clear(); save(); render();
     });
     document.getElementById('selClear').addEventListener('click', function() {
       selectedIds.clear(); render();
@@ -1218,6 +813,7 @@
       return;
     }
 
+    // Separate parents and subtasks
     var parents = filtered.filter(function(t) { return !t.parentId; });
     var childMap = {};
     filtered.forEach(function(t) {
@@ -1250,7 +846,9 @@
         listEl.appendChild(header);
       }
 
+      // Render parent
       appendTodoLi(todo, false);
+      // Render subtasks
       var children = childMap[todo.id] || [];
       children.forEach(function(child) { appendTodoLi(child, true); });
     });
@@ -1302,11 +900,7 @@
         var compBtn = document.createElement('button');
         compBtn.className = 'complete-btn' + (todo.done ? ' is-done' : '');
         compBtn.textContent = todo.done ? '已完成' : '完成';
-        compBtn.addEventListener('click', async function() {
-          todo.done = !todo.done;
-          await updateTodoDB(todo.id, { done: todo.done });
-          render();
-        });
+        compBtn.addEventListener('click', function() { todo.done = !todo.done; save(); render(); });
 
         var eb = document.createElement('button');
         eb.className = 'edit-btn';
@@ -1316,15 +910,10 @@
         var db = document.createElement('button');
         db.className = 'del-btn';
         db.innerHTML = '&#x2715;';
-        db.addEventListener('click', async function() {
+        db.addEventListener('click', function() {
           var tid = todo.id;
-          var children = todos.filter(function(t) { return t.parentId === tid; });
-          await deleteTodoDB(tid);
-          for (var i = 0; i < children.length; i++) {
-            await deleteTodoDB(children[i].id);
-          }
           todos = todos.filter(function(t) { return t.id !== tid && t.parentId !== tid; });
-          selectedIds.delete(tid); render();
+          selectedIds.delete(tid); save(); render();
         });
 
         li.appendChild(chk);
@@ -1341,13 +930,7 @@
         var ec = document.createElement('select');
         CAT_KEYS.forEach(function(k){ var o=document.createElement('option'); o.value=k; o.textContent=CATEGORIES[k]; if(todo.category===k) o.selected=true; ec.appendChild(o); });
         var sb = document.createElement('button'); sb.className='save-edit-btn'; sb.textContent='保存';
-        sb.addEventListener('click', async function(){
-          var v=et.value.trim(); if(!v)return;
-          todo.text=v; todo.dueDate=ed.value||''; todo.category=ec.value;
-          editingId=null;
-          await updateTodoDB(todo.id, { text: v, dueDate: ed.value||'', category: ec.value });
-          render();
-        });
+        sb.addEventListener('click', function(){ var v=et.value.trim(); if(!v)return; todo.text=v; todo.dueDate=ed.value||''; todo.category=ec.value; editingId=null; save(); render(); });
         var cb2 = document.createElement('button'); cb2.className='cancel-edit-btn'; cb2.textContent='取消';
         cb2.addEventListener('click', function(){ editingId=null; render(); });
         et.addEventListener('keydown', function(e){ if(e.key==='Enter') sb.click(); if(e.key==='Escape') cb2.click(); });
@@ -1364,36 +947,25 @@
   }
 
   // ===== Add Todo =====
-  async function addTodo() {
+  function addTodo() {
     var text = input.value.trim();
     if (!text) return;
-    var newTodo = {
+    todos.push({
       id: Date.now(), text: text, done: false,
       category: categoryInput.value, dueDate: dueDateInput.value || '',
-      createdAt: new Date().toISOString(), parentId: null,
-      sortOrder: todos.length
-    };
-    todos.push(newTodo);
+      createdAt: new Date().toISOString(), parentId: null
+    });
     input.value = '';
     dueDateInput.value = '';
-    render();
+    save(); render();
     input.focus();
-    await saveTodoDB(newTodo);
   }
 
   // ===== Drag & Drop =====
   function handleDragStart(e) { dragSrcIndex=parseInt(this.getAttribute('data-index')); this.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain',dragSrcIndex); }
   function handleDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect='move'; this.classList.add('drag-over'); }
   function handleDragLeave() { this.classList.remove('drag-over'); }
-  async function handleDrop(e) {
-    e.preventDefault(); this.classList.remove('drag-over');
-    var t=parseInt(this.getAttribute('data-index'));
-    if(dragSrcIndex===null||dragSrcIndex===t) return;
-    var item=todos.splice(dragSrcIndex,1)[0];
-    todos.splice(t,0,item);
-    render();
-    await saveAllSortOrders();
-  }
+  function handleDrop(e) { e.preventDefault(); this.classList.remove('drag-over'); var t=parseInt(this.getAttribute('data-index')); if(dragSrcIndex===null||dragSrcIndex===t) return; var item=todos.splice(dragSrcIndex,1)[0]; todos.splice(t,0,item); save(); render(); }
   function handleDragEnd() { this.classList.remove('dragging'); dragSrcIndex=null; listEl.querySelectorAll('.todo-item').forEach(function(i){i.classList.remove('drag-over');}); }
 
   // ===== Export / Import =====
@@ -1403,34 +975,20 @@
     var a = document.createElement('a'); a.href=url; a.download='my-todo-backup.json';
     document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
   }
-  async function importData(file) {
+  function importData(file) {
     var reader = new FileReader();
-    reader.onload = async function(e) {
+    reader.onload = function(e) {
       try {
         var data = JSON.parse(e.target.result);
         if (!Array.isArray(data)) { alert('无效的数据格式'); return; }
         if (!confirm('导入将替换当前所有数据，确定继续吗？')) return;
-
-        // Delete all existing todos from DB
-        for (var i = 0; i < todos.length; i++) {
-          await deleteTodoDB(todos[i].id);
-        }
-
-        todos = data.map(function(item,idx) {
-          if(!item.id) item.id=Date.now()+idx; if(!item.category) item.category='other';
+        todos = data.map(function(item,i) {
+          if(!item.id) item.id=Date.now()+i; if(!item.category) item.category='other';
           if(item.dueDate===undefined) item.dueDate=''; if(!item.createdAt) item.createdAt=new Date().toISOString();
           if(item.done===undefined) item.done=false; if(!item.text) item.text='';
-          if(item.parentId===undefined) item.parentId=null;
-          item.sortOrder = idx;
-          return item;
+          if(item.parentId===undefined) item.parentId=null; return item;
         });
-
-        // Save all to DB
-        for (var j = 0; j < todos.length; j++) {
-          await saveTodoDB(todos[j]);
-        }
-
-        render();
+        save(); render();
         alert('导入成功！共 ' + todos.length + ' 条记录');
       } catch(err) { alert('文件解析失败：' + err.message); }
     };
@@ -1557,13 +1115,7 @@
   aiPlanBtn.addEventListener('click', aiDailyPlan);
 
   renderKeyArea();
-
-  // ===== Init: check config & auth =====
-  if (initSupabase()) {
-    checkAuth();
-  } else {
-    showConfigModal();
-  }
+  render();
 })();
 </script>
 
