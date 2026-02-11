@@ -423,7 +423,13 @@
     <p style="font-size:13px;color:#64748b;margin-bottom:12px">粘贴文字或语音输入，AI 自动识别并生成待办事项</p>
     <div style="position:relative">
       <textarea class="smart-modal-textarea" id="smartAddText" placeholder="在此粘贴或输入文字...&#10;例如：明天下午开会讨论项目进度，后天交周报，今天买菜做饭"></textarea>
-      <button class="mic-btn" id="smartMicBtn" style="position:absolute;right:8px;bottom:8px" title="语音输入">&#127908;</button>
+      <div style="position:absolute;right:8px;bottom:8px;display:flex;gap:4px;align-items:center">
+        <select id="voiceLang" style="padding:4px 6px;border:1.5px solid #e2e8f0;border-radius:6px;font-size:11px;color:#64748b;outline:none;background:#fff;cursor:pointer" title="语音语言">
+          <option value="zh">中文</option>
+          <option value="en">English</option>
+        </select>
+        <button class="mic-btn" id="smartMicBtn" title="语音输入">&#127908;</button>
+      </div>
     </div>
     <div class="smart-modal-actions">
       <button class="smart-parse-btn" id="smartParseBtn">&#129302; AI 解析</button>
@@ -1414,10 +1420,11 @@
           var reader = new FileReader();
           reader.onloadend = async function() {
             var base64 = reader.result.split(',')[1];
+            var lang = document.getElementById('voiceLang').value;
             var resp = await fetch(WHISPER_BACKEND, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ audio: base64 })
+              body: JSON.stringify({ audio: base64, language: lang })
             });
             var data = await resp.json();
             if (data.error) {
