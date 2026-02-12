@@ -77,6 +77,11 @@
     font-size: 12px; cursor: pointer; color: #64748b; transition: all 0.2s;
   }
   .user-bar .logout-btn:hover { border-color: #fca5a5; color: #dc2626; background: #fef2f2; }
+  .lang-toggle {
+    padding: 3px 10px; border: 1.5px solid #e2e8f0; border-radius: 6px; background: #fff;
+    font-size: 11px; cursor: pointer; color: #64748b; transition: all 0.2s; font-weight: 600;
+  }
+  .lang-toggle:hover { border-color: #93c5fd; color: #3b82f6; }
 
   /* ===== Input Row ===== */
   .input-row { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
@@ -321,25 +326,26 @@
 <!-- Auth Overlay -->
 <div class="auth-overlay" id="authOverlay">
   <div class="auth-box">
-    <h2>&#128221; 待办事项</h2>
-    <p class="auth-subtitle">登录后数据云端同步，多设备访问</p>
+    <div style="text-align:right;margin-bottom:8px"><button class="lang-toggle" id="authLangToggle">EN</button></div>
+    <h2>&#128221; <span data-i18n="appTitle">待办事项</span></h2>
+    <p class="auth-subtitle" data-i18n="authSubtitle">登录后数据云端同步，多设备访问</p>
     <div class="auth-tabs">
-      <button class="auth-tab active" id="loginTab">登录</button>
-      <button class="auth-tab" id="registerTab">注册</button>
+      <button class="auth-tab active" id="loginTab" data-i18n="login">登录</button>
+      <button class="auth-tab" id="registerTab" data-i18n="register">注册</button>
     </div>
     <div id="authForm" class="hidden">
       <div class="auth-field">
-        <label for="authEmail">邮箱</label>
+        <label for="authEmail" data-i18n="email">邮箱</label>
         <input type="email" id="authEmail" placeholder="your@email.com" autocomplete="email">
       </div>
       <div class="auth-field">
-        <label for="authPassword">密码</label>
-        <input type="password" id="authPassword" placeholder="至少6位密码" autocomplete="current-password">
+        <label for="authPassword" data-i18n="password">密码</label>
+        <input type="password" id="authPassword" data-i18n-ph="passwordPh" placeholder="至少6位密码" autocomplete="current-password">
       </div>
-      <button class="auth-submit" id="authSubmit">登录</button>
+      <button class="auth-submit" id="authSubmit" data-i18n="login">登录</button>
       <div class="auth-error" id="authError"></div>
     </div>
-    <div class="auth-loading" id="authLoading">正在检查登录状态...</div>
+    <div class="auth-loading" id="authLoading" data-i18n="checkingAuth">正在检查登录状态...</div>
   </div>
 </div>
 
@@ -347,37 +353,38 @@
   <div class="card">
     <div class="user-bar" id="userBar" style="display:none">
       <span class="user-email" id="userEmail"></span>
-      <button class="logout-btn" id="logoutBtn">退出登录</button>
+      <button class="lang-toggle" id="langToggle">EN</button>
+      <button class="logout-btn" id="logoutBtn" data-i18n="logout">退出登录</button>
     </div>
 
-    <h1>&#128221; 待办事项</h1>
+    <h1>&#128221; <span data-i18n="appTitle">待办事项</span></h1>
 
     <div class="input-row">
-      <input id="todoInput" type="text" placeholder="添加新的待办事项..." autocomplete="off">
+      <input id="todoInput" type="text" data-i18n-ph="addTodoPh" placeholder="添加新的待办事项..." autocomplete="off">
       <input id="dueDateInput" type="date" title="截止日期">
       <select id="categoryInput" title="分类">
-        <option value="other">其他</option>
-        <option value="work">工作</option>
-        <option value="life">生活</option>
-        <option value="study">学习</option>
+        <option value="other" data-i18n="catOther">其他</option>
+        <option value="work" data-i18n="catWork">工作</option>
+        <option value="life" data-i18n="catLife">生活</option>
+        <option value="study" data-i18n="catStudy">学习</option>
       </select>
-      <button class="add-btn" id="addBtn">添加</button>
-      <button class="smart-add-trigger" id="smartAddBtn" title="智能添加 / 语音输入">&#x2728; 智能添加（支持语音）</button>
+      <button class="add-btn" id="addBtn" data-i18n="add">添加</button>
+      <button class="smart-add-trigger" id="smartAddBtn">&#x2728; <span data-i18n="smartAdd">智能添加（支持语音）</span></button>
     </div>
 
     <div class="toolbar">
-      <input class="search-input" id="searchInput" type="text" placeholder="搜索..." autocomplete="off">
+      <input class="search-input" id="searchInput" type="text" data-i18n-ph="searchPh" placeholder="搜索..." autocomplete="off">
       <div class="filter-btns">
-        <button class="filter-btn active" data-filter="all">全部</button>
-        <button class="filter-btn" data-filter="active">未完成</button>
-        <button class="filter-btn" data-filter="done">已完成</button>
+        <button class="filter-btn active" data-filter="all" data-i18n="filterAll">全部</button>
+        <button class="filter-btn" data-filter="active" data-i18n="filterActive">未完成</button>
+        <button class="filter-btn" data-filter="done" data-i18n="filterDone">已完成</button>
       </div>
-      <select id="catFilter" title="按分类筛选">
-        <option value="all">全部分类</option>
-        <option value="work">工作</option>
-        <option value="life">生活</option>
-        <option value="study">学习</option>
-        <option value="other">其他</option>
+      <select id="catFilter">
+        <option value="all" data-i18n="allCats">全部分类</option>
+        <option value="work" data-i18n="catWork">工作</option>
+        <option value="life" data-i18n="catLife">生活</option>
+        <option value="study" data-i18n="catStudy">学习</option>
+        <option value="other" data-i18n="catOther">其他</option>
       </select>
     </div>
 
@@ -387,19 +394,19 @@
 
     <!-- AI Section -->
     <div class="ai-section">
-      <h2>&#x2728; AI 助手</h2>
+      <h2>&#x2728; <span data-i18n="aiTitle">AI 助手</span></h2>
       <div id="aiKeyArea"></div>
       <div class="ai-bar">
-        <button class="ai-btn" id="aiBreakdownBtn" title="拆解选中任务或输入新任务">&#127919; 拆解任务</button>
-        <button class="ai-btn" id="aiExecuteBtn" title="AI 生成选中任务的执行步骤">&#9889; 任务执行</button>
-        <button class="ai-btn" id="aiPlanBtn" title="AI 根据待办生成今日规划">&#128197; 每日规划</button>
+        <button class="ai-btn" id="aiBreakdownBtn" title="拆解选中任务或输入新任务">&#127919; <span data-i18n="aiBreakdown">拆解任务</span></button>
+        <button class="ai-btn" id="aiExecuteBtn" title="AI 生成选中任务的执行步骤">&#9889; <span data-i18n="aiExecute">任务执行</span></button>
+        <button class="ai-btn" id="aiPlanBtn" title="AI 根据待办生成今日规划">&#128197; <span data-i18n="aiPlan">每日规划</span></button>
       </div>
       <div id="aiResult"></div>
     </div>
 
     <div class="footer-bar">
-      <button class="footer-btn" id="exportBtn">&#128230; 导出</button>
-      <button class="footer-btn" id="importBtn">&#128229; 导入</button>
+      <button class="footer-btn" id="exportBtn">&#128230; <span data-i18n="export">导出</span></button>
+      <button class="footer-btn" id="importBtn">&#128229; <span data-i18n="import">导入</span></button>
       <input type="file" id="importFile" accept=".json" style="display:none">
     </div>
   </div>
@@ -411,7 +418,7 @@
     <h3 id="aiModalTitle">AI 规划 <button class="speak-btn" id="modalSpeakBtn" title="朗读">&#128264;</button></h3>
     <div class="ai-result" id="aiModalContent"></div>
     <div style="display:flex;gap:8px;justify-content:center;margin-top:14px">
-      <button class="modal-close" onclick="document.getElementById('aiModal').classList.remove('show');speechSynthesis.cancel()">关闭</button>
+      <button class="modal-close" data-i18n="close" onclick="document.getElementById('aiModal').classList.remove('show');speechSynthesis.cancel()">关闭</button>
     </div>
   </div>
 </div>
@@ -419,25 +426,21 @@
 <!-- Smart Add Modal -->
 <div class="modal-overlay" id="smartAddModal">
   <div class="modal-box">
-    <h3>&#x2728; 智能添加</h3>
-    <p style="font-size:13px;color:#64748b;margin-bottom:12px">粘贴文字或语音输入，AI 自动识别并生成待办事项</p>
+    <h3>&#x2728; <span data-i18n="smartAddTitle">智能添加</span></h3>
+    <p style="font-size:13px;color:#64748b;margin-bottom:12px" data-i18n="smartAddDesc">粘贴文字或语音输入，AI 自动识别并生成待办事项</p>
     <div style="position:relative">
-      <textarea class="smart-modal-textarea" id="smartAddText" placeholder="在此粘贴或输入文字...&#10;例如：明天下午开会讨论项目进度，后天交周报，今天买菜做饭"></textarea>
+      <textarea class="smart-modal-textarea" id="smartAddText" data-i18n-ph="smartAddPh" placeholder="在此粘贴或输入文字...&#10;例如：明天下午开会讨论项目进度，后天交周报，今天买菜做饭"></textarea>
       <div style="position:absolute;right:8px;bottom:8px;display:flex;gap:4px;align-items:center">
-        <select id="voiceLang" style="padding:4px 6px;border:1.5px solid #e2e8f0;border-radius:6px;font-size:11px;color:#64748b;outline:none;background:#fff;cursor:pointer" title="语音语言">
-          <option value="zh">中文</option>
-          <option value="en">English</option>
-        </select>
         <button class="mic-btn" id="smartMicBtn" title="语音输入">&#127908;</button>
       </div>
     </div>
     <div class="smart-modal-actions">
-      <button class="smart-parse-btn" id="smartParseBtn">&#129302; AI 解析</button>
+      <button class="smart-parse-btn" id="smartParseBtn">&#129302; <span data-i18n="aiParse">AI 解析</span></button>
       <span class="smart-parse-hint" id="smartParseHint"></span>
     </div>
     <div id="smartAddResult"></div>
     <div style="display:flex;gap:8px;justify-content:center;margin-top:14px">
-      <button class="modal-close" id="smartAddClose">关闭</button>
+      <button class="modal-close" id="smartAddClose" data-i18n="close">关闭</button>
     </div>
   </div>
 </div>
@@ -470,7 +473,7 @@
     isLoginMode = true;
     loginTab.classList.add('active');
     registerTab.classList.remove('active');
-    authSubmit.textContent = '登录';
+    authSubmit.textContent = T('login');
     authError.textContent = '';
   });
 
@@ -478,7 +481,7 @@
     isLoginMode = false;
     registerTab.classList.add('active');
     loginTab.classList.remove('active');
-    authSubmit.textContent = '注册';
+    authSubmit.textContent = T('register');
     authError.textContent = '';
   });
 
@@ -489,8 +492,8 @@
   authSubmit.addEventListener('click', async function() {
     var email = authEmail.value.trim();
     var password = authPassword.value;
-    if (!email || !password) { authError.textContent = '请填写邮箱和密码'; return; }
-    if (password.length < 6) { authError.textContent = '密码至少6位'; return; }
+    if (!email || !password) { authError.textContent = T('fillEmailPwd'); return; }
+    if (password.length < 6) { authError.textContent = T('pwdMinLen'); return; }
 
     authSubmit.disabled = true;
     authError.textContent = '';
@@ -505,22 +508,22 @@
 
       if (result.error) {
         var msg = result.error.message;
-        if (msg.includes('Invalid login')) msg = '邮箱或密码错误';
-        else if (msg.includes('already registered')) msg = '该邮箱已注册，请直接登录';
-        else if (msg.includes('Email not confirmed')) msg = '请先前往邮箱验证账号';
-        else if (msg.includes('Password should')) msg = '密码至少6位';
+        if (msg.includes('Invalid login')) msg = T('wrongCredentials');
+        else if (msg.includes('already registered')) msg = T('alreadyRegistered');
+        else if (msg.includes('Email not confirmed')) msg = T('verifyEmail');
+        else if (msg.includes('Password should')) msg = T('pwdTooShort');
         authError.textContent = msg;
       } else if (result.data && result.data.user) {
         if (!isLoginMode && result.data.user.identities && result.data.user.identities.length === 0) {
-          authError.textContent = '该邮箱已注册，请直接登录';
+          authError.textContent = T('alreadyRegistered');
         } else if (!isLoginMode && !result.data.session) {
-          authError.textContent = '注册成功！请前往邮箱点击验证链接后登录';
+          authError.textContent = T('registerSuccess');
           authError.style.color = '#16a34a';
         }
         // onAuthStateChange will handle the rest
       }
     } catch(e) {
-      authError.textContent = '网络错误，请重试';
+      authError.textContent = T('networkError');
     }
     authSubmit.disabled = false;
   });
@@ -529,6 +532,14 @@
     if (!supabaseClient) return;
     await supabaseClient.auth.signOut();
     // onAuthStateChange will handle UI
+  });
+
+  // Language toggle
+  document.getElementById('authLangToggle').addEventListener('click', function() {
+    updateLanguage(currentLang === 'zh' ? 'en' : 'zh');
+  });
+  document.getElementById('langToggle').addEventListener('click', function() {
+    updateLanguage(currentLang === 'zh' ? 'en' : 'zh');
   });
 
   function showApp(user) {
@@ -607,8 +618,154 @@
   var editingId = null;
   var selectedIds = new Set();
 
-  var CATEGORIES = { work: '工作', life: '生活', study: '学习', other: '其他' };
   var CAT_KEYS = ['work', 'life', 'study', 'other'];
+
+  // ===== i18n =====
+  var currentLang = localStorage.getItem('app-lang') || 'zh';
+  var i18n = {
+    zh: {
+      appTitle: '待办事项', authSubtitle: '登录后数据云端同步，多设备访问',
+      login: '登录', register: '注册', email: '邮箱', password: '密码',
+      passwordPh: '至少6位密码', checkingAuth: '正在检查登录状态...',
+      logout: '退出登录', add: '添加', smartAdd: '智能添加（支持语音）',
+      addTodoPh: '添加新的待办事项...', searchPh: '搜索...',
+      filterAll: '全部', filterActive: '未完成', filterDone: '已完成',
+      allCats: '全部分类', catWork: '工作', catLife: '生活', catStudy: '学习', catOther: '其他',
+      aiTitle: 'AI 助手', aiBreakdown: '拆解任务', aiExecute: '任务执行', aiPlan: '每日规划',
+      export: '导出', import: '导入', close: '关闭',
+      smartAddTitle: '智能添加', smartAddDesc: '粘贴文字或语音输入，AI 自动识别并生成待办事项',
+      smartAddPh: '在此粘贴或输入文字...\n例如：明天下午开会讨论项目进度，后天交周报，今天买菜做饭',
+      aiParse: 'AI 解析', aiReady: 'AI 已就绪 \u2705',
+      // Dynamic text
+      done: '完成', isDone: '已完成', save: '保存', cancel: '取消',
+      emptyList: '暂无待办事项，添加一个吧', noMatch: '没有匹配的待办事项',
+      statsText: '{0} 项未完成 / 共 {1} 项',
+      selected: '已选 {0} 项', breakdown: '拆解', execute: '执行',
+      doneAll: '全部完成', delete: '删除', cancelSelect: '取消选择',
+      selectAll: '全选', doneAllSub: '全部完成', deleteAllSub: '全部删除',
+      breakingDown: '拆解中...', executing: '执行中...', planning: '规划中...',
+      parsing: '解析中...',
+      aiBreakdownLabel: 'AI 拆解: ', parseResult: '解析结果 ({0} 条待办)',
+      addBtn: '+ 添加', added: '已添加', addAllSub: '全部添加为子任务', addAll: '全部添加',
+      allAdded: '已全部添加',
+      confirmDeleteSel: '确定删除选中的 {0} 项？',
+      confirmDeleteSub: '确定删除全部 {0} 个子任务？',
+      confirmImport: '导入将替换当前所有数据，确定继续吗？',
+      importSuccess: '导入成功！共 {0} 条记录', invalidFormat: '无效的数据格式',
+      fileParseFail: '文件解析失败：', aiError: 'AI 错误: ', error: '错误: ',
+      recording: '正在录音...点击停止', recognizing: '识别中...',
+      voiceRecorded: '语音已录入，点击 "AI 解析" 生成待办',
+      noVoice: '未检测到语音内容，请重试', recognizeFail: '识别失败: ',
+      micPermission: '请允许麦克风权限', micFail: '无法启动录音: ',
+      parseFail: '解析失败: ', parseRetry: '解析失败，请重试',
+      inputHint: '请先输入内容',
+      fillEmailPwd: '请填写邮箱和密码', pwdMinLen: '密码至少6位',
+      wrongCredentials: '邮箱或密码错误', alreadyRegistered: '该邮箱已注册，请直接登录',
+      verifyEmail: '请先前往邮箱验证账号', pwdTooShort: '密码至少6位',
+      registerSuccess: '注册成功！请前往邮箱点击验证链接后登录',
+      networkError: '网络错误，请重试',
+      noDateSet: '未设定日期', today: '今天', tomorrow: '明天', dayAfter: '后天',
+      weekdays: ['日','一','二','三','四','五','六'],
+      dateFormat: '{0}年{1}月{2}日 周{3}',
+      todayPrefix: '今天 - ',
+      noTodosToBreak: '请先勾选要拆解的任务', noTodosToExec: '请先勾选要执行的任务',
+      noTodosPlan: '没有未完成的待办事项',
+      inputTask: '请输入要拆解的大任务：',
+      execResultTitle: '\u26A1 任务执行结果', planTitle: '\u{1F4CB} 今日规划',
+      ttsUnsupported: '您的浏览器不支持语音朗读'
+    },
+    en: {
+      appTitle: 'Todo List', authSubtitle: 'Sync data to cloud after login, access from any device',
+      login: 'Login', register: 'Register', email: 'Email', password: 'Password',
+      passwordPh: 'At least 6 characters', checkingAuth: 'Checking login status...',
+      logout: 'Logout', add: 'Add', smartAdd: 'Smart Add (Voice)',
+      addTodoPh: 'Add a new todo...', searchPh: 'Search...',
+      filterAll: 'All', filterActive: 'Active', filterDone: 'Done',
+      allCats: 'All Categories', catWork: 'Work', catLife: 'Life', catStudy: 'Study', catOther: 'Other',
+      aiTitle: 'AI Assistant', aiBreakdown: 'Breakdown', aiExecute: 'Execute', aiPlan: 'Daily Plan',
+      export: 'Export', import: 'Import', close: 'Close',
+      smartAddTitle: 'Smart Add', smartAddDesc: 'Paste text or use voice input, AI will auto-generate todos',
+      smartAddPh: 'Paste or type here...\nE.g.: Meeting tomorrow afternoon, submit report day after tomorrow',
+      aiParse: 'AI Parse', aiReady: 'AI Ready \u2705',
+      done: 'Done', isDone: 'Completed', save: 'Save', cancel: 'Cancel',
+      emptyList: 'No todos yet, add one!', noMatch: 'No matching todos',
+      statsText: '{0} remaining / {1} total',
+      selected: '{0} selected', breakdown: 'Breakdown', execute: 'Execute',
+      doneAll: 'Complete All', delete: 'Delete', cancelSelect: 'Cancel',
+      selectAll: 'Select All', doneAllSub: 'Complete All', deleteAllSub: 'Delete All',
+      breakingDown: 'Breaking down...', executing: 'Executing...', planning: 'Planning...',
+      parsing: 'Parsing...',
+      aiBreakdownLabel: 'AI Breakdown: ', parseResult: 'Results ({0} todos)',
+      addBtn: '+ Add', added: 'Added', addAllSub: 'Add All as Subtasks', addAll: 'Add All',
+      allAdded: 'All Added',
+      confirmDeleteSel: 'Delete {0} selected items?',
+      confirmDeleteSub: 'Delete all {0} subtasks?',
+      confirmImport: 'Import will replace all current data. Continue?',
+      importSuccess: 'Imported {0} items', invalidFormat: 'Invalid data format',
+      fileParseFail: 'File parse error: ', aiError: 'AI Error: ', error: 'Error: ',
+      recording: 'Recording... click to stop', recognizing: 'Recognizing...',
+      voiceRecorded: 'Voice recorded, click "AI Parse" to generate todos',
+      noVoice: 'No speech detected, please try again', recognizeFail: 'Recognition failed: ',
+      micPermission: 'Please allow microphone access', micFail: 'Cannot start recording: ',
+      parseFail: 'Parse failed: ', parseRetry: 'Parse failed, please retry',
+      inputHint: 'Please enter content first',
+      fillEmailPwd: 'Please fill in email and password', pwdMinLen: 'Password must be at least 6 characters',
+      wrongCredentials: 'Invalid email or password', alreadyRegistered: 'Email already registered, please login',
+      verifyEmail: 'Please verify your email first', pwdTooShort: 'Password must be at least 6 characters',
+      registerSuccess: 'Registration successful! Please verify your email to login',
+      networkError: 'Network error, please retry',
+      noDateSet: 'No date set', today: 'Today', tomorrow: 'Tomorrow', dayAfter: 'Day after',
+      weekdays: ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
+      dateFormat: '{3} {1}/{2}/{0}',
+      todayPrefix: 'Today - ',
+      noTodosToBreak: 'Please select tasks to break down', noTodosToExec: 'Please select tasks to execute',
+      noTodosPlan: 'No pending todos',
+      inputTask: 'Enter the task to break down:',
+      execResultTitle: '\u26A1 Execution Results', planTitle: '\u{1F4CB} Daily Plan',
+      ttsUnsupported: 'Your browser does not support text-to-speech'
+    }
+  };
+
+  function T(key) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    var s = (i18n[currentLang] && i18n[currentLang][key]) || (i18n.zh[key]) || key;
+    args.forEach(function(a, i) { s = s.replace('{' + i + '}', a); });
+    return s;
+  }
+
+  var CATEGORIES = { work: T('catWork'), life: T('catLife'), study: T('catStudy'), other: T('catOther') };
+
+  function updateCATEGORIES() {
+    CATEGORIES = { work: T('catWork'), life: T('catLife'), study: T('catStudy'), other: T('catOther') };
+  }
+
+  function updateLanguage(lang) {
+    currentLang = lang;
+    localStorage.setItem('app-lang', lang);
+    updateCATEGORIES();
+    // Update static elements with data-i18n
+    document.querySelectorAll('[data-i18n]').forEach(function(el) {
+      var key = el.getAttribute('data-i18n');
+      if (i18n[lang] && i18n[lang][key]) el.textContent = i18n[lang][key];
+    });
+    // Update placeholders
+    document.querySelectorAll('[data-i18n-ph]').forEach(function(el) {
+      var key = el.getAttribute('data-i18n-ph');
+      if (i18n[lang] && i18n[lang][key]) el.placeholder = i18n[lang][key];
+    });
+    // Update lang toggle buttons
+    var toggleText = lang === 'zh' ? 'EN' : '中文';
+    var authToggle = document.getElementById('authLangToggle');
+    var mainToggle = document.getElementById('langToggle');
+    if (authToggle) authToggle.textContent = toggleText;
+    if (mainToggle) mainToggle.textContent = toggleText;
+    // Update title
+    document.title = T('appTitle');
+    // Update AI key area
+    renderKeyArea();
+    // Re-render todo list
+    if (currentUser) render();
+  }
 
   // ===== Data =====
   var todos = [];
@@ -690,12 +847,12 @@
   }
   function formatDate(s) { if (!s) return ''; var p=s.split('-'); return p[1]+'/'+p[2]; }
   function formatDateFull(s) {
-    if (!s) return '未设定日期';
+    if (!s) return T('noDateSet');
     var today = todayStr(), p = s.split('-');
-    var wd = ['日','一','二','三','四','五','六'];
+    var wd = T('weekdays');
     var d = new Date(+p[0], +p[1]-1, +p[2]);
-    var label = p[0]+'年'+parseInt(p[1])+'月'+parseInt(p[2])+'日 周'+wd[d.getDay()];
-    if (s === today) label = '今天 - ' + label;
+    var label = T('dateFormat', p[0], parseInt(p[1]), parseInt(p[2]), wd[d.getDay()]);
+    if (s === today) label = T('todayPrefix') + label;
     return label;
   }
   function dateHeaderClass(s) { if(!s) return ''; var t=todayStr(); if(s<t) return 'is-overdue'; if(s===t) return 'is-today'; return ''; }
@@ -705,7 +862,7 @@
   var API_BACKEND = 'https://my-todo-api-sooty.vercel.app/api/chat';
 
   function renderKeyArea() {
-    aiKeyArea.innerHTML = '<div class="ai-key-hint">AI 已就绪 &#x2705;</div>';
+    aiKeyArea.innerHTML = '<div class="ai-key-hint">' + T('aiReady') + '</div>';
   }
 
   // ===== AI API Call =====
@@ -727,14 +884,14 @@
   function aiBreakdown() {
     var sel = getSelectedTodos();
     if (sel.length > 0) { aiBreakdownSelected(); return; }
-    var task = prompt('请输入要拆解的大任务：');
+    var task = prompt(T('inputTask'));
     if (!task) return;
     doBreakdown(task, null);
   }
 
   function aiBreakdownSelected() {
     var sel = getSelectedTodos();
-    if (sel.length === 0) { alert('请先勾选要拆解的任务'); return; }
+    if (sel.length === 0) { alert(T('noTodosToBreak')); return; }
     var taskText = sel.map(function(t) { return t.text; }).join('、');
     var parentId = sel.length === 1 ? sel[0].id : null;
     doBreakdown(taskText, parentId);
@@ -743,7 +900,7 @@
   function doBreakdown(task, parentId) {
     aiBreakdownBtn.disabled = true;
     aiBreakdownBtn.classList.add('loading');
-    aiBreakdownBtn.textContent = '拆解中...';
+    aiBreakdownBtn.innerHTML = '\u{1F3AF} ' + T('breakingDown');
 
     var today = todayStr();
     var p = '你是一个任务管理助手。用户输入了一个大任务（可能包含多个），请将其拆解为3-7个具体的子任务。\n\n' +
@@ -759,27 +916,27 @@
     callAI(p, function(text, err) {
       aiBreakdownBtn.disabled = false;
       aiBreakdownBtn.classList.remove('loading');
-      aiBreakdownBtn.textContent = '\u{1F3AF} 拆解任务';
+      aiBreakdownBtn.innerHTML = '\u{1F3AF} <span data-i18n="aiBreakdown">' + T('aiBreakdown') + '</span>';
 
-      if (err) { aiResultEl.innerHTML = '<div class="ai-result">错误: ' + err + '</div>'; return; }
+      if (err) { aiResultEl.innerHTML = '<div class="ai-result">' + T('error') + err + '</div>'; return; }
 
       try {
         var match = text.match(/\[[\s\S]*\]/);
         var tasks = JSON.parse(match[0]);
         var html = '<div class="ai-result">';
-        html += '<div style="font-weight:600;margin-bottom:8px;color:#7c3aed">AI 拆解: ' + task + '</div>';
+        html += '<div style="font-weight:600;margin-bottom:8px;color:#7c3aed">' + T('aiBreakdownLabel') + task + '</div>';
         tasks.forEach(function(t, i) {
           html += '<div class="ai-task-item">' +
             '<span style="flex:1">' + (i+1) + '. ' + t.text +
-            ' <span class="cat-badge cat-' + (t.category||'other') + '">' + (CATEGORIES[t.category]||'其他') + '</span>' +
+            ' <span class="cat-badge cat-' + (t.category||'other') + '">' + (CATEGORIES[t.category]||T('catOther')) + '</span>' +
             (t.dueDate ? ' <span class="due-badge due-future">' + formatDate(t.dueDate) + '</span>' : '') +
             '</span>' +
-            '<button class="ai-add-btn" data-idx="' + i + '">+ 添加</button></div>';
+            '<button class="ai-add-btn" data-idx="' + i + '">' + T('addBtn') + '</button></div>';
         });
         html += '</div>';
         aiResultEl.innerHTML = html;
 
-        var addAllHtml = '<div style="margin-top:8px;text-align:right"><button class="ai-add-btn" id="aiAddAll">全部添加为子任务</button></div>';
+        var addAllHtml = '<div style="margin-top:8px;text-align:right"><button class="ai-add-btn" id="aiAddAll">' + T('addAllSub') + '</button></div>';
         aiResultEl.querySelector('.ai-result').insertAdjacentHTML('beforeend', addAllHtml);
 
         async function addSubtask(idx, btnEl) {
@@ -792,7 +949,7 @@
           };
           todos.push(newTodo);
           await saveTodoDB(newTodo);
-          if (btnEl) { btnEl.textContent = '已添加'; btnEl.disabled = true; btnEl.style.background = '#94a3b8'; }
+          if (btnEl) { btnEl.textContent = T('added'); btnEl.disabled = true; btnEl.style.background = '#94a3b8'; }
         }
 
         aiResultEl.querySelectorAll('.ai-add-btn[data-idx]').forEach(function(btn) {
@@ -809,9 +966,9 @@
             await addSubtask(i, null);
           }
           render();
-          this.textContent = '已全部添加'; this.disabled = true; this.style.background = '#94a3b8';
+          this.textContent = T('allAdded'); this.disabled = true; this.style.background = '#94a3b8';
           aiResultEl.querySelectorAll('.ai-add-btn[data-idx]').forEach(function(b) {
-            b.textContent = '已添加'; b.disabled = true; b.style.background = '#94a3b8';
+            b.textContent = T('added'); b.disabled = true; b.style.background = '#94a3b8';
           });
         });
       } catch(e) {
@@ -823,11 +980,11 @@
   // ===== AI Feature: Task Execution =====
   function aiExecuteSelected() {
     var sel = getSelectedTodos();
-    if (sel.length === 0) { alert('请先勾选要执行的任务'); return; }
+    if (sel.length === 0) { alert(T('noTodosToExec')); return; }
 
     aiExecuteBtn.disabled = true;
     aiExecuteBtn.classList.add('loading');
-    aiExecuteBtn.textContent = '执行中...';
+    aiExecuteBtn.innerHTML = '\u26A1 ' + T('executing');
 
     var today = todayStr();
     var taskList = sel.map(function(t, i) {
@@ -853,11 +1010,11 @@
     callAI(p, function(text, err) {
       aiExecuteBtn.disabled = false;
       aiExecuteBtn.classList.remove('loading');
-      aiExecuteBtn.textContent = '\u26A1 任务执行';
+      aiExecuteBtn.innerHTML = '\u26A1 <span data-i18n="aiExecute">' + T('aiExecute') + '</span>';
 
-      if (err) { alert('AI 错误: ' + err); return; }
+      if (err) { alert(T('aiError') + err); return; }
 
-      document.getElementById('aiModalTitle').textContent = '\u26A1 任务执行结果';
+      document.getElementById('aiModalTitle').textContent = T('execResultTitle');
       document.getElementById('aiModalContent').textContent = text;
       document.getElementById('aiModal').classList.add('show');
     });
@@ -866,11 +1023,11 @@
   // ===== AI Feature 2: Daily Plan =====
   function aiDailyPlan() {
     var pending = todos.filter(function(t) { return !t.done; });
-    if (pending.length === 0) { alert('没有未完成的待办事项'); return; }
+    if (pending.length === 0) { alert(T('noTodosPlan')); return; }
 
     aiPlanBtn.disabled = true;
     aiPlanBtn.classList.add('loading');
-    aiPlanBtn.textContent = '规划中...';
+    aiPlanBtn.innerHTML = '\u{1F4C5} ' + T('planning');
 
     var today = todayStr();
     var todoList = pending.map(function(t) {
@@ -890,11 +1047,11 @@
     callAI(p, function(text, err) {
       aiPlanBtn.disabled = false;
       aiPlanBtn.classList.remove('loading');
-      aiPlanBtn.textContent = '\u{1F4C5} 每日规划';
+      aiPlanBtn.innerHTML = '\u{1F4C5} <span data-i18n="aiPlan">' + T('aiPlan') + '</span>';
 
-      if (err) { alert('AI 错误: ' + err); return; }
+      if (err) { alert(T('aiError') + err); return; }
 
-      document.getElementById('aiModalTitle').textContent = '\u{1F4CB} 今日规划';
+      document.getElementById('aiModalTitle').textContent = T('planTitle');
       document.getElementById('aiModalContent').textContent = text;
       document.getElementById('aiModal').classList.add('show');
     });
@@ -917,10 +1074,10 @@
 
   function smartParse() {
     var text = smartAddText.value.trim();
-    if (!text) { smartParseHint.textContent = '请先输入内容'; smartParseHint.style.color = '#f87171'; return; }
+    if (!text) { smartParseHint.textContent = T('inputHint'); smartParseHint.style.color = '#f87171'; return; }
 
     smartParseBtn.disabled = true;
-    smartParseBtn.textContent = '解析中...';
+    smartParseBtn.innerHTML = '\u{1F916} ' + T('parsing');
     smartParseBtn.classList.add('loading');
     smartParseHint.textContent = '';
     smartParseHint.style.color = '';
@@ -948,11 +1105,11 @@
 
     callAI(p, function(result, err) {
       smartParseBtn.disabled = false;
-      smartParseBtn.innerHTML = '&#129302; AI 解析';
+      smartParseBtn.innerHTML = '\u{1F916} <span data-i18n="aiParse">' + T('aiParse') + '</span>';
       smartParseBtn.classList.remove('loading');
 
       if (err) {
-        smartParseHint.textContent = '解析失败: ' + err;
+        smartParseHint.textContent = T('parseFail') + err;
         smartParseHint.style.color = '#f87171';
         return;
       }
@@ -964,7 +1121,7 @@
         if (items.length === 0) throw new Error('empty');
         renderSmartResults(items);
       } catch(e) {
-        smartParseHint.textContent = '解析失败，请重试';
+        smartParseHint.textContent = T('parseRetry');
         smartParseHint.style.color = '#f87171';
       }
     });
@@ -978,26 +1135,26 @@
     function fmt(dt) { return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0'); }
 
     var html = '<div class="ai-result" style="margin-top:12px">';
-    html += '<div style="font-weight:600;margin-bottom:8px;color:#7c3aed">解析结果 (' + items.length + ' 条待办)</div>';
+    html += '<div style="font-weight:600;margin-bottom:8px;color:#7c3aed">' + T('parseResult', items.length) + '</div>';
 
     items.forEach(function(item, i) {
       var dateLabel = '';
       if (item.dueDate) {
-        if (item.dueDate === today) dateLabel = '今天';
-        else if (item.dueDate === fmt(tomorrow)) dateLabel = '明天';
-        else if (item.dueDate === fmt(dayAfter)) dateLabel = '后天';
+        if (item.dueDate === today) dateLabel = T('today');
+        else if (item.dueDate === fmt(tomorrow)) dateLabel = T('tomorrow');
+        else if (item.dueDate === fmt(dayAfter)) dateLabel = T('dayAfter');
         else dateLabel = formatDate(item.dueDate);
       }
       html += '<div class="ai-task-item">' +
         '<span style="flex:1">' + (i+1) + '. ' + item.text +
-        ' <span class="cat-badge cat-' + (item.category||'other') + '">' + (CATEGORIES[item.category]||'其他') + '</span>' +
+        ' <span class="cat-badge cat-' + (item.category||'other') + '">' + (CATEGORIES[item.category]||T('catOther')) + '</span>' +
         (dateLabel ? ' <span class="due-badge ' + dueDateClass(item.dueDate, false) + '">' + dateLabel + '</span>' : '') +
         '</span>' +
-        '<button class="ai-add-btn" data-sidx="' + i + '">+ 添加</button></div>';
+        '<button class="ai-add-btn" data-sidx="' + i + '">' + T('addBtn') + '</button></div>';
     });
 
     html += '<div style="margin-top:10px;text-align:right">' +
-      '<button class="ai-add-btn" id="smartAddAllBtn" style="padding:5px 16px;font-size:12px">全部添加</button></div>';
+      '<button class="ai-add-btn" id="smartAddAllBtn" style="padding:5px 16px;font-size:12px">' + T('addAll') + '</button></div>';
     html += '</div>';
 
     smartAddResult.innerHTML = html;
@@ -1017,7 +1174,7 @@
         todos.push(newTodo);
         await saveTodoDB(newTodo);
         render();
-        this.textContent = '已添加'; this.disabled = true; this.style.background = '#94a3b8';
+        this.textContent = T('added'); this.disabled = true; this.style.background = '#94a3b8';
       });
     });
 
@@ -1036,9 +1193,9 @@
         await saveTodoDB(newTodo);
       }
       render();
-      this.textContent = '已全部添加'; this.disabled = true; this.style.background = '#94a3b8';
+      this.textContent = T('allAdded'); this.disabled = true; this.style.background = '#94a3b8';
       smartAddResult.querySelectorAll('.ai-add-btn[data-sidx]').forEach(function(b) {
-        b.textContent = '已添加'; b.disabled = true; b.style.background = '#94a3b8';
+        b.textContent = T('added'); b.disabled = true; b.style.background = '#94a3b8';
       });
     });
   }
@@ -1066,12 +1223,12 @@
     if (count === 0) { selectBar.style.display = 'none'; return; }
     selectBar.style.display = 'flex';
     selectBar.innerHTML =
-      '<span class="select-count">已选 ' + count + ' 项</span>' +
-      '<button class="select-action" id="selBreakdown">&#127919; 拆解</button>' +
-      '<button class="select-action" id="selExecute">&#9889; 执行</button>' +
-      '<button class="select-action" id="selDone">&#x2705; 全部完成</button>' +
-      '<button class="select-action danger" id="selDelete">&#x2715; 删除</button>' +
-      '<button class="select-cancel" id="selClear">取消选择</button>';
+      '<span class="select-count">' + T('selected', count) + '</span>' +
+      '<button class="select-action" id="selBreakdown">&#127919; ' + T('breakdown') + '</button>' +
+      '<button class="select-action" id="selExecute">&#9889; ' + T('execute') + '</button>' +
+      '<button class="select-action" id="selDone">&#x2705; ' + T('doneAll') + '</button>' +
+      '<button class="select-action danger" id="selDelete">&#x2715; ' + T('delete') + '</button>' +
+      '<button class="select-cancel" id="selClear">' + T('cancelSelect') + '</button>';
     document.getElementById('selBreakdown').addEventListener('click', function() { aiBreakdownSelected(); });
     document.getElementById('selExecute').addEventListener('click', function() { aiExecuteSelected(); });
     document.getElementById('selDone').addEventListener('click', async function() {
@@ -1083,7 +1240,7 @@
       selectedIds.clear(); render();
     });
     document.getElementById('selDelete').addEventListener('click', async function() {
-      if (!confirm('确定删除选中的 ' + count + ' 项？')) return;
+      if (!confirm(T('confirmDeleteSel', count))) return;
       var ids = new Set(selectedIds);
       var toDelete = todos.filter(function(t) { return ids.has(t.id) || ids.has(t.parentId); });
       for (var i = 0; i < toDelete.length; i++) {
@@ -1103,14 +1260,14 @@
     var filtered = getFiltered();
 
     if (todos.length === 0) {
-      listEl.innerHTML = '<li class="empty">暂无待办事项，添加一个吧</li>';
+      listEl.innerHTML = '<li class="empty">' + T('emptyList') + '</li>';
       statsEl.textContent = '';
       return;
     }
     if (filtered.length === 0) {
-      listEl.innerHTML = '<li class="empty">没有匹配的待办事项</li>';
+      listEl.innerHTML = '<li class="empty">' + T('noMatch') + '</li>';
       var r = todos.filter(function(t){return !t.done;}).length;
-      statsEl.textContent = r + ' 项未完成 / 共 ' + todos.length + ' 项';
+      statsEl.textContent = T('statsText', r, todos.length);
       return;
     }
 
@@ -1160,7 +1317,7 @@
 
       var selAllBtn = document.createElement('button');
       selAllBtn.className = 'sub-action-btn';
-      selAllBtn.textContent = '\u2610 全选';
+      selAllBtn.textContent = '\u2610 ' + T('selectAll');
       selAllBtn.addEventListener('click', function() {
         var allSelected = children.every(function(c) { return selectedIds.has(c.id); });
         children.forEach(function(c) {
@@ -1171,7 +1328,7 @@
 
       var doneAllBtn = document.createElement('button');
       doneAllBtn.className = 'sub-action-btn';
-      doneAllBtn.textContent = '\u2705 全部完成';
+      doneAllBtn.textContent = '\u2705 ' + T('doneAllSub');
       doneAllBtn.addEventListener('click', async function() {
         for (var i = 0; i < children.length; i++) {
           children[i].done = true;
@@ -1182,9 +1339,9 @@
 
       var delAllBtn = document.createElement('button');
       delAllBtn.className = 'sub-action-btn danger';
-      delAllBtn.textContent = '\u2715 全部删除';
+      delAllBtn.textContent = '\u2715 ' + T('deleteAllSub');
       delAllBtn.addEventListener('click', async function() {
-        if (!confirm('确定删除全部 ' + children.length + ' 个子任务？')) return;
+        if (!confirm(T('confirmDeleteSub', children.length))) return;
         for (var i = 0; i < children.length; i++) {
           await deleteTodoDB(children[i].id);
         }
@@ -1239,14 +1396,14 @@
         meta.className = 'item-meta';
         var catBadge = document.createElement('span');
         catBadge.className = 'cat-badge cat-' + todo.category;
-        catBadge.textContent = CATEGORIES[todo.category] || '其他';
+        catBadge.textContent = CATEGORIES[todo.category] || T('catOther');
         meta.appendChild(catBadge);
         content.appendChild(textSpan);
         content.appendChild(meta);
 
         var compBtn = document.createElement('button');
         compBtn.className = 'complete-btn' + (todo.done ? ' is-done' : '');
-        compBtn.textContent = todo.done ? '已完成' : '完成';
+        compBtn.textContent = todo.done ? T('isDone') : T('done');
         compBtn.addEventListener('click', async function() {
           todo.done = !todo.done;
           await updateTodoDB(todo.id, { done: todo.done });
@@ -1285,7 +1442,7 @@
         var ed = document.createElement('input'); ed.type='date'; ed.value=todo.dueDate||'';
         var ec = document.createElement('select');
         CAT_KEYS.forEach(function(k){ var o=document.createElement('option'); o.value=k; o.textContent=CATEGORIES[k]; if(todo.category===k) o.selected=true; ec.appendChild(o); });
-        var sb = document.createElement('button'); sb.className='save-edit-btn'; sb.textContent='保存';
+        var sb = document.createElement('button'); sb.className='save-edit-btn'; sb.textContent=T('save');
         sb.addEventListener('click', async function(){
           var v=et.value.trim(); if(!v)return;
           todo.text=v; todo.dueDate=ed.value||''; todo.category=ec.value;
@@ -1293,7 +1450,7 @@
           await updateTodoDB(todo.id, { text: v, dueDate: ed.value||'', category: ec.value });
           render();
         });
-        var cb2 = document.createElement('button'); cb2.className='cancel-edit-btn'; cb2.textContent='取消';
+        var cb2 = document.createElement('button'); cb2.className='cancel-edit-btn'; cb2.textContent=T('cancel');
         cb2.addEventListener('click', function(){ editingId=null; render(); });
         et.addEventListener('keydown', function(e){ if(e.key==='Enter') sb.click(); if(e.key==='Escape') cb2.click(); });
         er.appendChild(et); er.appendChild(ed); er.appendChild(ec); er.appendChild(sb); er.appendChild(cb2);
@@ -1304,7 +1461,7 @@
     }
 
     var remaining = todos.filter(function(t){return !t.done;}).length;
-    statsEl.textContent = remaining + ' 项未完成 / 共 ' + todos.length + ' 项';
+    statsEl.textContent = T('statsText', remaining, todos.length);
     renderSelectBar();
   }
 
@@ -1353,8 +1510,8 @@
     reader.onload = async function(e) {
       try {
         var data = JSON.parse(e.target.result);
-        if (!Array.isArray(data)) { alert('无效的数据格式'); return; }
-        if (!confirm('导入将替换当前所有数据，确定继续吗？')) return;
+        if (!Array.isArray(data)) { alert(T('invalidFormat')); return; }
+        if (!confirm(T('confirmImport'))) return;
 
         // Delete all existing todos from DB
         for (var i = 0; i < todos.length; i++) {
@@ -1376,8 +1533,8 @@
         }
 
         render();
-        alert('导入成功！共 ' + todos.length + ' 条记录');
-      } catch(err) { alert('文件解析失败：' + err.message); }
+        alert(T('importSuccess', todos.length));
+      } catch(err) { alert(T('fileParseFail') + err.message); }
     };
     reader.readAsText(file);
   }
@@ -1412,7 +1569,7 @@
 
         smartMicBtn.classList.remove('listening');
         smartMicBtn.innerHTML = '&#8987;';
-        smartParseHint.textContent = '识别中...';
+        smartParseHint.textContent = T('recognizing');
         smartParseHint.style.color = '#7c3aed';
 
         try {
@@ -1420,15 +1577,14 @@
           var reader = new FileReader();
           reader.onloadend = async function() {
             var base64 = reader.result.split(',')[1];
-            var lang = document.getElementById('voiceLang').value;
             var resp = await fetch(WHISPER_BACKEND, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ audio: base64, language: lang })
+              body: JSON.stringify({ audio: base64 })
             });
             var data = await resp.json();
             if (data.error) {
-              smartParseHint.textContent = '识别失败: ' + data.error;
+              smartParseHint.textContent = T('recognizeFail') + data.error;
               smartParseHint.style.color = '#f87171';
               smartMicBtn.innerHTML = '&#127908;';
               return;
@@ -1437,21 +1593,21 @@
             if (transcript) {
               var current = smartAddText.value;
               var sep = '';
-              if (current && !current.endsWith('\n') && !current.endsWith('，') && !current.endsWith('。')) {
-                sep = '，';
+              if (current && !current.endsWith('\n') && !current.endsWith('，') && !current.endsWith('。') && !current.endsWith(',') && !current.endsWith('.')) {
+                sep = currentLang === 'zh' ? '，' : ', ';
               }
               smartAddText.value = current + sep + transcript;
-              smartParseHint.textContent = '语音已录入，点击 "AI 解析" 生成待办';
+              smartParseHint.textContent = T('voiceRecorded');
               smartParseHint.style.color = '#16a34a';
             } else {
-              smartParseHint.textContent = '未检测到语音内容，请重试';
+              smartParseHint.textContent = T('noVoice');
               smartParseHint.style.color = '#f87171';
             }
             smartMicBtn.innerHTML = '&#127908;';
           };
           reader.readAsDataURL(blob);
         } catch(e) {
-          smartParseHint.textContent = '识别失败: ' + e.message;
+          smartParseHint.textContent = T('recognizeFail') + e.message;
           smartParseHint.style.color = '#f87171';
           smartMicBtn.innerHTML = '&#127908;';
         }
@@ -1460,13 +1616,13 @@
       mediaRecorder.start();
       isListening = true;
       smartMicBtn.classList.add('listening');
-      smartParseHint.textContent = '正在录音...点击停止';
+      smartParseHint.textContent = T('recording');
       smartParseHint.style.color = '#7c3aed';
     } catch(e) {
       if (e.name === 'NotAllowedError') {
-        smartParseHint.textContent = '请允许麦克风权限';
+        smartParseHint.textContent = T('micPermission');
       } else {
-        smartParseHint.textContent = '无法启动录音: ' + e.message;
+        smartParseHint.textContent = T('micFail') + e.message;
       }
       smartParseHint.style.color = '#f87171';
     }
@@ -1481,7 +1637,7 @@
 
   // ===== Text-to-Speech =====
   function speakText(text) {
-    if (!window.speechSynthesis) { alert('您的浏览器不支持语音朗读'); return; }
+    if (!window.speechSynthesis) { alert(T('ttsUnsupported')); return; }
     speechSynthesis.cancel();
     var utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'zh-CN';
@@ -1535,6 +1691,10 @@
   renderKeyArea();
 
   // ===== Init =====
+  // Apply saved language preference
+  if (currentLang !== 'zh') {
+    updateLanguage(currentLang);
+  }
   checkAuth();
 })();
 </script>
