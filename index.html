@@ -1539,20 +1539,134 @@
     reader.readAsText(file);
   }
 
-  // ===== Voice Input (Whisper) =====
+  // ===== Voice Input (Web Speech API + MediaRecorder fallback) =====
   var WHISPER_BACKEND = 'https://my-todo-api-sooty.vercel.app/api/whisper';
   var mediaRecorder = null;
   var audioChunks = [];
   var isListening = false;
+  var recognition = null;
+  var voiceBaseText = '';
+
+  var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
   function toggleSmartVoice() {
     if (isListening) {
-      stopRecording();
+      if (recognition) {
+        stopSpeechRecognition();
+      } else {
+        stopRecording();
+      }
     } else {
+      if (SpeechRecognition) {
+        startSpeechRecognition();
+      } else {
+        startRecording();
+      }
+    }
+  }
+
+  // --- Web Speech API ---
+  function startSpeechRecognition() {
+    try {
+      recognition = new SpeechRecognition();
+    } catch(e) {
+      // SpeechRecognition constructor failed, fall back
+      recognition = null;
+      startRecording();
+      return;
+    }
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
+    recognition.lang = currentLang === 'zh' ? 'zh-CN' : 'en-US';
+
+    voiceBaseText = smartAddText.value;
+
+    recognition.onresult = function(event) {
+      var finalText = '';
+      var interimText = '';
+      for (var i = 0; i < event.results.length; i++) {
+        var t = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalText += t;
+        } else {
+          interimText += t;
+        }
+      }
+      var fullTranscript = (finalText + interimText).trim();
+      if (fullTranscript) {
+        var sep = '';
+        if (voiceBaseText && !voiceBaseText.endsWith('\n') && !voiceBaseText.endsWith('，') && !voiceBaseText.endsWith('。') && !voiceBaseText.endsWith(',') && !voiceBaseText.endsWith('.')) {
+          sep = currentLang === 'zh' ? '，' : ', ';
+        }
+        smartAddText.value = voiceBaseText + sep + fullTranscript;
+        smartAddText.scrollTop = smartAddText.scrollHeight;
+        // Show real-time hint
+        if (interimText) {
+          smartParseHint.textContent = currentLang === 'zh' ? '正在听...' : 'Listening...';
+          smartParseHint.style.color = '#7c3aed';
+        } else {
+          smartParseHint.textContent = currentLang === 'zh' ? '✓ 已识别，继续说话...' : '✓ Got it, keep talking...';
+          smartParseHint.style.color = '#16a34a';
+        }
+      }
+    };
+
+    recognition.onend = function() {
+      // If user didn't manually stop, restart (some browsers auto-stop)
+      if (isListening) {
+        try { recognition.start(); } catch(e) {}
+        return;
+      }
+      smartMicBtn.classList.remove('listening');
+      smartMicBtn.innerHTML = '&#127908;';
+      if (smartAddText.value.trim() !== voiceBaseText.trim()) {
+        smartParseHint.textContent = T('voiceRecorded');
+        smartParseHint.style.color = '#16a34a';
+      } else {
+        smartParseHint.textContent = T('noVoice');
+        smartParseHint.style.color = '#f87171';
+      }
+      recognition = null;
+    };
+
+    recognition.onerror = function(event) {
+      // 'no-speech' is non-fatal when continuous, just keep going
+      if (event.error === 'no-speech' && isListening) return;
+      isListening = false;
+      smartMicBtn.classList.remove('listening');
+      smartMicBtn.innerHTML = '&#127908;';
+      recognition = null;
+      if (event.error === 'not-allowed') {
+        smartParseHint.textContent = T('micPermission');
+      } else if (event.error === 'no-speech') {
+        smartParseHint.textContent = T('noVoice');
+      } else {
+        smartParseHint.textContent = T('recognizeFail') + event.error;
+      }
+      smartParseHint.style.color = '#f87171';
+    };
+
+    try {
+      recognition.start();
+      isListening = true;
+      smartMicBtn.classList.add('listening');
+      smartParseHint.textContent = currentLang === 'zh' ? '请说话...' : 'Speak now...';
+      smartParseHint.style.color = '#7c3aed';
+    } catch(e) {
+      recognition = null;
       startRecording();
     }
   }
 
+  function stopSpeechRecognition() {
+    isListening = false;
+    if (recognition) {
+      try { recognition.stop(); } catch(e) {}
+    }
+  }
+
+  // --- MediaRecorder fallback (for browsers without Web Speech API) ---
   async function startRecording() {
     try {
       var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
