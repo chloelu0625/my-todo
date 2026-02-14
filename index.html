@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>待办事项</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -17,7 +19,15 @@
     padding: 40px 16px;
   }
 
-  .container { width: 100%; max-width: 580px; align-self: flex-start; }
+  .app-layout {
+    display: flex; gap: 20px; max-width: 1200px; width: 100%; align-self: flex-start;
+    height: calc(100vh - 80px);
+  }
+  .left-panel { flex: 0 0 420px; position: relative; display: flex; flex-direction: column; }
+  .left-panel .card {
+    flex: 1; display: flex; flex-direction: column; overflow: hidden;
+  }
+  .right-panel { flex: 1; display: flex; flex-direction: column; position: relative; }
 
   .card {
     background: #fff;
@@ -25,8 +35,10 @@
     box-shadow: 0 8px 30px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6);
     padding: 32px 28px;
   }
+  .left-panel .card { padding: 16px 18px; }
 
   h1 { font-size: 26px; font-weight: 700; color: #1e293b; text-align: center; margin-bottom: 24px; }
+  .left-panel h1 { font-size: 17px; margin-bottom: 10px; }
 
   /* ===== Auth Overlay ===== */
   .auth-overlay {
@@ -68,8 +80,8 @@
 
   /* ===== User Bar ===== */
   .user-bar {
-    display: flex; align-items: center; justify-content: flex-end; gap: 10px;
-    margin-bottom: 16px; padding: 0 2px;
+    display: flex; align-items: center; justify-content: flex-end; gap: 8px;
+    margin-bottom: 8px; padding: 0;
   }
   .user-bar .user-email { font-size: 12px; color: #64748b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px; }
   .user-bar .logout-btn {
@@ -84,25 +96,25 @@
   .lang-toggle:hover { border-color: #93c5fd; color: #3b82f6; }
 
   /* ===== Input Row ===== */
-  .input-row { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .input-row { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; align-items: center; }
   .input-row input[type="text"] {
-    flex: 1; min-width: 160px; padding: 10px 14px; border: 2px solid #e2e8f0;
-    border-radius: 10px; font-size: 15px; outline: none; transition: border-color 0.2s;
+    flex: 1; min-width: 100px; padding: 7px 10px; border: 1.5px solid #e2e8f0;
+    border-radius: 8px; font-size: 13px; outline: none; transition: border-color 0.2s;
   }
   .input-row input[type="text"]:focus { border-color: #60a5fa; }
   .input-row input[type="date"] {
-    padding: 10px 10px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 13px;
-    outline: none; transition: border-color 0.2s; color: #64748b; max-width: 150px;
+    padding: 7px 6px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 11px;
+    outline: none; transition: border-color 0.2s; color: #64748b; max-width: 120px;
   }
   .input-row input[type="date"]:focus { border-color: #60a5fa; }
   .input-row select {
-    padding: 10px 10px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 13px;
+    padding: 7px 6px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 11px;
     outline: none; background: #fff; cursor: pointer; color: #64748b; transition: border-color 0.2s;
   }
   .input-row select:focus { border-color: #60a5fa; }
   .input-row .add-btn {
-    padding: 10px 18px; background: #3b82f6; color: #fff; border: none; border-radius: 10px;
-    font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.2s; white-space: nowrap;
+    padding: 7px 12px; background: #3b82f6; color: #fff; border: none; border-radius: 8px;
+    font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s; white-space: nowrap;
   }
   .input-row .add-btn:hover { background: #2563eb; }
   .mic-btn {
@@ -119,8 +131,8 @@
   .speak-btn:hover { opacity: 1; }
   .speak-btn.speaking { opacity: 1; animation: pulse 1s ease-in-out infinite; }
   .smart-add-trigger {
-    padding: 10px 14px; background: #f5f3ff; border: 2px solid #c4b5fd; border-radius: 10px;
-    font-size: 15px; cursor: pointer; color: #7c3aed; font-weight: 600; transition: all 0.2s;
+    padding: 7px 10px; background: #f5f3ff; border: 1.5px solid #c4b5fd; border-radius: 8px;
+    font-size: 13px; cursor: pointer; color: #7c3aed; font-weight: 600; transition: all 0.2s;
     white-space: nowrap; line-height: 1; flex-shrink: 0;
   }
   .smart-add-trigger:hover { background: #ede9fe; border-color: #a78bfa; }
@@ -141,26 +153,26 @@
   .smart-parse-hint { font-size: 12px; color: #94a3b8; }
 
   /* ===== Filter Toolbar ===== */
-  .toolbar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+  .toolbar { display: flex; gap: 5px; margin-bottom: 8px; flex-wrap: wrap; align-items: center; }
   .toolbar .search-input {
-    flex: 1; min-width: 120px; padding: 7px 12px; border: 1.5px solid #e2e8f0;
-    border-radius: 8px; font-size: 13px; outline: none; transition: border-color 0.2s;
+    flex: 1; min-width: 80px; padding: 5px 8px; border: 1.5px solid #e2e8f0;
+    border-radius: 6px; font-size: 12px; outline: none; transition: border-color 0.2s;
   }
   .toolbar .search-input:focus { border-color: #60a5fa; }
-  .filter-btns { display: flex; gap: 4px; }
+  .filter-btns { display: flex; gap: 2px; }
   .filter-btn {
-    padding: 5px 12px; border: 1.5px solid #e2e8f0; border-radius: 8px; background: #fff;
-    font-size: 12px; cursor: pointer; color: #64748b; transition: all 0.2s; white-space: nowrap;
+    padding: 4px 8px; border: 1.5px solid #e2e8f0; border-radius: 6px; background: #fff;
+    font-size: 11px; cursor: pointer; color: #64748b; transition: all 0.2s; white-space: nowrap;
   }
   .filter-btn:hover { border-color: #93c5fd; color: #3b82f6; }
   .filter-btn.active { background: #3b82f6; color: #fff; border-color: #3b82f6; }
   .toolbar select {
-    padding: 5px 8px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 12px;
+    padding: 4px 6px; border: 1.5px solid #e2e8f0; border-radius: 6px; font-size: 11px;
     background: #fff; cursor: pointer; color: #64748b; outline: none;
   }
 
   /* ===== Todo List ===== */
-  .todo-list { list-style: none; }
+  .todo-list { list-style: none; flex: 1; overflow-y: auto; min-height: 0; }
   .todo-item {
     display: flex; align-items: center; gap: 10px; padding: 12px 4px;
     border-bottom: 1px solid #f1f5f9; animation: fadeIn 0.25s ease;
@@ -243,8 +255,8 @@
   .edit-row .cancel-edit-btn { padding:5px 12px; background:#e2e8f0; color:#64748b; border:none; border-radius:6px; font-size:12px; cursor:pointer; }
 
   /* Stats & Empty */
-  .stats { text-align: center; margin-top: 16px; font-size: 13px; color: #94a3b8; }
-  .empty { text-align: center; padding: 32px 0; color: #cbd5e1; font-size: 14px; }
+  .stats { text-align: center; margin-top: 6px; font-size: 11px; color: #94a3b8; }
+  .empty { text-align: center; padding: 24px 0; color: #cbd5e1; font-size: 13px; }
 
   /* Date Group Header */
   .date-header { display: flex; align-items: center; gap: 10px; padding: 10px 4px 6px; margin-top: 8px; font-size: 13px; font-weight: 600; color: #64748b; }
@@ -255,21 +267,14 @@
   .date-header-label.is-today { color: #ea580c; font-weight: 700; }
 
   /* ===== Footer ===== */
-  .footer-bar { display: flex; justify-content: center; gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px solid #f1f5f9; flex-wrap: wrap; }
+  .footer-bar { display: flex; justify-content: center; gap: 6px; margin-top: 8px; padding-top: 8px; border-top: 1px solid #f1f5f9; flex-wrap: wrap; }
   .footer-btn {
-    padding: 6px 14px; border: 1.5px solid #e2e8f0; border-radius: 8px; background: #fff;
-    font-size: 12px; cursor: pointer; color: #64748b; transition: all 0.2s;
+    padding: 4px 10px; border: 1.5px solid #e2e8f0; border-radius: 6px; background: #fff;
+    font-size: 11px; cursor: pointer; color: #64748b; transition: all 0.2s;
   }
   .footer-btn:hover { border-color: #93c5fd; color: #3b82f6; }
 
-  /* ===== AI Section ===== */
-  .ai-section {
-    margin-top: 20px; padding-top: 16px; border-top: 2px solid #e0f2fe;
-  }
-  .ai-section h2 {
-    font-size: 15px; font-weight: 700; color: #7c3aed; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
-  }
-  .ai-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  /* ===== AI Buttons (reused in chat panel) ===== */
   .ai-btn {
     padding: 7px 14px; border: 1.5px solid #c4b5fd; border-radius: 8px; background: #faf5ff;
     font-size: 12px; cursor: pointer; color: #7c3aed; font-weight: 500; transition: all 0.2s;
@@ -279,11 +284,9 @@
   .ai-btn.loading { animation: pulse 1.2s ease-in-out infinite; }
   @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
 
-  .ai-key-hint { font-size: 11px; color: #94a3b8; margin-bottom: 10px; }
-
   .ai-result {
     background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 10px; padding: 14px 16px;
-    font-size: 13px; line-height: 1.7; color: #334155; white-space: pre-wrap; max-height: 350px;
+    font-size: 13px; line-height: 1.7; color: #334155; white-space: pre-wrap; max-height: none;
     overflow-y: auto; margin-top: 8px;
   }
   .ai-result .ai-task-item {
@@ -295,6 +298,87 @@
     font-size: 11px; cursor: pointer; white-space: nowrap; flex-shrink: 0;
   }
   .ai-add-btn:hover { background: #6d28d9; }
+
+  /* ===== Right Panel Chat ===== */
+  .right-panel .card {
+    display: flex; flex-direction: column; flex: 1; overflow: hidden; min-height: 0;
+  }
+  .chat-header {
+    border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 0;
+  }
+  .chat-header h2 { font-size: 16px; font-weight: 700; color: #1e293b; margin-bottom: 10px; word-break: break-word; }
+  .chat-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chat-messages {
+    flex: 1; overflow-y: auto; padding: 16px 0; display: flex; flex-direction: column; gap: 16px;
+    min-height: 0;
+  }
+  .chat-msg {
+    padding: 12px 16px; border-radius: 12px; line-height: 1.7; font-size: 14px; word-break: break-word;
+  }
+  .chat-msg.user {
+    background: #ede9fe; align-self: flex-end; max-width: 80%;
+  }
+  .chat-msg.ai {
+    background: #f8fafc; border: 1px solid #e2e8f0; align-self: flex-start; max-width: 90%;
+  }
+  .chat-msg.ai h1, .chat-msg.ai h2, .chat-msg.ai h3 {
+    margin: 12px 0 6px; font-weight: 700; color: #1e293b;
+  }
+  .chat-msg.ai h1 { font-size: 18px; }
+  .chat-msg.ai h2 { font-size: 16px; }
+  .chat-msg.ai h3 { font-size: 14px; }
+  .chat-msg.ai ul, .chat-msg.ai ol { margin: 6px 0; padding-left: 20px; }
+  .chat-msg.ai li { margin: 3px 0; }
+  .chat-msg.ai code {
+    background: #f1f5f9; padding: 1px 5px; border-radius: 4px; font-size: 13px; font-family: monospace;
+  }
+  .chat-msg.ai pre { background: #f1f5f9; padding: 10px 14px; border-radius: 8px; overflow-x: auto; margin: 8px 0; }
+  .chat-msg.ai pre code { background: none; padding: 0; }
+  .chat-msg.ai table { border-collapse: collapse; width: 100%; margin: 8px 0; }
+  .chat-msg.ai th, .chat-msg.ai td { border: 1px solid #e2e8f0; padding: 6px 10px; font-size: 13px; text-align: left; }
+  .chat-msg.ai th { background: #f1f5f9; font-weight: 600; }
+  .chat-msg.ai p { margin: 6px 0; }
+  .chat-msg.ai strong { font-weight: 700; }
+  .chat-msg.ai blockquote { border-left: 3px solid #c4b5fd; padding-left: 12px; color: #64748b; margin: 8px 0; }
+  .chat-empty {
+    flex: 1; display: flex; align-items: center; justify-content: center; color: #cbd5e1;
+    font-size: 14px; text-align: center; padding: 40px 0;
+  }
+  .chat-input-bar {
+    display: flex; gap: 8px; padding-top: 12px; border-top: 1px solid #e2e8f0; margin-top: 8px;
+  }
+  .chat-input-bar input {
+    flex: 1; padding: 9px 14px; border: 2px solid #e2e8f0; border-radius: 10px;
+    font-size: 14px; outline: none; transition: border-color 0.2s;
+  }
+  .chat-input-bar input:focus { border-color: #60a5fa; }
+  .chat-input-bar button {
+    padding: 9px 18px; background: #3b82f6; color: #fff; border: none; border-radius: 10px;
+    font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; white-space: nowrap;
+  }
+  .chat-input-bar button:hover { background: #2563eb; }
+  .chat-export-bar {
+    display: flex; gap: 8px; padding-top: 10px; justify-content: flex-end;
+  }
+  .chat-export-bar button {
+    padding: 6px 14px; border: 1.5px solid #e2e8f0; border-radius: 8px; background: #fff;
+    font-size: 12px; cursor: pointer; color: #64748b; transition: all 0.2s;
+  }
+  .chat-export-bar button:hover { border-color: #93c5fd; color: #3b82f6; }
+
+  .todo-item.selected-task { background: #f5f3ff; }
+
+  /* ===== Scroll Down Button ===== */
+  .scroll-down-btn {
+    position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%);
+    width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid #e2e8f0;
+    background: #fff; color: #64748b; font-size: 18px; cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: none;
+    align-items: center; justify-content: center; z-index: 10; transition: all 0.2s;
+    line-height: 1; padding: 0;
+  }
+  .scroll-down-btn:hover { background: #f1f5f9; border-color: #93c5fd; color: #3b82f6; }
+  .scroll-down-btn.show { display: flex; }
 
   /* ===== Modal ===== */
   .modal-overlay {
@@ -314,6 +398,11 @@
   }
 
   /* ===== Responsive ===== */
+  @media (max-width: 900px) {
+    .app-layout { flex-direction: column; height: auto; }
+    .left-panel { flex: none; width: 100%; max-height: 60vh; }
+    .right-panel { min-height: 60vh; }
+  }
   @media (max-width: 480px) {
     body { padding: 16px 8px; }
     .card { padding: 20px 16px; }
@@ -349,77 +438,84 @@
   </div>
 </div>
 
-<div class="container">
-  <div class="card">
-    <div class="user-bar" id="userBar" style="display:none">
-      <span class="user-email" id="userEmail"></span>
-      <button class="lang-toggle" id="langToggle">EN</button>
-      <button class="logout-btn" id="logoutBtn" data-i18n="logout">退出登录</button>
-    </div>
-
-    <h1>&#128221; <span data-i18n="appTitle">待办事项</span></h1>
-
-    <div class="input-row">
-      <input id="todoInput" type="text" data-i18n-ph="addTodoPh" placeholder="添加新的待办事项..." autocomplete="off">
-      <input id="dueDateInput" type="date" title="截止日期">
-      <select id="categoryInput" title="分类">
-        <option value="other" data-i18n="catOther">其他</option>
-        <option value="work" data-i18n="catWork">工作</option>
-        <option value="life" data-i18n="catLife">生活</option>
-        <option value="study" data-i18n="catStudy">学习</option>
-      </select>
-      <button class="add-btn" id="addBtn" data-i18n="add">添加</button>
-      <button class="smart-add-trigger" id="smartAddBtn">&#x2728; <span data-i18n="smartAdd">智能添加（支持语音）</span></button>
-    </div>
-
-    <div class="toolbar">
-      <input class="search-input" id="searchInput" type="text" data-i18n-ph="searchPh" placeholder="搜索..." autocomplete="off">
-      <div class="filter-btns">
-        <button class="filter-btn active" data-filter="all" data-i18n="filterAll">全部</button>
-        <button class="filter-btn" data-filter="active" data-i18n="filterActive">未完成</button>
-        <button class="filter-btn" data-filter="done" data-i18n="filterDone">已完成</button>
+<div class="app-layout">
+  <!-- Left Panel: Todo List -->
+  <div class="left-panel">
+    <div class="card">
+      <div class="user-bar" id="userBar" style="display:none">
+        <span class="user-email" id="userEmail"></span>
+        <button class="lang-toggle" id="langToggle">EN</button>
+        <button class="logout-btn" id="logoutBtn" data-i18n="logout">退出登录</button>
       </div>
-      <select id="catFilter">
-        <option value="all" data-i18n="allCats">全部分类</option>
-        <option value="work" data-i18n="catWork">工作</option>
-        <option value="life" data-i18n="catLife">生活</option>
-        <option value="study" data-i18n="catStudy">学习</option>
-        <option value="other" data-i18n="catOther">其他</option>
-      </select>
-    </div>
 
-    <div id="selectBar" class="select-bar" style="display:none"></div>
-    <ul class="todo-list" id="todoList"></ul>
-    <div class="stats" id="stats"></div>
+      <h1>&#128221; <span data-i18n="appTitle">待办事项</span></h1>
 
-    <!-- AI Section -->
-    <div class="ai-section">
-      <h2>&#x2728; <span data-i18n="aiTitle">AI 助手</span></h2>
-      <div id="aiKeyArea"></div>
-      <div class="ai-bar">
-        <button class="ai-btn" id="aiBreakdownBtn" title="拆解选中任务或输入新任务">&#127919; <span data-i18n="aiBreakdown">拆解任务</span></button>
-        <button class="ai-btn" id="aiExecuteBtn" title="AI 生成选中任务的执行步骤">&#9889; <span data-i18n="aiExecute">任务执行</span></button>
-        <button class="ai-btn" id="aiPlanBtn" title="AI 根据待办生成今日规划">&#128197; <span data-i18n="aiPlan">每日规划</span></button>
+      <div class="input-row">
+        <input id="todoInput" type="text" data-i18n-ph="addTodoPh" placeholder="添加新待办..." autocomplete="off">
+        <input id="dueDateInput" type="date" title="截止日期">
+        <select id="categoryInput" title="分类">
+          <option value="other" data-i18n="catOther">其他</option>
+          <option value="work" data-i18n="catWork">工作</option>
+          <option value="life" data-i18n="catLife">生活</option>
+          <option value="study" data-i18n="catStudy">学习</option>
+        </select>
+        <button class="add-btn" id="addBtn" data-i18n="add">添加</button>
+        <button class="smart-add-trigger" id="smartAddBtn" title="智能添加（支持语音）">&#x2728;</button>
       </div>
-      <div id="aiResult"></div>
-    </div>
 
-    <div class="footer-bar">
-      <button class="footer-btn" id="exportBtn">&#128230; <span data-i18n="export">导出</span></button>
-      <button class="footer-btn" id="importBtn">&#128229; <span data-i18n="import">导入</span></button>
-      <input type="file" id="importFile" accept=".json" style="display:none">
+      <div class="toolbar">
+        <input class="search-input" id="searchInput" type="text" data-i18n-ph="searchPh" placeholder="搜索..." autocomplete="off">
+        <div class="filter-btns">
+          <button class="filter-btn active" data-filter="all" data-i18n="filterAll">全部</button>
+          <button class="filter-btn" data-filter="active" data-i18n="filterActive">未完成</button>
+          <button class="filter-btn" data-filter="done" data-i18n="filterDone">已完成</button>
+        </div>
+        <select id="catFilter">
+          <option value="all" data-i18n="allCats">全部分类</option>
+          <option value="work" data-i18n="catWork">工作</option>
+          <option value="life" data-i18n="catLife">生活</option>
+          <option value="study" data-i18n="catStudy">学习</option>
+          <option value="other" data-i18n="catOther">其他</option>
+        </select>
+      </div>
+
+      <div id="selectBar" class="select-bar" style="display:none"></div>
+      <ul class="todo-list" id="todoList"></ul>
+      <div class="stats" id="stats"></div>
+
+      <div class="footer-bar">
+        <button class="footer-btn" id="exportBtn">&#128230; <span data-i18n="export">导出</span></button>
+        <button class="footer-btn" id="importBtn">&#128229; <span data-i18n="import">导入</span></button>
+        <input type="file" id="importFile" accept=".json" style="display:none">
+      </div>
     </div>
+    <button class="scroll-down-btn" id="leftScrollBtn" title="滚动到底部">&#8595;</button>
   </div>
-</div>
 
-<!-- AI Plan Modal -->
-<div class="modal-overlay" id="aiModal">
-  <div class="modal-box">
-    <h3 id="aiModalTitle">AI 规划 <button class="speak-btn" id="modalSpeakBtn" title="朗读">&#128264;</button></h3>
-    <div class="ai-result" id="aiModalContent"></div>
-    <div style="display:flex;gap:8px;justify-content:center;margin-top:14px">
-      <button class="modal-close" data-i18n="close" onclick="document.getElementById('aiModal').classList.remove('show');speechSynthesis.cancel()">关闭</button>
+  <!-- Right Panel: Chat -->
+  <div class="right-panel">
+    <div class="card">
+      <div class="chat-header">
+        <h2 id="chatTaskTitle">选择一个任务开始...</h2>
+        <div class="chat-actions">
+          <button class="ai-btn" id="chatBreakdownBtn" disabled>&#127919; 拆解</button>
+          <button class="ai-btn" id="chatExecuteBtn" disabled>&#9889; 执行</button>
+          <button class="ai-btn" id="chatPlanBtn">&#128197; 每日规划</button>
+        </div>
+      </div>
+      <div class="chat-messages" id="chatMessages">
+        <div class="chat-empty" id="chatEmpty">&#x2728; 点击左侧任务，开始 AI 对话</div>
+      </div>
+      <div class="chat-input-bar">
+        <input id="chatInput" placeholder="输入追问..." disabled>
+        <button id="chatSendBtn" disabled>发送</button>
+      </div>
+      <div class="chat-export-bar">
+        <button id="exportWordBtn">&#128196; 导出 Word</button>
+        <button id="exportPdfBtn">&#128196; 导出 PDF</button>
+      </div>
     </div>
+    <button class="scroll-down-btn" id="rightScrollBtn" title="滚动到底部">&#8595;</button>
   </div>
 </div>
 
@@ -450,7 +546,12 @@
   // ===== Supabase Configuration =====
   var SUPABASE_URL = 'https://cokplvhmunogtjubuuud.supabase.co';
   var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNva3BsdmhtdW5vZ3RqdWJ1dXVkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2MjE2NzksImV4cCI6MjA4NjE5NzY3OX0.dLYyQzWk8r-CLaitelSPrgQZPnrRwpRaGJ3SIeJKeGs';
-  var supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  var supabaseClient;
+  try {
+    supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  } catch(e) {
+    document.getElementById('authLoading').textContent = '网络连接失败，请刷新页面重试';
+  }
   var currentUser = null;
 
   // ===== Auth =====
@@ -547,12 +648,16 @@
     authOverlay.classList.add('hidden');
     userBar.style.display = 'flex';
     userEmailEl.textContent = user.email;
+    loadChatMap();
     loadTodosFromDB();
   }
 
   function showAuth() {
     currentUser = null;
     todos = [];
+    taskChatMap = {};
+    chatHistory = [];
+    selectedTask = null;
     authOverlay.classList.remove('hidden');
     authForm.classList.remove('hidden');
     authLoading.classList.add('hidden');
@@ -561,11 +666,16 @@
   }
 
   async function checkAuth() {
+    if (!supabaseClient) { showAuth(); return; }
     authForm.classList.add('hidden');
     authLoading.classList.remove('hidden');
 
     try {
-      var { data: { session } } = await supabaseClient.auth.getSession();
+      var sessionPromise = supabaseClient.auth.getSession();
+      var timeoutPromise = new Promise(function(_, reject) {
+        setTimeout(function() { reject(new Error('timeout')); }, 6000);
+      });
+      var { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]);
       if (session && session.user) {
         showApp(session.user);
       } else {
@@ -597,12 +707,17 @@
   var exportBtn = document.getElementById('exportBtn');
   var importBtn = document.getElementById('importBtn');
   var importFile = document.getElementById('importFile');
-  var aiKeyArea = document.getElementById('aiKeyArea');
-  var aiResultEl = document.getElementById('aiResult');
-  var modalSpeakBtn = document.getElementById('modalSpeakBtn');
-  var aiBreakdownBtn = document.getElementById('aiBreakdownBtn');
-  var aiExecuteBtn = document.getElementById('aiExecuteBtn');
-  var aiPlanBtn = document.getElementById('aiPlanBtn');
+  // Chat panel refs
+  var chatTaskTitle = document.getElementById('chatTaskTitle');
+  var chatMessages = document.getElementById('chatMessages');
+  var chatEmpty = document.getElementById('chatEmpty');
+  var chatInput = document.getElementById('chatInput');
+  var chatSendBtn = document.getElementById('chatSendBtn');
+  var chatBreakdownBtn = document.getElementById('chatBreakdownBtn');
+  var chatExecuteBtn = document.getElementById('chatExecuteBtn');
+  var chatPlanBtn = document.getElementById('chatPlanBtn');
+  var exportWordBtn = document.getElementById('exportWordBtn');
+  var exportPdfBtn = document.getElementById('exportPdfBtn');
   var selectBar = document.getElementById('selectBar');
   var smartAddBtn = document.getElementById('smartAddBtn');
   var smartAddModal = document.getElementById('smartAddModal');
@@ -617,6 +732,9 @@
   var dragSrcIndex = null;
   var editingId = null;
   var selectedIds = new Set();
+  var selectedTask = null;
+  var chatHistory = [];
+  var taskChatMap = {}; // { taskId: { history: [...], html: '' } }
 
   var CAT_KEYS = ['work', 'life', 'study', 'other'];
 
@@ -861,9 +979,145 @@
   // ===== AI Configuration =====
   var API_BACKEND = 'https://my-todo-api-sooty.vercel.app/api/chat';
 
-  function renderKeyArea() {
-    aiKeyArea.innerHTML = '<div class="ai-key-hint">' + T('aiReady') + '</div>';
+  function renderKeyArea() { /* no-op, AI key area removed */ }
+
+  // ===== Chat Panel Helpers =====
+  function selectTask(todo) {
+    // Save current task's chat before switching (exclude loading indicator)
+    if (selectedTask && chatHistory.length > 0) {
+      removeChatLoading();
+      taskChatMap[selectedTask.id] = {
+        history: chatHistory.slice(),
+        html: chatMessages.innerHTML
+      };
+    }
+
+    selectedTask = todo;
+    chatTaskTitle.textContent = todo.text;
+    chatInput.disabled = false;
+    chatSendBtn.disabled = false;
+
+    // Restore or reset chat
+    var saved = taskChatMap[todo.id];
+    if (saved && saved.history.length > 0) {
+      chatHistory = saved.history.slice();
+      chatMessages.innerHTML = saved.html;
+      if (chatEmpty) chatEmpty.style.display = 'none';
+    } else {
+      chatMessages.innerHTML = '';
+      chatHistory = [];
+      var emptyDiv = document.getElementById('chatEmpty');
+      if (!emptyDiv) {
+        chatMessages.innerHTML = '<div class="chat-empty" id="chatEmpty">&#x2728; 点击按钮开始 AI 对话</div>';
+      }
+    }
+    // Show loading if this task is currently executing
+    if (executingTaskIds.has(todo.id)) {
+      addChatLoading();
+    }
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    render();
   }
+
+  function addChatMessage(role, content) {
+    if (chatEmpty) chatEmpty.style.display = 'none';
+    var div = document.createElement('div');
+    div.className = 'chat-msg ' + role;
+    if (role === 'ai') {
+      try { div.innerHTML = marked.parse(content); } catch(e) { div.textContent = content; }
+    } else {
+      div.textContent = content;
+    }
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    chatHistory.push({ role: role, content: content });
+    saveChatState();
+    return div;
+  }
+
+  function saveChatState() {
+    if (selectedTask && chatHistory.length > 0) {
+      // Remove loading indicator before saving HTML
+      removeChatLoading();
+      taskChatMap[selectedTask.id] = {
+        history: chatHistory.slice(),
+        html: chatMessages.innerHTML
+      };
+      // Re-add loading if task is still executing
+      if (executingTaskIds.has(selectedTask.id)) {
+        addChatLoading();
+      }
+    }
+    persistChatMap();
+  }
+
+  function persistChatMap() {
+    if (!currentUser) return;
+    try {
+      localStorage.setItem('todo-chat-' + currentUser.id, JSON.stringify(taskChatMap));
+    } catch (e) {
+      // localStorage quota exceeded — prune oldest entries
+      var keys = Object.keys(taskChatMap);
+      if (keys.length > 5) {
+        delete taskChatMap[keys[0]];
+        delete taskChatMap[keys[1]];
+        try { localStorage.setItem('todo-chat-' + currentUser.id, JSON.stringify(taskChatMap)); } catch(e2) {}
+      }
+    }
+  }
+
+  function loadChatMap() {
+    if (!currentUser) return;
+    try {
+      var raw = localStorage.getItem('todo-chat-' + currentUser.id);
+      if (raw) taskChatMap = JSON.parse(raw);
+      else taskChatMap = {};
+    } catch (e) {
+      taskChatMap = {};
+    }
+  }
+
+  function deleteChatForTask(taskId) {
+    if (taskChatMap[taskId]) {
+      delete taskChatMap[taskId];
+      persistChatMap();
+    }
+  }
+
+  // Track which tasks are currently executing AI calls
+  var executingTaskIds = new Set();
+
+  function addChatLoading() {
+    var div = document.createElement('div');
+    div.className = 'chat-msg ai';
+    div.id = 'chatLoading';
+    div.textContent = '思考中...';
+    div.style.opacity = '0.6';
+    div.style.animation = 'pulse 1.2s ease-in-out infinite';
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    return div;
+  }
+
+  function removeChatLoading() {
+    var el = document.getElementById('chatLoading');
+    if (el) el.remove();
+  }
+
+  // Render a chat history array to HTML string (for off-screen tasks)
+  function renderChatHistoryHTML(history) {
+    return history.map(function(msg) {
+      var cls = 'chat-msg ' + msg.role;
+      var inner;
+      if (msg.role === 'ai') {
+        try { inner = marked.parse(msg.content); } catch(e) { inner = msg.content.replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+      } else {
+        inner = msg.content.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      }
+      return '<div class="' + cls + '">' + inner + '</div>';
+    }).join('');
+  }
+
 
   // ===== AI API Call =====
   function callAI(prompt, callback) {
@@ -880,27 +1134,37 @@
     .catch(function(err) { callback(null, err.message); });
   }
 
-  // ===== AI Feature 1: Task Breakdown =====
+  // ===== AI Feature 1: Task Breakdown (checkbox-based) =====
   function aiBreakdown() {
     var sel = getSelectedTodos();
-    if (sel.length > 0) { aiBreakdownSelected(); return; }
-    var task = prompt(T('inputTask'));
-    if (!task) return;
-    doBreakdown(task, null);
+    if (sel.length > 0) {
+      // Switch chat to the first selected task
+      selectTask(sel[0]);
+      var taskText = sel.map(function(t) { return t.text; }).join('、');
+      var parentId = sel.length === 1 ? sel[0].id : null;
+      doBreakdown(taskText, parentId);
+    } else {
+      var task = prompt(T('inputTask'));
+      if (!task) return;
+      doBreakdown(task, null);
+    }
   }
 
   function aiBreakdownSelected() {
     var sel = getSelectedTodos();
     if (sel.length === 0) { alert(T('noTodosToBreak')); return; }
+    selectTask(sel[0]);
     var taskText = sel.map(function(t) { return t.text; }).join('、');
     var parentId = sel.length === 1 ? sel[0].id : null;
     doBreakdown(taskText, parentId);
   }
 
   function doBreakdown(task, parentId) {
-    aiBreakdownBtn.disabled = true;
-    aiBreakdownBtn.classList.add('loading');
-    aiBreakdownBtn.innerHTML = '\u{1F3AF} ' + T('breakingDown');
+    chatBreakdownBtn.disabled = true;
+    chatBreakdownBtn.classList.add('loading');
+
+    addChatMessage('user', '请拆解任务：' + task);
+    var loadingEl = addChatLoading();
 
     var today = todayStr();
     var p = '你是一个任务管理助手。用户输入了一个大任务（可能包含多个），请将其拆解为3-7个具体的子任务。\n\n' +
@@ -914,11 +1178,11 @@
       '[{"text":"调研竞品","category":"work","dueDate":"2026-02-10"}]';
 
     callAI(p, function(text, err) {
-      aiBreakdownBtn.disabled = false;
-      aiBreakdownBtn.classList.remove('loading');
-      aiBreakdownBtn.innerHTML = '\u{1F3AF} <span data-i18n="aiBreakdown">' + T('aiBreakdown') + '</span>';
+      chatBreakdownBtn.disabled = false;
+      chatBreakdownBtn.classList.remove('loading');
+      removeChatLoading();
 
-      if (err) { aiResultEl.innerHTML = '<div class="ai-result">' + T('error') + err + '</div>'; return; }
+      if (err) { addChatMessage('ai', T('error') + err); return; }
 
       try {
         var match = text.match(/\[[\s\S]*\]/);
@@ -933,11 +1197,16 @@
             '</span>' +
             '<button class="ai-add-btn" data-idx="' + i + '">' + T('addBtn') + '</button></div>';
         });
+        html += '<div style="margin-top:8px;text-align:right"><button class="ai-add-btn" id="aiAddAll">' + T('addAllSub') + '</button></div>';
         html += '</div>';
-        aiResultEl.innerHTML = html;
 
-        var addAllHtml = '<div style="margin-top:8px;text-align:right"><button class="ai-add-btn" id="aiAddAll">' + T('addAllSub') + '</button></div>';
-        aiResultEl.querySelector('.ai-result').insertAdjacentHTML('beforeend', addAllHtml);
+        var msgDiv = document.createElement('div');
+        msgDiv.className = 'chat-msg ai';
+        msgDiv.innerHTML = html;
+        chatMessages.appendChild(msgDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        chatHistory.push({ role: 'ai', content: text });
+        saveChatState();
 
         async function addSubtask(idx, btnEl) {
           var t = tasks[idx];
@@ -952,72 +1221,127 @@
           if (btnEl) { btnEl.textContent = T('added'); btnEl.disabled = true; btnEl.style.background = '#94a3b8'; }
         }
 
-        aiResultEl.querySelectorAll('.ai-add-btn[data-idx]').forEach(function(btn) {
+        msgDiv.querySelectorAll('.ai-add-btn[data-idx]').forEach(function(btn) {
           btn.addEventListener('click', async function() {
             await addSubtask(parseInt(this.getAttribute('data-idx')), this);
             render();
           });
         });
 
-        document.getElementById('aiAddAll').addEventListener('click', async function() {
-          var btns = aiResultEl.querySelectorAll('.ai-add-btn[data-idx]');
+        msgDiv.querySelector('#aiAddAll').addEventListener('click', async function() {
+          var btns = msgDiv.querySelectorAll('.ai-add-btn[data-idx]');
           for (var i = 0; i < tasks.length; i++) {
             if (btns[i] && btns[i].disabled) continue;
             await addSubtask(i, null);
           }
           render();
           this.textContent = T('allAdded'); this.disabled = true; this.style.background = '#94a3b8';
-          aiResultEl.querySelectorAll('.ai-add-btn[data-idx]').forEach(function(b) {
+          msgDiv.querySelectorAll('.ai-add-btn[data-idx]').forEach(function(b) {
             b.textContent = T('added'); b.disabled = true; b.style.background = '#94a3b8';
           });
         });
       } catch(e) {
-        aiResultEl.innerHTML = '<div class="ai-result">' + text + '</div>';
+        addChatMessage('ai', text);
       }
     });
   }
 
-  // ===== AI Feature: Task Execution =====
+  // ===== AI Feature: Task Execution (checkbox-based) =====
+  // Helper: add a message to a specific task's chatMap (without touching DOM)
+  function addChatToTaskMap(taskId, role, content) {
+    if (!taskChatMap[taskId]) {
+      taskChatMap[taskId] = { history: [], html: '' };
+    }
+    var entry = taskChatMap[taskId];
+    entry.history.push({ role: role, content: content });
+    entry.html = renderChatHistoryHTML(entry.history);
+  }
+
+  // Helper: if the given task is currently displayed, refresh the DOM from its chatMap
+  function syncTaskToDOM(taskId) {
+    if (!selectedTask || selectedTask.id !== taskId) return;
+    var entry = taskChatMap[taskId];
+    if (!entry) return;
+    chatHistory = entry.history.slice();
+    chatMessages.innerHTML = entry.html;
+    if (executingTaskIds.has(taskId)) {
+      addChatLoading();
+    }
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
   function aiExecuteSelected() {
     var sel = getSelectedTodos();
     if (sel.length === 0) { alert(T('noTodosToExec')); return; }
 
-    aiExecuteBtn.disabled = true;
-    aiExecuteBtn.classList.add('loading');
-    aiExecuteBtn.innerHTML = '\u26A1 ' + T('executing');
+    chatExecuteBtn.disabled = true;
+    chatExecuteBtn.classList.add('loading');
 
-    var today = todayStr();
-    var taskList = sel.map(function(t, i) {
-      return (i+1) + '. ' + t.text +
-        ' [分类:' + (CATEGORIES[t.category]||'其他') + ']' +
-        (t.dueDate ? ' [截止:' + t.dueDate + ']' : '');
-    }).join('\n');
+    var total = sel.length;
+    var idx = 0;
 
-    var p = '你是一个全能工作助手。用户选中了以下待办任务，请直接帮用户完成这些任务，产出实际可用的工作成果。\n\n' +
-      '今天日期: ' + today + '\n\n' +
-      '需要执行的任务:\n' + taskList + '\n\n' +
-      '重要要求：不要告诉用户"你应该怎么做"，而是直接产出成果。例如：\n' +
-      '- 如果任务是"写周报" → 直接写出一份周报\n' +
-      '- 如果任务是"准备会议议程" → 直接写出议程内容\n' +
-      '- 如果任务是"调研XX" → 直接给出调研报告\n' +
-      '- 如果任务是"写邮件给XX" → 直接写出邮件全文\n' +
-      '- 如果任务是"做PPT大纲" → 直接写出完整大纲\n' +
-      '- 如果任务是"制定计划" → 直接写出详细计划\n' +
-      '- 如果任务是"整理资料" → 直接给出整理好的框架和内容\n\n' +
-      '对于每个任务，先用标题标明任务名，然后直接给出完整的工作成果（可以直接复制使用的程度）。\n' +
-      '用中文回答，内容专业、详实，格式清晰。如果任务描述信息不足，请基于合理假设补充完整。';
-
-    callAI(p, function(text, err) {
-      aiExecuteBtn.disabled = false;
-      aiExecuteBtn.classList.remove('loading');
-      aiExecuteBtn.innerHTML = '\u26A1 <span data-i18n="aiExecute">' + T('aiExecute') + '</span>';
-
-      if (err) { alert(T('aiError') + err); return; }
-
-      document.getElementById('aiModalTitle').textContent = T('execResultTitle');
-      document.getElementById('aiModalContent').textContent = text;
-      document.getElementById('aiModal').classList.add('show');
+    // Mark all tasks as executing + add user messages upfront
+    sel.forEach(function(task) {
+      executingTaskIds.add(task.id);
+      addChatToTaskMap(task.id, 'user', '请执行任务：' + task.text);
     });
+    persistChatMap();
+
+    // Show the first task's chat
+    selectTask(sel[0]);
+    chatExecuteBtn.disabled = true;
+    chatExecuteBtn.classList.add('loading');
+
+    // Process tasks one by one (avoids API rate limits)
+    function processNext() {
+      if (idx >= total) {
+        chatExecuteBtn.disabled = false;
+        chatExecuteBtn.classList.remove('loading');
+        return;
+      }
+
+      var task = sel[idx];
+      idx++;
+
+      // Build prompt
+      var today = todayStr();
+      var taskLine = '1. ' + task.text +
+        ' [分类:' + (CATEGORIES[task.category] || '其他') + ']' +
+        (task.dueDate ? ' [截止:' + task.dueDate + ']' : '');
+
+      var p = '你是一个全能工作助手。用户选中了以下待办任务，请直接帮用户完成这些任务，产出实际可用的工作成果。\n\n' +
+        '今天日期: ' + today + '\n\n' +
+        '需要执行的任务:\n' + taskLine + '\n\n' +
+        '重要要求：不要告诉用户"你应该怎么做"，而是直接产出成果。例如：\n' +
+        '- 如果任务是"写周报" → 直接写出一份周报\n' +
+        '- 如果任务是"准备会议议程" → 直接写出议程内容\n' +
+        '- 如果任务是"调研XX" → 直接给出调研报告\n' +
+        '- 如果任务是"写邮件给XX" → 直接写出邮件全文\n' +
+        '- 如果任务是"做PPT大纲" → 直接写出完整大纲\n' +
+        '- 如果任务是"制定计划" → 直接写出详细计划\n' +
+        '- 如果任务是"整理资料" → 直接给出整理好的框架和内容\n\n' +
+        '对于每个任务，先用标题标明任务名，然后直接给出完整的工作成果（可以直接复制使用的程度）。\n' +
+        '用中文回答，内容专业、详实，格式清晰，使用 Markdown 格式。如果任务描述信息不足，请基于合理假设补充完整。';
+
+      // Update DOM if viewing this task (show loading)
+      syncTaskToDOM(task.id);
+
+      callAI(p, function(text, err) {
+        var result = err ? (T('aiError') + err) : text;
+
+        // Write result to taskChatMap (always re-fetch, never use stale ref)
+        addChatToTaskMap(task.id, 'ai', result);
+        executingTaskIds.delete(task.id);
+        persistChatMap();
+
+        // Refresh DOM if viewing this task
+        syncTaskToDOM(task.id);
+
+        processNext();
+      });
+    }
+
+    processNext();
   }
 
   // ===== AI Feature 2: Daily Plan =====
@@ -1025,9 +1349,11 @@
     var pending = todos.filter(function(t) { return !t.done; });
     if (pending.length === 0) { alert(T('noTodosPlan')); return; }
 
-    aiPlanBtn.disabled = true;
-    aiPlanBtn.classList.add('loading');
-    aiPlanBtn.innerHTML = '\u{1F4C5} ' + T('planning');
+    chatPlanBtn.disabled = true;
+    chatPlanBtn.classList.add('loading');
+
+    addChatMessage('user', '请生成今日规划');
+    addChatLoading();
 
     var today = todayStr();
     var todoList = pending.map(function(t) {
@@ -1042,18 +1368,15 @@
       '1. 今日优先级排序（考虑截止日期紧迫性）\n' +
       '2. 建议的时间安排（上午/下午/晚上）\n' +
       '3. 一句话激励\n\n' +
-      '用中文回答，格式清晰，使用 emoji 让内容更生动。';
+      '用中文回答，格式清晰，使用 Markdown 格式和 emoji 让内容更生动。';
 
     callAI(p, function(text, err) {
-      aiPlanBtn.disabled = false;
-      aiPlanBtn.classList.remove('loading');
-      aiPlanBtn.innerHTML = '\u{1F4C5} <span data-i18n="aiPlan">' + T('aiPlan') + '</span>';
+      chatPlanBtn.disabled = false;
+      chatPlanBtn.classList.remove('loading');
+      removeChatLoading();
 
-      if (err) { alert(T('aiError') + err); return; }
-
-      document.getElementById('aiModalTitle').textContent = T('planTitle');
-      document.getElementById('aiModalContent').textContent = text;
-      document.getElementById('aiModal').classList.add('show');
+      if (err) { addChatMessage('ai', T('aiError') + err); return; }
+      addChatMessage('ai', text);
     });
   }
 
@@ -1220,6 +1543,8 @@
 
   function renderSelectBar() {
     var count = selectedIds.size;
+    chatExecuteBtn.disabled = (count === 0);
+    chatBreakdownBtn.disabled = (count === 0);
     if (count === 0) { selectBar.style.display = 'none'; return; }
     selectBar.style.display = 'flex';
     selectBar.innerHTML =
@@ -1230,7 +1555,9 @@
       '<button class="select-action danger" id="selDelete">&#x2715; ' + T('delete') + '</button>' +
       '<button class="select-cancel" id="selClear">' + T('cancelSelect') + '</button>';
     document.getElementById('selBreakdown').addEventListener('click', function() { aiBreakdownSelected(); });
-    document.getElementById('selExecute').addEventListener('click', function() { aiExecuteSelected(); });
+    document.getElementById('selExecute').addEventListener('click', function() {
+      aiExecuteSelected();
+    });
     document.getElementById('selDone').addEventListener('click', async function() {
       var sel = getSelectedTodos();
       for (var i = 0; i < sel.length; i++) {
@@ -1245,6 +1572,7 @@
       var toDelete = todos.filter(function(t) { return ids.has(t.id) || ids.has(t.parentId); });
       for (var i = 0; i < toDelete.length; i++) {
         await deleteTodoDB(toDelete[i].id);
+        deleteChatForTask(toDelete[i].id);
       }
       todos = todos.filter(function(t) { return !ids.has(t.id) && !ids.has(t.parentId); });
       selectedIds.clear(); render();
@@ -1344,6 +1672,7 @@
         if (!confirm(T('confirmDeleteSub', children.length))) return;
         for (var i = 0; i < children.length; i++) {
           await deleteTodoDB(children[i].id);
+          deleteChatForTask(children[i].id);
         }
         var childIds = new Set(children.map(function(c) { return c.id; }));
         todos = todos.filter(function(t) { return !childIds.has(t.id); });
@@ -1360,7 +1689,7 @@
     function appendTodoLi(todo, isSubtask) {
       var realIndex = todos.indexOf(todo);
       var li = document.createElement('li');
-      li.className = 'todo-item' + (isSubtask ? ' subtask' : '');
+      li.className = 'todo-item' + (isSubtask ? ' subtask' : '') + (selectedTask && selectedTask.id === todo.id ? ' selected-task' : '');
       li.setAttribute('data-index', realIndex);
       var isEditing = editingId === todo.id;
 
@@ -1389,6 +1718,10 @@
 
         var content = document.createElement('div');
         content.className = 'item-content';
+        content.style.cursor = 'pointer';
+        (function(t) {
+          content.addEventListener('click', function() { selectTask(t); });
+        })(todo);
         var textSpan = document.createElement('span');
         textSpan.className = 'todo-text' + (todo.done ? ' done' : '');
         textSpan.textContent = todo.text;
@@ -1424,7 +1757,9 @@
           await deleteTodoDB(tid);
           for (var i = 0; i < children.length; i++) {
             await deleteTodoDB(children[i].id);
+            deleteChatForTask(children[i].id);
           }
+          deleteChatForTask(tid);
           todos = todos.filter(function(t) { return t.id !== tid && t.parentId !== tid; });
           selectedIds.delete(tid); render();
         });
@@ -1513,10 +1848,12 @@
         if (!Array.isArray(data)) { alert(T('invalidFormat')); return; }
         if (!confirm(T('confirmImport'))) return;
 
-        // Delete all existing todos from DB
+        // Delete all existing todos from DB + chat history
         for (var i = 0; i < todos.length; i++) {
           await deleteTodoDB(todos[i].id);
         }
+        taskChatMap = {};
+        persistChatMap();
 
         todos = data.map(function(item,idx) {
           if(!item.id) item.id=Date.now()+idx; if(!item.category) item.category='other';
@@ -1749,17 +2086,60 @@
     }
   }
 
-  // ===== Text-to-Speech =====
-  function speakText(text) {
-    if (!window.speechSynthesis) { alert(T('ttsUnsupported')); return; }
-    speechSynthesis.cancel();
-    var utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'zh-CN';
-    utterance.rate = 1.0;
-    utterance.onstart = function() { modalSpeakBtn.classList.add('speaking'); modalSpeakBtn.innerHTML = '&#128266;'; };
-    utterance.onend = function() { modalSpeakBtn.classList.remove('speaking'); modalSpeakBtn.innerHTML = '&#128264;'; };
-    utterance.onerror = function() { modalSpeakBtn.classList.remove('speaking'); modalSpeakBtn.innerHTML = '&#128264;'; };
-    speechSynthesis.speak(utterance);
+  // ===== Chat Follow-up =====
+  function chatSendFollowUp() {
+    var text = chatInput.value.trim();
+    if (!text) return;
+    chatInput.value = '';
+
+    addChatMessage('user', text);
+    addChatLoading();
+
+    // Build context from task + history
+    var context = '';
+    if (selectedTask) {
+      context = '当前任务: ' + selectedTask.text + '\n\n';
+    }
+    if (chatHistory.length > 0) {
+      context += '之前的对话:\n';
+      chatHistory.slice(-6).forEach(function(m) {
+        context += (m.role === 'user' ? '用户: ' : 'AI: ') + m.content.substring(0, 500) + '\n';
+      });
+      context += '\n';
+    }
+
+    var p = context + '用户追问: ' + text + '\n\n请用中文回答，格式清晰，使用 Markdown 格式。';
+
+    callAI(p, function(result, err) {
+      removeChatLoading();
+      if (err) { addChatMessage('ai', T('error') + err); return; }
+      addChatMessage('ai', result);
+    });
+  }
+
+  // ===== Export Functions =====
+  function exportWord() {
+    var content = chatMessages.innerHTML;
+    if (!content || chatMessages.querySelectorAll('.chat-msg').length === 0) return;
+    var html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><style>body{font-family:sans-serif;font-size:14px;line-height:1.7}.chat-msg{margin:10px 0;padding:10px;border-radius:8px}.chat-msg.user{background:#ede9fe;text-align:right}.chat-msg.ai{background:#f8fafc;border:1px solid #e2e8f0}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ccc;padding:6px 10px}</style></head><body>' + content + '</body></html>';
+    var blob = new Blob(['\ufeff' + html], { type: 'application/msword' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = (selectedTask ? selectedTask.text.substring(0, 20) : 'chat') + '.doc';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+  }
+
+  function exportPdf() {
+    if (chatMessages.querySelectorAll('.chat-msg').length === 0) return;
+    var opt = {
+      margin: 10,
+      filename: (selectedTask ? selectedTask.text.substring(0, 20) : 'chat') + '.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(chatMessages).save();
   }
 
   // ===== Event Listeners =====
@@ -1770,17 +2150,6 @@
   smartMicBtn.addEventListener('click', toggleSmartVoice);
   smartParseBtn.addEventListener('click', smartParse);
   smartAddClose.addEventListener('click', closeSmartAdd);
-
-  modalSpeakBtn.addEventListener('click', function() {
-    if (speechSynthesis.speaking) {
-      speechSynthesis.cancel();
-      modalSpeakBtn.classList.remove('speaking');
-      modalSpeakBtn.innerHTML = '&#128264;';
-    } else {
-      var text = document.getElementById('aiModalContent').textContent;
-      if (text) speakText(text);
-    }
-  });
 
   document.querySelectorAll('.filter-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
@@ -1798,9 +2167,45 @@
   importBtn.addEventListener('click', function() { importFile.click(); });
   importFile.addEventListener('change', function() { if(this.files&&this.files[0]){importData(this.files[0]);this.value='';} });
 
-  aiBreakdownBtn.addEventListener('click', aiBreakdown);
-  aiExecuteBtn.addEventListener('click', function() { aiExecuteSelected(); });
-  aiPlanBtn.addEventListener('click', aiDailyPlan);
+  // Chat panel buttons
+  chatBreakdownBtn.addEventListener('click', aiBreakdown);
+  chatExecuteBtn.addEventListener('click', function() { aiExecuteSelected(); });
+  chatPlanBtn.addEventListener('click', aiDailyPlan);
+  chatSendBtn.addEventListener('click', chatSendFollowUp);
+  chatInput.addEventListener('keydown', function(e) { if(e.key==='Enter') chatSendFollowUp(); });
+  exportWordBtn.addEventListener('click', exportWord);
+  exportPdfBtn.addEventListener('click', exportPdf);
+
+  // ===== Scroll-down buttons =====
+  var leftScrollBtn = document.getElementById('leftScrollBtn');
+  var rightScrollBtn = document.getElementById('rightScrollBtn');
+
+  function updateScrollBtn(scrollEl, btn) {
+    if (!scrollEl || !btn) return;
+    var gap = scrollEl.scrollHeight - scrollEl.scrollTop - scrollEl.clientHeight;
+    if (gap > 80) {
+      btn.classList.add('show');
+    } else {
+      btn.classList.remove('show');
+    }
+  }
+
+  listEl.addEventListener('scroll', function() { updateScrollBtn(listEl, leftScrollBtn); });
+  chatMessages.addEventListener('scroll', function() { updateScrollBtn(chatMessages, rightScrollBtn); });
+
+  leftScrollBtn.addEventListener('click', function() {
+    listEl.scrollTo({ top: listEl.scrollHeight, behavior: 'smooth' });
+  });
+  rightScrollBtn.addEventListener('click', function() {
+    chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
+  });
+
+  // Re-check scroll buttons after render
+  var _origRender = render;
+  render = function() {
+    _origRender();
+    setTimeout(function() { updateScrollBtn(listEl, leftScrollBtn); }, 50);
+  };
 
   renderKeyArea();
 
