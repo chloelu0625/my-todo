@@ -1420,7 +1420,7 @@
       '{"items":[{"text":"任务描述","dueDate":"YYYY-MM-DD","category":"work/life/study/other"}]}\n\n' +
       '规则:\n' +
       '- text: 简洁的任务描述，去掉时间词（今天、明天、后天、下周等）\n' +
-      '- dueDate: 根据文字中的时间词推算具体日期。"今天"=' + today + '，"明天"=' + fmt(tomorrow) + '，"后天"=' + fmt(dayAfter) + '。"下周X"请计算具体日期。没提到时间就留空字符串\n' +
+      '- dueDate: 根据文字中的时间词推算具体日期。"今天"=' + today + '，"明天"=' + fmt(tomorrow) + '，"后天"=' + fmt(dayAfter) + '。"下周X"请计算具体日期。没提到时间就默认填今天(' + today + ')\n' +
       '- category: work(工作/开会/项目/汇报), life(生活/买/吃/运动), study(学习/看书/课程), other(其他)\n' +
       '- 如果内容包含多个任务，拆分为多个items\n' +
       '- 如果只有一个任务也要返回数组格式\n\n' +
@@ -1490,7 +1490,7 @@
         var item = items[idx];
         var newTodo = {
           id: Date.now() + idx, text: item.text, done: false,
-          category: item.category || 'other', dueDate: item.dueDate || '',
+          category: item.category || 'other', dueDate: item.dueDate || todayStr(),
           createdAt: new Date().toISOString(), parentId: null,
           sortOrder: todos.length
         };
@@ -1508,7 +1508,7 @@
         var item = items[i];
         var newTodo = {
           id: Date.now() + i, text: item.text, done: false,
-          category: item.category || 'other', dueDate: item.dueDate || '',
+          category: item.category || 'other', dueDate: item.dueDate || todayStr(),
           createdAt: new Date().toISOString(), parentId: null,
           sortOrder: todos.length + i
         };
