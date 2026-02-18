@@ -410,6 +410,29 @@
     flex: 1; overflow-y: auto; font-size: 14px; line-height: 1.8; color: #334155;
     white-space: pre-wrap; word-break: break-word;
   }
+  .doc-viewer-content audio, .doc-viewer-content video {
+    width: 100%; max-height: 60vh; border-radius: 8px; outline: none;
+  }
+  .doc-viewer-content img.doc-preview-img {
+    max-width: 100%; max-height: 65vh; border-radius: 8px; object-fit: contain;
+  }
+  .doc-media-note {
+    font-size: 12px; color: #94a3b8; text-align: center; margin-top: 12px;
+  }
+  .doc-reupload-hint {
+    text-align: center; padding: 40px 16px; color: #94a3b8; font-size: 14px;
+  }
+  .doc-reupload-hint button {
+    margin-top: 12px; padding: 8px 20px; border: 1.5px solid #e2e8f0; border-radius: 8px;
+    background: #fff; cursor: pointer; font-size: 13px; color: #64748b; transition: all 0.2s;
+  }
+  .doc-reupload-hint button:hover { border-color: #93c5fd; color: #3b82f6; }
+  .kb-doc-item .kb-media-badge {
+    font-size: 9px; padding: 1px 5px; border-radius: 3px; color: #fff; flex-shrink: 0;
+  }
+  .kb-media-badge.audio { background: #8b5cf6; }
+  .kb-media-badge.video { background: #ef4444; }
+  .kb-media-badge.image { background: #10b981; }
   .chat-messages {
     flex: 1; overflow-y: auto; padding: 16px 0; display: flex; flex-direction: column; gap: 16px;
     min-height: 0;
@@ -632,7 +655,7 @@
         <div class="kb-toolbar">
           <button class="kb-action-btn" id="kbUploadBtn">&#128194; <span data-i18n="kbUploadFile">上传文件</span></button>
           <button class="kb-action-btn" id="kbPasteToggle">&#128221; <span data-i18n="kbPasteText">粘贴文本</span></button>
-          <input type="file" id="kbFileInput" multiple accept=".txt,.md,.csv,.json,.log,.xml,.html,.css,.js,.py,.yaml,.yml,.toml,.pdf,.docx,.doc,.pptx,.ppt" style="display:none">
+          <input type="file" id="kbFileInput" multiple accept=".txt,.md,.csv,.json,.log,.xml,.html,.css,.js,.py,.yaml,.yml,.toml,.pdf,.docx,.doc,.pptx,.ppt,.mp3,.wav,.ogg,.aac,.flac,.m4a,.wma,.mp4,.webm,.mov,.avi,.mkv,.flv,.wmv,.jpg,.jpeg,.png,.gif,.bmp,.webp,.svg,.ico,.xlsx,.xls" style="display:none">
         </div>
         <div class="kb-paste-row hidden" id="kbPasteRow">
           <textarea id="kbPasteText" data-i18n-ph="kbPastePh" placeholder="粘贴笔记、research report 等内容..."></textarea>
@@ -949,6 +972,7 @@
       kbPdfEmpty: 'PDF 未提取到文字内容', kbPdfFail: 'PDF 解析失败: ',
       kbWordEmpty: 'Word 文档未提取到文字内容', kbWordFail: 'Word 解析失败: ',
       kbPptEmpty: 'PPT 未提取到文字内容', kbPptFail: 'PPT 解析失败: ',
+      kbMediaReupload: '页面刷新后需重新上传以播放',
       reviewWeek: '最近一周', reviewMonth: '最近一个月', reviewYear: '最近一年',
       reviewCustom: '自定义范围', reviewGenerate: '生成'
     },
@@ -1015,6 +1039,7 @@
       kbPdfEmpty: 'No text extracted from PDF', kbPdfFail: 'PDF parse failed: ',
       kbWordEmpty: 'No text extracted from Word document', kbWordFail: 'Word parse failed: ',
       kbPptEmpty: 'No text extracted from PPT', kbPptFail: 'PPT parse failed: ',
+      kbMediaReupload: 'Re-upload to play after page refresh',
       reviewWeek: 'Past Week', reviewMonth: 'Past Month', reviewYear: 'Past Year',
       reviewCustom: 'Custom Range', reviewGenerate: 'Generate'
     }
@@ -1332,11 +1357,32 @@
     }
   }
 
+  var AUDIO_EXTS = ['mp3','wav','ogg','aac','flac','m4a','wma'];
+  var VIDEO_EXTS = ['mp4','webm','mov','avi','mkv','flv','wmv'];
+  var IMAGE_EXTS = ['jpg','jpeg','png','gif','bmp','webp','svg','ico'];
+  var mediaBlobMap = {}; // docId -> blobUrl (session-only)
+
+  function getMediaType(name) {
+    var ext = (name.split('.').pop() || '').toLowerCase();
+    if (AUDIO_EXTS.indexOf(ext) !== -1) return 'audio';
+    if (VIDEO_EXTS.indexOf(ext) !== -1) return 'video';
+    if (IMAGE_EXTS.indexOf(ext) !== -1) return 'image';
+    return null;
+  }
+
   function getFileIcon(name) {
     var ext = (name.split('.').pop() || '').toLowerCase();
     var icons = { pdf: '\uD83D\uDCD5', doc: '\uD83D\uDCD8', docx: '\uD83D\uDCD8', ppt: '\uD83D\uDCCA', pptx: '\uD83D\uDCCA',
       md: '\uD83D\uDCDD', txt: '\uD83D\uDCC4', csv: '\uD83D\uDCCA', json: '\u2699\uFE0F',
-      js: '\uD83D\uDCBB', py: '\uD83D\uDC0D', html: '\uD83C\uDF10', xml: '\uD83D\uDCE6' };
+      js: '\uD83D\uDCBB', py: '\uD83D\uDC0D', html: '\uD83C\uDF10', xml: '\uD83D\uDCE6',
+      xlsx: '\uD83D\uDCCA', xls: '\uD83D\uDCCA',
+      mp3: '\uD83C\uDFB5', wav: '\uD83C\uDFB5', ogg: '\uD83C\uDFB5', aac: '\uD83C\uDFB5',
+      flac: '\uD83C\uDFB5', m4a: '\uD83C\uDFB5', wma: '\uD83C\uDFB5',
+      mp4: '\uD83C\uDFAC', webm: '\uD83C\uDFAC', mov: '\uD83C\uDFAC', avi: '\uD83C\uDFAC',
+      mkv: '\uD83C\uDFAC', flv: '\uD83C\uDFAC', wmv: '\uD83C\uDFAC',
+      jpg: '\uD83D\uDDBC\uFE0F', jpeg: '\uD83D\uDDBC\uFE0F', png: '\uD83D\uDDBC\uFE0F',
+      gif: '\uD83D\uDDBC\uFE0F', bmp: '\uD83D\uDDBC\uFE0F', webp: '\uD83D\uDDBC\uFE0F',
+      svg: '\uD83D\uDDBC\uFE0F', ico: '\uD83D\uDDBC\uFE0F' };
     return icons[ext] || '\uD83D\uDCC4';
   }
 
@@ -1354,7 +1400,29 @@
     updateKBToggle();
   }
 
+  function addMediaDoc(name, file) {
+    var id = Date.now();
+    var blobUrl = URL.createObjectURL(file);
+    mediaBlobMap[id] = blobUrl;
+    var mtype = getMediaType(name);
+    var label = mtype === 'audio' ? '[音频文件]' : mtype === 'video' ? '[视频文件]' : '[图片文件]';
+    contextDocs.push({
+      id: id,
+      name: name,
+      content: label,
+      size: file.size,
+      mediaType: mtype
+    });
+    saveContextDocs();
+    renderKBList();
+    updateKBToggle();
+  }
+
   function removeDoc(id) {
+    if (mediaBlobMap[id]) {
+      URL.revokeObjectURL(mediaBlobMap[id]);
+      delete mediaBlobMap[id];
+    }
     contextDocs = contextDocs.filter(function(d) { return d.id !== id; });
     saveContextDocs();
     renderKBList();
@@ -1366,14 +1434,60 @@
     if (!doc) return;
     document.getElementById('docViewerTitle').textContent = doc.name;
     var viewer = document.getElementById('docViewerContent');
-    // Try rendering as markdown for .md files
+    viewer.style.whiteSpace = 'pre-wrap';
     var ext = (doc.name.split('.').pop() || '').toLowerCase();
-    if (ext === 'md') {
+    var mtype = doc.mediaType || getMediaType(doc.name);
+    var blobUrl = mediaBlobMap[id];
+
+    if (mtype && blobUrl) {
+      viewer.style.whiteSpace = 'normal';
+      if (mtype === 'audio') {
+        viewer.innerHTML = '<audio controls src="' + blobUrl + '"></audio>' +
+          '<div class="doc-media-note">' + formatFileSize(doc.size) + '</div>';
+      } else if (mtype === 'video') {
+        viewer.innerHTML = '<video controls src="' + blobUrl + '"></video>' +
+          '<div class="doc-media-note">' + formatFileSize(doc.size) + '</div>';
+      } else if (mtype === 'image') {
+        viewer.innerHTML = '<img class="doc-preview-img" src="' + blobUrl + '" alt="' + doc.name.replace(/"/g, '&quot;') + '">' +
+          '<div class="doc-media-note">' + formatFileSize(doc.size) + '</div>';
+      }
+    } else if (mtype && !blobUrl) {
+      // Media file without blob (page was reloaded)
+      viewer.style.whiteSpace = 'normal';
+      viewer.innerHTML = '<div class="doc-reupload-hint">' +
+        '<div>' + getFileIcon(doc.name) + '</div>' +
+        '<div style="margin-top:8px">' + doc.name + ' (' + formatFileSize(doc.size) + ')</div>' +
+        '<div style="margin-top:4px;font-size:12px">' + T('kbMediaReupload') + '</div>' +
+        '<button id="docReuploadBtn">' + T('kbUploadFile') + '</button></div>';
+      var reupBtn = viewer.querySelector('#docReuploadBtn');
+      if (reupBtn) {
+        reupBtn.addEventListener('click', function() {
+          var inp = document.createElement('input');
+          inp.type = 'file';
+          inp.accept = mtype === 'audio' ? 'audio/*' : mtype === 'video' ? 'video/*' : 'image/*';
+          inp.onchange = function() {
+            if (inp.files && inp.files[0]) {
+              var newBlob = URL.createObjectURL(inp.files[0]);
+              mediaBlobMap[id] = newBlob;
+              viewDoc(id);
+            }
+          };
+          inp.click();
+        });
+      }
+    } else if (ext === 'md') {
       try { viewer.innerHTML = marked.parse(doc.content); } catch(e) { viewer.textContent = doc.content; }
     } else {
       viewer.textContent = doc.content;
     }
     document.getElementById('docViewerModal').classList.remove('hidden');
+  }
+
+  function formatFileSize(bytes) {
+    if (bytes > 1073741824) return (bytes / 1073741824).toFixed(1) + ' GB';
+    if (bytes > 1048576) return (bytes / 1048576).toFixed(1) + ' MB';
+    if (bytes > 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return bytes + ' B';
   }
 
   function renderKBList() {
@@ -1384,10 +1498,16 @@
       return;
     }
     el.innerHTML = contextDocs.map(function(d) {
-      var sizeStr = d.size > 1048576 ? (d.size / 1048576).toFixed(1) + 'MB' : d.size > 1024 ? (d.size / 1024).toFixed(1) + 'KB' : d.size + 'B';
+      var sizeStr = formatFileSize(d.size);
+      var mtype = d.mediaType || getMediaType(d.name);
+      var badge = '';
+      if (mtype === 'audio') badge = '<span class="kb-media-badge audio">AUDIO</span>';
+      else if (mtype === 'video') badge = '<span class="kb-media-badge video">VIDEO</span>';
+      else if (mtype === 'image') badge = '<span class="kb-media-badge image">IMG</span>';
       return '<div class="kb-doc-item" data-view="' + d.id + '">' +
         '<span class="kb-doc-icon">' + getFileIcon(d.name) + '</span>' +
         '<span class="kb-doc-name" title="' + d.name.replace(/"/g, '&quot;') + '">' + d.name + '</span>' +
+        badge +
         '<span class="kb-doc-size">' + sizeStr + '</span>' +
         '<button class="kb-doc-del" data-id="' + d.id + '" title="删除">&times;</button>' +
         '</div>';
@@ -1464,9 +1584,12 @@
   }
 
   function buildDocContext() {
-    if (contextDocs.length === 0) return '';
+    var textDocs = contextDocs.filter(function(d) {
+      return !d.mediaType && !getMediaType(d.name);
+    });
+    if (textDocs.length === 0) return '';
     var ctx = '\n\n--- 用户提供的参考文档 ---\n';
-    contextDocs.forEach(function(d) {
+    textDocs.forEach(function(d) {
       ctx += '\n【' + d.name + '】\n' + d.content + '\n';
     });
     ctx += '--- 参考文档结束 ---\n\n请在回答时参考以上文档内容。';
@@ -2695,7 +2818,11 @@
   function handleKBFiles(files) {
     Array.from(files).forEach(function(file) {
       var ext = (file.name.split('.').pop() || '').toLowerCase();
-      if (ext === 'pdf') {
+      var mtype = getMediaType(file.name);
+      if (mtype) {
+        // Audio / Video / Image — store blob for playback
+        addMediaDoc(file.name, file);
+      } else if (ext === 'pdf') {
         var statusEl = showKBParsingStatus(file.name);
         parsePDF(file).then(function(text) {
           removeKBParsingStatus(statusEl);
