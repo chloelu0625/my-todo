@@ -335,6 +335,47 @@
     font-size: 12px; cursor: pointer; font-weight: 600;
   }
   .review-custom-btn:hover { background: #6d28d9; }
+
+  /* Knowledge Base */
+  .kb-toggle {
+    padding: 4px 10px; border: 1.5px solid #e2e8f0; border-radius: 6px; background: #fff;
+    font-size: 12px; cursor: pointer; color: #64748b; transition: all 0.2s;
+  }
+  .kb-toggle:hover { border-color: #93c5fd; color: #3b82f6; }
+  .kb-toggle.has-docs { border-color: #a78bfa; color: #7c3aed; background: #f5f3ff; }
+  .kb-panel {
+    display: none; border-top: 1px solid #e2e8f0; padding: 10px 0 0; margin-top: 8px;
+  }
+  .kb-panel.show { display: block; }
+  .kb-upload-area {
+    border: 2px dashed #e2e8f0; border-radius: 8px; padding: 12px; text-align: center;
+    cursor: pointer; transition: all 0.2s; margin-bottom: 8px;
+  }
+  .kb-upload-area:hover { border-color: #93c5fd; background: #f0f9ff; }
+  .kb-upload-area input[type="file"] { display: none; }
+  .kb-upload-hint { font-size: 12px; color: #94a3b8; margin-top: 4px; }
+  .kb-paste-row { display: flex; gap: 6px; margin-bottom: 8px; }
+  .kb-paste-row textarea {
+    flex: 1; padding: 6px 10px; border: 1.5px solid #e2e8f0; border-radius: 6px;
+    font-size: 12px; resize: vertical; min-height: 50px; max-height: 120px;
+  }
+  .kb-paste-row textarea:focus { border-color: #60a5fa; outline: none; }
+  .kb-paste-btn {
+    padding: 6px 12px; background: #7c3aed; color: #fff; border: none; border-radius: 6px;
+    font-size: 12px; cursor: pointer; font-weight: 600; align-self: flex-end;
+  }
+  .kb-paste-btn:hover { background: #6d28d9; }
+  .kb-doc-list { display: flex; flex-direction: column; gap: 4px; max-height: 120px; overflow-y: auto; }
+  .kb-doc-item {
+    display: flex; align-items: center; gap: 8px; padding: 5px 8px;
+    background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px;
+  }
+  .kb-doc-item .kb-doc-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #334155; }
+  .kb-doc-item .kb-doc-size { color: #94a3b8; font-size: 11px; }
+  .kb-doc-item .kb-doc-del {
+    background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 14px; padding: 0 2px;
+  }
+  .kb-doc-item .kb-doc-del:hover { color: #dc2626; }
   .chat-messages {
     flex: 1; overflow-y: auto; padding: 16px 0; display: flex; flex-direction: column; gap: 16px;
     min-height: 0;
@@ -549,8 +590,21 @@
         <div class="chat-empty" id="chatEmpty">&#x2728; 点击左侧任务，开始 AI 对话</div>
       </div>
       <div class="chat-input-bar">
+        <button class="kb-toggle" id="kbToggle" title="知识库">&#128206; 知识库</button>
         <input id="chatInput" placeholder="输入追问..." disabled>
         <button id="chatSendBtn" disabled>发送</button>
+      </div>
+      <div class="kb-panel" id="kbPanel">
+        <div class="kb-upload-area" id="kbUploadArea">
+          &#128196; 点击上传或拖拽文件
+          <div class="kb-upload-hint">支持 .txt .md .csv .json 等文本文件</div>
+          <input type="file" id="kbFileInput" multiple accept=".txt,.md,.csv,.json,.log,.xml,.html,.css,.js,.py,.yaml,.yml,.toml">
+        </div>
+        <div class="kb-paste-row">
+          <textarea id="kbPasteText" placeholder="或直接粘贴文本内容..."></textarea>
+          <button class="kb-paste-btn" id="kbPasteBtn">添加</button>
+        </div>
+        <div class="kb-doc-list" id="kbDocList"></div>
       </div>
       <div class="chat-export-bar">
         <button id="exportWordBtn">&#128196; 导出 Word</button>
@@ -691,6 +745,7 @@
     userBar.style.display = 'flex';
     userEmailEl.textContent = user.email;
     loadChatMap();
+    loadContextDocs();
     loadTodosFromDB();
   }
 
@@ -700,6 +755,7 @@
     taskChatMap = {};
     chatHistory = [];
     selectedTask = null;
+    contextDocs = [];
     authOverlay.classList.remove('hidden');
     authForm.classList.remove('hidden');
     authLoading.classList.add('hidden');
@@ -832,6 +888,7 @@
       noTodosToBreak: '请先勾选要拆解的任务', noTodosToExec: '请先勾选要执行的任务',
       noTodosPlan: '没有未完成的待办事项', weekReview: '一周回顾', reviewing: '回顾中...',
       noTodosReview: '本周没有任何任务记录',
+      knowledgeBase: '知识库', kbDocAdded: '已添加', kbEmpty: '请输入内容',
       inputTask: '请输入要拆解的大任务：',
       execResultTitle: '\u26A1 任务执行结果', planTitle: '\u{1F4CB} 今日规划',
       ttsUnsupported: '您的浏览器不支持语音朗读'
@@ -883,6 +940,7 @@
       noTodosToBreak: 'Please select tasks to break down', noTodosToExec: 'Please select tasks to execute',
       noTodosPlan: 'No pending todos', weekReview: 'Weekly Review', reviewing: 'Reviewing...',
       noTodosReview: 'No tasks recorded this week',
+      knowledgeBase: 'Knowledge Base', kbDocAdded: 'Added', kbEmpty: 'Please enter content',
       inputTask: 'Enter the task to break down:',
       execResultTitle: '\u26A1 Execution Results', planTitle: '\u{1F4CB} Daily Plan',
       ttsUnsupported: 'Your browser does not support text-to-speech'
@@ -1165,6 +1223,93 @@
 
 
   // ===== AI API Call =====
+  // ===== Knowledge Base =====
+  var contextDocs = []; // [{ id, name, content, size }]
+
+  function loadContextDocs() {
+    if (!currentUser) return;
+    try {
+      var raw = localStorage.getItem('todo-kb-' + currentUser.id);
+      if (raw) contextDocs = JSON.parse(raw); else contextDocs = [];
+    } catch(e) { contextDocs = []; }
+    renderKBList();
+    updateKBToggle();
+  }
+
+  function saveContextDocs() {
+    if (!currentUser) return;
+    try {
+      localStorage.setItem('todo-kb-' + currentUser.id, JSON.stringify(contextDocs));
+    } catch(e) {
+      // quota exceeded - remove largest doc
+      if (contextDocs.length > 1) {
+        contextDocs.sort(function(a,b) { return b.content.length - a.content.length; });
+        contextDocs.shift();
+        try { localStorage.setItem('todo-kb-' + currentUser.id, JSON.stringify(contextDocs)); } catch(e2) {}
+      }
+    }
+  }
+
+  function addDoc(name, content) {
+    var maxLen = 6000;
+    var trimmed = content.length > maxLen ? content.substring(0, maxLen) + '\n...(已截断)' : content;
+    contextDocs.push({
+      id: Date.now(),
+      name: name,
+      content: trimmed,
+      size: content.length
+    });
+    saveContextDocs();
+    renderKBList();
+    updateKBToggle();
+  }
+
+  function removeDoc(id) {
+    contextDocs = contextDocs.filter(function(d) { return d.id !== id; });
+    saveContextDocs();
+    renderKBList();
+    updateKBToggle();
+  }
+
+  function renderKBList() {
+    var el = document.getElementById('kbDocList');
+    if (!el) return;
+    if (contextDocs.length === 0) { el.innerHTML = ''; return; }
+    el.innerHTML = contextDocs.map(function(d) {
+      var sizeStr = d.size > 1024 ? (d.size / 1024).toFixed(1) + 'KB' : d.size + 'B';
+      return '<div class="kb-doc-item">' +
+        '<span class="kb-doc-name" title="' + d.name.replace(/"/g, '&quot;') + '">' + d.name + '</span>' +
+        '<span class="kb-doc-size">' + sizeStr + '</span>' +
+        '<button class="kb-doc-del" data-id="' + d.id + '" title="删除">&times;</button>' +
+        '</div>';
+    }).join('');
+    el.querySelectorAll('.kb-doc-del').forEach(function(btn) {
+      btn.addEventListener('click', function() { removeDoc(parseInt(this.getAttribute('data-id'))); });
+    });
+  }
+
+  function updateKBToggle() {
+    var btn = document.getElementById('kbToggle');
+    if (!btn) return;
+    if (contextDocs.length > 0) {
+      btn.classList.add('has-docs');
+      btn.innerHTML = '&#128206; ' + T('knowledgeBase') + ' (' + contextDocs.length + ')';
+    } else {
+      btn.classList.remove('has-docs');
+      btn.innerHTML = '&#128206; ' + T('knowledgeBase');
+    }
+  }
+
+  function buildDocContext() {
+    if (contextDocs.length === 0) return '';
+    var ctx = '\n\n--- 用户提供的参考文档 ---\n';
+    contextDocs.forEach(function(d) {
+      ctx += '\n【' + d.name + '】\n' + d.content + '\n';
+    });
+    ctx += '--- 参考文档结束 ---\n\n请在回答时参考以上文档内容。';
+    return ctx;
+  }
+
   var SYSTEM_PROMPT = '你是一个专业的工作助手，帮助用户管理和执行待办任务。\n' +
     '要求：\n' +
     '- 直接产出成果，不要教用户怎么做\n' +
@@ -1175,11 +1320,12 @@
   // opts: { messages, temperature, history }
   function callAI(promptOrOpts, callback) {
     var body;
+    var sysContent = SYSTEM_PROMPT + buildDocContext();
     if (typeof promptOrOpts === 'string') {
       // Legacy: simple prompt string
       body = {
         messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'system', content: sysContent },
           { role: 'user', content: promptOrOpts }
         ],
         temperature: 0.7
@@ -1187,7 +1333,7 @@
     } else {
       // New: options object with messages, temperature, history
       var opts = promptOrOpts;
-      var msgs = [{ role: 'system', content: SYSTEM_PROMPT }];
+      var msgs = [{ role: 'system', content: sysContent }];
       if (opts.history && opts.history.length > 0) {
         opts.history.forEach(function(m) {
           msgs.push({ role: m.role === 'ai' ? 'assistant' : m.role, content: m.content });
@@ -2347,6 +2493,49 @@
   chatInput.addEventListener('keydown', function(e) { if(e.key==='Enter') chatSendFollowUp(); });
   exportWordBtn.addEventListener('click', exportWord);
   exportPdfBtn.addEventListener('click', exportPdf);
+
+  // Knowledge Base events
+  var kbToggle = document.getElementById('kbToggle');
+  var kbPanel = document.getElementById('kbPanel');
+  var kbFileInput = document.getElementById('kbFileInput');
+  var kbUploadArea = document.getElementById('kbUploadArea');
+  var kbPasteText = document.getElementById('kbPasteText');
+  var kbPasteBtn = document.getElementById('kbPasteBtn');
+
+  kbToggle.addEventListener('click', function() {
+    kbPanel.classList.toggle('show');
+  });
+
+  kbUploadArea.addEventListener('click', function() { kbFileInput.click(); });
+  kbUploadArea.addEventListener('dragover', function(e) { e.preventDefault(); this.style.borderColor = '#60a5fa'; });
+  kbUploadArea.addEventListener('dragleave', function() { this.style.borderColor = ''; });
+  kbUploadArea.addEventListener('drop', function(e) {
+    e.preventDefault(); this.style.borderColor = '';
+    if (e.dataTransfer.files) handleKBFiles(e.dataTransfer.files);
+  });
+
+  kbFileInput.addEventListener('change', function() {
+    if (this.files) handleKBFiles(this.files);
+    this.value = '';
+  });
+
+  function handleKBFiles(files) {
+    Array.from(files).forEach(function(file) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        addDoc(file.name, e.target.result);
+      };
+      reader.readAsText(file);
+    });
+  }
+
+  kbPasteBtn.addEventListener('click', function() {
+    var text = kbPasteText.value.trim();
+    if (!text) return;
+    var name = text.substring(0, 30).replace(/\n/g, ' ') + (text.length > 30 ? '...' : '');
+    addDoc(name, text);
+    kbPasteText.value = '';
+  });
 
   // ===== Scroll-down buttons =====
   var leftScrollBtn = document.getElementById('leftScrollBtn');
