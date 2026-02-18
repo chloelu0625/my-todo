@@ -307,7 +307,34 @@
     border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 0;
   }
   .chat-header h2 { font-size: 16px; font-weight: 700; color: #1e293b; margin-bottom: 10px; word-break: break-word; }
-  .chat-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chat-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-start; }
+  .review-dropdown { position: relative; }
+  .review-menu {
+    display: none; position: absolute; top: 100%; right: 0; margin-top: 4px;
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1); z-index: 100; min-width: 200px;
+    padding: 6px 0;
+  }
+  .review-menu.show { display: block; }
+  .review-option {
+    display: block; width: 100%; padding: 8px 16px; border: none; background: none;
+    text-align: left; font-size: 13px; cursor: pointer; color: #334155;
+  }
+  .review-option:hover { background: #f1f5f9; }
+  .review-custom {
+    padding: 8px 12px; border-top: 1px solid #e2e8f0; margin-top: 4px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .review-custom label { font-size: 12px; color: #64748b; font-weight: 600; }
+  .review-custom input[type="date"] {
+    padding: 4px 8px; border: 1.5px solid #e2e8f0; border-radius: 6px; font-size: 12px;
+  }
+  .review-custom span { text-align: center; font-size: 12px; color: #94a3b8; }
+  .review-custom-btn {
+    padding: 5px 12px; background: #7c3aed; color: #fff; border: none; border-radius: 6px;
+    font-size: 12px; cursor: pointer; font-weight: 600;
+  }
+  .review-custom-btn:hover { background: #6d28d9; }
   .chat-messages {
     flex: 1; overflow-y: auto; padding: 16px 0; display: flex; flex-direction: column; gap: 16px;
     min-height: 0;
@@ -501,7 +528,21 @@
           <button class="ai-btn" id="chatBreakdownBtn" disabled>&#127919; 拆解</button>
           <button class="ai-btn" id="chatExecuteBtn" disabled>&#9889; 执行</button>
           <button class="ai-btn" id="chatPlanBtn">&#128197; 每日规划</button>
-          <button class="ai-btn" id="chatWeekReviewBtn">&#128202; 一周回顾</button>
+          <div class="review-dropdown" id="reviewDropdown">
+            <button class="ai-btn" id="chatWeekReviewBtn">&#128202; 回顾 &#9662;</button>
+            <div class="review-menu" id="reviewMenu">
+              <button class="review-option" data-days="7">最近一周</button>
+              <button class="review-option" data-days="30">最近一个月</button>
+              <button class="review-option" data-days="365">最近一年</button>
+              <div class="review-custom">
+                <label>自定义范围</label>
+                <input type="date" id="reviewFrom">
+                <span>~</span>
+                <input type="date" id="reviewTo">
+                <button class="review-custom-btn" id="reviewCustomBtn">生成</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <div class="chat-messages" id="chatMessages">
@@ -1413,38 +1454,33 @@
     });
   }
 
-  // ===== AI Feature 3: Weekly Review =====
-  function aiWeekReview() {
-    var today = new Date();
-    var weekAgo = new Date(today);
-    weekAgo.setDate(today.getDate() - 7);
-    function fmtD(d) { return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
-    var todayS = fmtD(today);
-    var weekAgoS = fmtD(weekAgo);
+  // ===== AI Feature 3: Review =====
+  function fmtDate(d) { return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
 
-    // Gather all tasks (done + pending) created or due within the past week
-    var weekTasks = todos.filter(function(t) {
+  function aiReview(fromDate, toDate) {
+    // Gather all tasks created or due within the range
+    var rangeTasks = todos.filter(function(t) {
       var created = t.createdAt ? t.createdAt.substring(0, 10) : '';
-      return created >= weekAgoS || (t.dueDate >= weekAgoS && t.dueDate <= todayS);
+      return created >= fromDate || (t.dueDate >= fromDate && t.dueDate <= toDate);
     });
 
-    if (weekTasks.length === 0) { alert(T('noTodosReview')); return; }
+    if (rangeTasks.length === 0) { alert(T('noTodosReview')); return; }
 
-    var completed = weekTasks.filter(function(t) { return t.done; });
-    var pending = weekTasks.filter(function(t) { return !t.done; });
+    var completed = rangeTasks.filter(function(t) { return t.done; });
+    var pending = rangeTasks.filter(function(t) { return !t.done; });
 
     chatWeekReviewBtn.disabled = true;
     chatWeekReviewBtn.classList.add('loading');
 
     // Clear chat for review (not tied to a specific task)
     selectedTask = null;
-    chatTaskTitle.textContent = T('weekReview');
+    chatTaskTitle.textContent = T('weekReview') + ' (' + fromDate + ' ~ ' + toDate + ')';
     chatMessages.innerHTML = '';
     chatHistory = [];
     chatInput.disabled = false;
     chatSendBtn.disabled = false;
 
-    addChatMessage('user', T('weekReview') + ' (' + weekAgoS + ' ~ ' + todayS + ')');
+    addChatMessage('user', T('weekReview') + ' (' + fromDate + ' ~ ' + toDate + ')');
     addChatLoading();
 
     var completedList = completed.length > 0
@@ -1461,16 +1497,21 @@
         }).join('\n')
       : '（无）';
 
-    var p = '今天日期: ' + todayS + '\n' +
-      '回顾周期: ' + weekAgoS + ' 至 ' + todayS + '\n\n' +
+    // Determine period label for prompt
+    var now = new Date();
+    var diffDays = Math.round((now - new Date(fromDate)) / 86400000);
+    var periodLabel = diffDays <= 7 ? '一周' : diffDays <= 31 ? '一个月' : diffDays <= 366 ? '一年' : diffDays + '天';
+
+    var p = '今天日期: ' + fmtDate(now) + '\n' +
+      '回顾周期: ' + fromDate + ' 至 ' + toDate + '（' + periodLabel + '）\n\n' +
       '已完成 (' + completed.length + ' 项):\n' + completedList + '\n\n' +
       '未完成 (' + pending.length + ' 项):\n' + pendingList + '\n\n' +
-      '请生成一份一周工作回顾报告，包含:\n' +
-      '1. 本周成果总结（按分类归纳已完成的任务）\n' +
+      '请生成一份工作回顾报告，包含:\n' +
+      '1. 成果总结（按分类归纳已完成的任务）\n' +
       '2. 未完成事项分析（原因推测与建议）\n' +
       '3. 效率评估（完成率、时间分配等）\n' +
-      '4. 下周改进建议\n' +
-      '5. 一句话总结本周';
+      '4. 下一阶段改进建议\n' +
+      '5. 一句话总结';
 
     callAI({ messages: [{ role: 'user', content: p }], temperature: 0.8 }, function(text, err) {
       chatWeekReviewBtn.disabled = false;
@@ -2269,7 +2310,39 @@
   chatBreakdownBtn.addEventListener('click', aiBreakdown);
   chatExecuteBtn.addEventListener('click', function() { aiExecuteSelected(); });
   chatPlanBtn.addEventListener('click', aiDailyPlan);
-  chatWeekReviewBtn.addEventListener('click', aiWeekReview);
+  // Review dropdown
+  var reviewMenu = document.getElementById('reviewMenu');
+  var reviewFrom = document.getElementById('reviewFrom');
+  var reviewTo = document.getElementById('reviewTo');
+  chatWeekReviewBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    reviewMenu.classList.toggle('show');
+    if (reviewMenu.classList.contains('show')) {
+      var now = new Date();
+      reviewTo.value = fmtDate(now);
+      var wk = new Date(now); wk.setDate(now.getDate() - 7);
+      reviewFrom.value = fmtDate(wk);
+    }
+  });
+  document.querySelectorAll('.review-option').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var days = parseInt(this.getAttribute('data-days'));
+      var now = new Date();
+      var from = new Date(now); from.setDate(now.getDate() - days);
+      reviewMenu.classList.remove('show');
+      aiReview(fmtDate(from), fmtDate(now));
+    });
+  });
+  document.getElementById('reviewCustomBtn').addEventListener('click', function() {
+    if (!reviewFrom.value || !reviewTo.value) return;
+    reviewMenu.classList.remove('show');
+    aiReview(reviewFrom.value, reviewTo.value);
+  });
+  document.addEventListener('click', function(e) {
+    if (!document.getElementById('reviewDropdown').contains(e.target)) {
+      reviewMenu.classList.remove('show');
+    }
+  });
   chatSendBtn.addEventListener('click', chatSendFollowUp);
   chatInput.addEventListener('keydown', function(e) { if(e.key==='Enter') chatSendFollowUp(); });
   exportWordBtn.addEventListener('click', exportWord);
