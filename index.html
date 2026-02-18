@@ -7,6 +7,9 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -365,17 +368,48 @@
     font-size: 12px; cursor: pointer; font-weight: 600; align-self: flex-end;
   }
   .kb-paste-btn:hover { background: #6d28d9; }
-  .kb-doc-list { display: flex; flex-direction: column; gap: 4px; max-height: 120px; overflow-y: auto; }
-  .kb-doc-item {
-    display: flex; align-items: center; gap: 8px; padding: 5px 8px;
-    background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px;
+  .kb-toolbar { display: flex; gap: 6px; margin-bottom: 8px; }
+  .kb-action-btn {
+    padding: 5px 10px; border: 1.5px solid #e2e8f0; border-radius: 6px; background: #fff;
+    font-size: 12px; cursor: pointer; color: #64748b; transition: all 0.2s;
   }
-  .kb-doc-item .kb-doc-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #334155; }
-  .kb-doc-item .kb-doc-size { color: #94a3b8; font-size: 11px; }
+  .kb-action-btn:hover { border-color: #93c5fd; color: #3b82f6; }
+  .kb-folder { display: flex; flex-direction: column; gap: 3px; max-height: 160px; overflow-y: auto; }
+  .kb-doc-item {
+    display: flex; align-items: center; gap: 8px; padding: 6px 10px;
+    background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .kb-doc-item:hover { background: #ede9fe; border-color: #a78bfa; }
+  .kb-doc-icon { font-size: 16px; flex-shrink: 0; }
+  .kb-doc-item .kb-doc-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #334155; font-weight: 500; }
+  .kb-doc-item .kb-doc-size { color: #94a3b8; font-size: 11px; flex-shrink: 0; }
   .kb-doc-item .kb-doc-del {
-    background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 14px; padding: 0 2px;
+    background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 14px; padding: 0 4px; flex-shrink: 0;
   }
   .kb-doc-item .kb-doc-del:hover { color: #dc2626; }
+  .kb-parsing { font-size: 12px; color: #7c3aed; padding: 4px 0; animation: pulse 1.2s ease-in-out infinite; }
+  .kb-parsing-status {
+    display: flex; align-items: center; gap: 8px; font-size: 12px; color: #7c3aed;
+    padding: 8px 10px; background: #f5f3ff; border-radius: 6px; margin-bottom: 4px;
+  }
+  .kb-parsing-spinner {
+    display: inline-block; width: 14px; height: 14px; border: 2px solid #c4b5fd;
+    border-top-color: #7c3aed; border-radius: 50%; animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Document Viewer */
+  .doc-viewer-box { max-width: 700px; width: 95%; max-height: 85vh; display: flex; flex-direction: column; }
+  .doc-viewer-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 12px; border-bottom: 1px solid #e2e8f0; margin-bottom: 12px;
+  }
+  .doc-viewer-title { font-size: 15px; font-weight: 700; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .doc-viewer-content {
+    flex: 1; overflow-y: auto; font-size: 14px; line-height: 1.8; color: #334155;
+    white-space: pre-wrap; word-break: break-word;
+  }
   .chat-messages {
     flex: 1; overflow-y: auto; padding: 16px 0; display: flex; flex-direction: column; gap: 16px;
     min-height: 0;
@@ -595,16 +629,16 @@
         <button id="chatSendBtn" disabled>发送</button>
       </div>
       <div class="kb-panel" id="kbPanel">
-        <div class="kb-upload-area" id="kbUploadArea">
-          &#128196; 点击上传或拖拽文件
-          <div class="kb-upload-hint">支持 .txt .md .csv .json 等文本文件</div>
-          <input type="file" id="kbFileInput" multiple accept=".txt,.md,.csv,.json,.log,.xml,.html,.css,.js,.py,.yaml,.yml,.toml">
+        <div class="kb-toolbar">
+          <button class="kb-action-btn" id="kbUploadBtn">&#128194; 上传文件</button>
+          <button class="kb-action-btn" id="kbPasteToggle">&#128221; 粘贴文本</button>
+          <input type="file" id="kbFileInput" multiple accept=".txt,.md,.csv,.json,.log,.xml,.html,.css,.js,.py,.yaml,.yml,.toml,.pdf,.docx,.doc,.pptx,.ppt">
         </div>
-        <div class="kb-paste-row">
-          <textarea id="kbPasteText" placeholder="或直接粘贴文本内容..."></textarea>
+        <div class="kb-paste-row hidden" id="kbPasteRow">
+          <textarea id="kbPasteText" placeholder="粘贴笔记、research report 等内容..."></textarea>
           <button class="kb-paste-btn" id="kbPasteBtn">添加</button>
         </div>
-        <div class="kb-doc-list" id="kbDocList"></div>
+        <div class="kb-folder" id="kbDocList"></div>
       </div>
       <div class="chat-export-bar">
         <button id="exportWordBtn">&#128196; 导出 Word</button>
@@ -612,6 +646,17 @@
       </div>
     </div>
     <button class="scroll-down-btn" id="rightScrollBtn" title="滚动到底部">&#8595;</button>
+  </div>
+</div>
+
+<!-- Document Viewer Modal -->
+<div class="modal-overlay hidden" id="docViewerModal">
+  <div class="modal-box doc-viewer-box">
+    <div class="doc-viewer-header">
+      <span class="doc-viewer-title" id="docViewerTitle"></span>
+      <button class="modal-close" id="docViewerClose">&times;</button>
+    </div>
+    <div class="doc-viewer-content" id="docViewerContent"></div>
   </div>
 </div>
 
@@ -1250,9 +1295,17 @@
     }
   }
 
+  function getFileIcon(name) {
+    var ext = (name.split('.').pop() || '').toLowerCase();
+    var icons = { pdf: '\uD83D\uDCD5', doc: '\uD83D\uDCD8', docx: '\uD83D\uDCD8', ppt: '\uD83D\uDCCA', pptx: '\uD83D\uDCCA',
+      md: '\uD83D\uDCDD', txt: '\uD83D\uDCC4', csv: '\uD83D\uDCCA', json: '\u2699\uFE0F',
+      js: '\uD83D\uDCBB', py: '\uD83D\uDC0D', html: '\uD83C\uDF10', xml: '\uD83D\uDCE6' };
+    return icons[ext] || '\uD83D\uDCC4';
+  }
+
   function addDoc(name, content) {
-    var maxLen = 6000;
-    var trimmed = content.length > maxLen ? content.substring(0, maxLen) + '\n...(已截断)' : content;
+    var maxLen = 8000;
+    var trimmed = content.length > maxLen ? content.substring(0, maxLen) + '\n...(已截断，原文 ' + content.length + ' 字)' : content;
     contextDocs.push({
       id: Date.now(),
       name: name,
@@ -1271,21 +1324,94 @@
     updateKBToggle();
   }
 
+  function viewDoc(id) {
+    var doc = contextDocs.find(function(d) { return d.id === id; });
+    if (!doc) return;
+    document.getElementById('docViewerTitle').textContent = doc.name;
+    var viewer = document.getElementById('docViewerContent');
+    // Try rendering as markdown for .md files
+    var ext = (doc.name.split('.').pop() || '').toLowerCase();
+    if (ext === 'md') {
+      try { viewer.innerHTML = marked.parse(doc.content); } catch(e) { viewer.textContent = doc.content; }
+    } else {
+      viewer.textContent = doc.content;
+    }
+    document.getElementById('docViewerModal').classList.remove('hidden');
+  }
+
   function renderKBList() {
     var el = document.getElementById('kbDocList');
     if (!el) return;
-    if (contextDocs.length === 0) { el.innerHTML = ''; return; }
+    if (contextDocs.length === 0) {
+      el.innerHTML = '<div style="font-size:12px;color:#94a3b8;text-align:center;padding:8px 0">暂无文档，点击上方按钮添加</div>';
+      return;
+    }
     el.innerHTML = contextDocs.map(function(d) {
-      var sizeStr = d.size > 1024 ? (d.size / 1024).toFixed(1) + 'KB' : d.size + 'B';
-      return '<div class="kb-doc-item">' +
+      var sizeStr = d.size > 1048576 ? (d.size / 1048576).toFixed(1) + 'MB' : d.size > 1024 ? (d.size / 1024).toFixed(1) + 'KB' : d.size + 'B';
+      return '<div class="kb-doc-item" data-view="' + d.id + '">' +
+        '<span class="kb-doc-icon">' + getFileIcon(d.name) + '</span>' +
         '<span class="kb-doc-name" title="' + d.name.replace(/"/g, '&quot;') + '">' + d.name + '</span>' +
         '<span class="kb-doc-size">' + sizeStr + '</span>' +
         '<button class="kb-doc-del" data-id="' + d.id + '" title="删除">&times;</button>' +
         '</div>';
     }).join('');
     el.querySelectorAll('.kb-doc-del').forEach(function(btn) {
-      btn.addEventListener('click', function() { removeDoc(parseInt(this.getAttribute('data-id'))); });
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        removeDoc(parseInt(this.getAttribute('data-id')));
+      });
     });
+    el.querySelectorAll('.kb-doc-item[data-view]').forEach(function(item) {
+      item.addEventListener('click', function() {
+        viewDoc(parseInt(this.getAttribute('data-view')));
+      });
+    });
+  }
+
+  // Configure pdf.js worker
+  if (typeof pdfjsLib !== 'undefined') {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+
+  // Parse PDF files using pdf.js
+  async function parsePDF(file) {
+    var arrayBuf = await file.arrayBuffer();
+    var pdf = await pdfjsLib.getDocument({ data: arrayBuf }).promise;
+    var texts = [];
+    for (var i = 1; i <= pdf.numPages; i++) {
+      var page = await pdf.getPage(i);
+      var content = await page.getTextContent();
+      var pageText = content.items.map(function(item) { return item.str; }).join(' ');
+      if (pageText.trim()) texts.push('--- 第' + i + '页 ---\n' + pageText);
+    }
+    return texts.join('\n\n');
+  }
+
+  // Parse DOCX files using mammoth.js
+  async function parseDOCX(file) {
+    var arrayBuf = await file.arrayBuffer();
+    var result = await mammoth.extractRawText({ arrayBuffer: arrayBuf });
+    return result.value;
+  }
+
+  // Parse PPTX files using JSZip
+  async function parsePPTX(file) {
+    var arrayBuf = await file.arrayBuffer();
+    var zip = await JSZip.loadAsync(arrayBuf);
+    var slides = [];
+    var slideFiles = Object.keys(zip.files).filter(function(f) {
+      return f.match(/^ppt\/slides\/slide\d+\.xml$/);
+    }).sort();
+    for (var i = 0; i < slideFiles.length; i++) {
+      var xml = await zip.files[slideFiles[i]].async('string');
+      // Extract text from XML tags <a:t>...</a:t>
+      var texts = [];
+      var re = /<a:t>([\s\S]*?)<\/a:t>/g;
+      var m;
+      while ((m = re.exec(xml)) !== null) { if (m[1].trim()) texts.push(m[1]); }
+      if (texts.length > 0) slides.push('--- 幻灯片 ' + (i+1) + ' ---\n' + texts.join('\n'));
+    }
+    return slides.join('\n\n');
   }
 
   function updateKBToggle() {
@@ -2498,20 +2624,30 @@
   var kbToggle = document.getElementById('kbToggle');
   var kbPanel = document.getElementById('kbPanel');
   var kbFileInput = document.getElementById('kbFileInput');
-  var kbUploadArea = document.getElementById('kbUploadArea');
+  var kbUploadBtn = document.getElementById('kbUploadBtn');
+  var kbPasteToggle = document.getElementById('kbPasteToggle');
+  var kbPasteRow = document.getElementById('kbPasteRow');
   var kbPasteText = document.getElementById('kbPasteText');
   var kbPasteBtn = document.getElementById('kbPasteBtn');
+  var docViewerModal = document.getElementById('docViewerModal');
+  var docViewerClose = document.getElementById('docViewerClose');
 
   kbToggle.addEventListener('click', function() {
     kbPanel.classList.toggle('show');
   });
 
-  kbUploadArea.addEventListener('click', function() { kbFileInput.click(); });
-  kbUploadArea.addEventListener('dragover', function(e) { e.preventDefault(); this.style.borderColor = '#60a5fa'; });
-  kbUploadArea.addEventListener('dragleave', function() { this.style.borderColor = ''; });
-  kbUploadArea.addEventListener('drop', function(e) {
-    e.preventDefault(); this.style.borderColor = '';
-    if (e.dataTransfer.files) handleKBFiles(e.dataTransfer.files);
+  kbUploadBtn.addEventListener('click', function() { kbFileInput.click(); });
+
+  kbPasteToggle.addEventListener('click', function() {
+    kbPasteRow.classList.toggle('hidden');
+    if (!kbPasteRow.classList.contains('hidden')) kbPasteText.focus();
+  });
+
+  docViewerClose.addEventListener('click', function() {
+    docViewerModal.classList.add('hidden');
+  });
+  docViewerModal.addEventListener('click', function(e) {
+    if (e.target === docViewerModal) docViewerModal.classList.add('hidden');
   });
 
   kbFileInput.addEventListener('change', function() {
@@ -2521,12 +2657,59 @@
 
   function handleKBFiles(files) {
     Array.from(files).forEach(function(file) {
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        addDoc(file.name, e.target.result);
-      };
-      reader.readAsText(file);
+      var ext = (file.name.split('.').pop() || '').toLowerCase();
+      if (ext === 'pdf') {
+        var statusEl = showKBParsingStatus(file.name);
+        parsePDF(file).then(function(text) {
+          removeKBParsingStatus(statusEl);
+          if (text.trim()) addDoc(file.name, text);
+          else alert('PDF 未提取到文字内容');
+        }).catch(function(err) {
+          removeKBParsingStatus(statusEl);
+          alert('PDF 解析失败: ' + err.message);
+        });
+      } else if (ext === 'docx' || ext === 'doc') {
+        var statusEl = showKBParsingStatus(file.name);
+        parseDOCX(file).then(function(text) {
+          removeKBParsingStatus(statusEl);
+          if (text.trim()) addDoc(file.name, text);
+          else alert('Word 文档未提取到文字内容');
+        }).catch(function(err) {
+          removeKBParsingStatus(statusEl);
+          alert('Word 解析失败: ' + err.message);
+        });
+      } else if (ext === 'pptx' || ext === 'ppt') {
+        var statusEl = showKBParsingStatus(file.name);
+        parsePPTX(file).then(function(text) {
+          removeKBParsingStatus(statusEl);
+          if (text.trim()) addDoc(file.name, text);
+          else alert('PPT 未提取到文字内容');
+        }).catch(function(err) {
+          removeKBParsingStatus(statusEl);
+          alert('PPT 解析失败: ' + err.message);
+        });
+      } else {
+        // Plain text files
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          addDoc(file.name, e.target.result);
+        };
+        reader.readAsText(file);
+      }
     });
+  }
+
+  function showKBParsingStatus(filename) {
+    var el = document.createElement('div');
+    el.className = 'kb-parsing-status';
+    el.innerHTML = '<span class="kb-parsing-spinner"></span> 正在解析 ' + filename + '...';
+    var docList = document.getElementById('kbDocList');
+    docList.parentNode.insertBefore(el, docList);
+    return el;
+  }
+
+  function removeKBParsingStatus(el) {
+    if (el && el.parentNode) el.parentNode.removeChild(el);
   }
 
   kbPasteBtn.addEventListener('click', function() {
@@ -2535,6 +2718,7 @@
     var name = text.substring(0, 30).replace(/\n/g, ' ') + (text.length > 30 ? '...' : '');
     addDoc(name, text);
     kbPasteText.value = '';
+    kbPasteRow.classList.add('hidden');
   });
 
   // ===== Scroll-down buttons =====
