@@ -1120,11 +1120,46 @@
 
 
   // ===== AI API Call =====
-  function callAI(prompt, callback) {
+  var SYSTEM_PROMPT = '你是一个专业的工作助手，帮助用户管理和执行待办任务。\n' +
+    '要求：\n' +
+    '- 直接产出成果，不要教用户怎么做\n' +
+    '- 用中文回答，内容专业、详实\n' +
+    '- 使用 Markdown 格式，结构清晰\n' +
+    '- 回答简洁有力，避免废话和客套';
+
+  // opts: { messages, temperature, history }
+  function callAI(promptOrOpts, callback) {
+    var body;
+    if (typeof promptOrOpts === 'string') {
+      // Legacy: simple prompt string
+      body = {
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: promptOrOpts }
+        ],
+        temperature: 0.7
+      };
+    } else {
+      // New: options object with messages, temperature, history
+      var opts = promptOrOpts;
+      var msgs = [{ role: 'system', content: SYSTEM_PROMPT }];
+      if (opts.history && opts.history.length > 0) {
+        opts.history.forEach(function(m) {
+          msgs.push({ role: m.role === 'ai' ? 'assistant' : m.role, content: m.content });
+        });
+      }
+      if (opts.messages) {
+        opts.messages.forEach(function(m) { msgs.push(m); });
+      }
+      body = {
+        messages: msgs,
+        temperature: opts.temperature || 0.7
+      };
+    }
     fetch(API_BACKEND, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: prompt })
+      body: JSON.stringify(body)
     })
     .then(function(r) { return r.json(); })
     .then(function(data) {
@@ -1177,7 +1212,7 @@
       '只返回JSON数组，不要其他内容。示例:\n' +
       '[{"text":"调研竞品","category":"work","dueDate":"2026-02-10"}]';
 
-    callAI(p, function(text, err) {
+    callAI({ messages: [{ role: 'user', content: p }], temperature: 0.3 }, function(text, err) {
       chatBreakdownBtn.disabled = false;
       chatBreakdownBtn.classList.remove('loading');
       removeChatLoading();
@@ -1309,24 +1344,20 @@
         ' [分类:' + (CATEGORIES[task.category] || '其他') + ']' +
         (task.dueDate ? ' [截止:' + task.dueDate + ']' : '');
 
-      var p = '你是一个全能工作助手。用户选中了以下待办任务，请直接帮用户完成这些任务，产出实际可用的工作成果。\n\n' +
-        '今天日期: ' + today + '\n\n' +
+      var p = '今天日期: ' + today + '\n\n' +
         '需要执行的任务:\n' + taskLine + '\n\n' +
-        '重要要求：不要告诉用户"你应该怎么做"，而是直接产出成果。例如：\n' +
-        '- 如果任务是"写周报" → 直接写出一份周报\n' +
-        '- 如果任务是"准备会议议程" → 直接写出议程内容\n' +
-        '- 如果任务是"调研XX" → 直接给出调研报告\n' +
-        '- 如果任务是"写邮件给XX" → 直接写出邮件全文\n' +
-        '- 如果任务是"做PPT大纲" → 直接写出完整大纲\n' +
-        '- 如果任务是"制定计划" → 直接写出详细计划\n' +
-        '- 如果任务是"整理资料" → 直接给出整理好的框架和内容\n\n' +
-        '对于每个任务，先用标题标明任务名，然后直接给出完整的工作成果（可以直接复制使用的程度）。\n' +
-        '用中文回答，内容专业、详实，格式清晰，使用 Markdown 格式。如果任务描述信息不足，请基于合理假设补充完整。';
+        '请直接产出实际可用的工作成果，不要教用户怎么做。\n' +
+        '先用标题标明任务名，然后给出完整的工作成果（可以直接复制使用的程度）。\n' +
+        '如果任务描述信息不足，请基于合理假设补充完整。';
+
+      // Get existing history for this task (for context)
+      var taskEntry = taskChatMap[task.id];
+      var taskHist = taskEntry ? taskEntry.history.slice(-6) : [];
 
       // Update DOM if viewing this task (show loading)
       syncTaskToDOM(task.id);
 
-      callAI(p, function(text, err) {
+      callAI({ messages: [{ role: 'user', content: p }], history: taskHist, temperature: 0.7 }, function(text, err) {
         var result = err ? (T('aiError') + err) : text;
 
         // Write result to taskChatMap (always re-fetch, never use stale ref)
@@ -1361,16 +1392,14 @@
         (t.dueDate ? ' [截止:' + t.dueDate + ']' : ' [无截止日期]');
     }).join('\n');
 
-    var p = '你是一个时间管理专家。根据用户的待办事项列表，生成一份今日行动计划。\n\n' +
-      '今天日期: ' + today + '\n\n' +
+    var p = '今天日期: ' + today + '\n\n' +
       '待办事项:\n' + todoList + '\n\n' +
-      '请生成:\n' +
-      '1. 今日优先级排序（考虑截止日期紧迫性）\n' +
-      '2. 建议的时间安排（上午/下午/晚上）\n' +
-      '3. 一句话激励\n\n' +
-      '用中文回答，格式清晰，使用 Markdown 格式和 emoji 让内容更生动。';
+      '请生成今日行动计划:\n' +
+      '1. 优先级排序（考虑截止日期紧迫性）\n' +
+      '2. 时间安排（上午/下午/晚上）\n' +
+      '3. 一句话激励';
 
-    callAI(p, function(text, err) {
+    callAI({ messages: [{ role: 'user', content: p }], temperature: 0.8 }, function(text, err) {
       chatPlanBtn.disabled = false;
       chatPlanBtn.classList.remove('loading');
       removeChatLoading();
@@ -1426,7 +1455,7 @@
       '- 如果只有一个任务也要返回数组格式\n\n' +
       '只返回JSON，不要其他内容。';
 
-    callAI(p, function(result, err) {
+    callAI({ messages: [{ role: 'user', content: p }], temperature: 0.3 }, function(result, err) {
       smartParseBtn.disabled = false;
       smartParseBtn.innerHTML = '\u{1F916} <span data-i18n="aiParse">' + T('aiParse') + '</span>';
       smartParseBtn.classList.remove('loading');
@@ -2095,22 +2124,18 @@
     addChatMessage('user', text);
     addChatLoading();
 
-    // Build context from task + history
-    var context = '';
+    // Build user message with task context
+    var userMsg = text;
     if (selectedTask) {
-      context = '当前任务: ' + selectedTask.text + '\n\n';
-    }
-    if (chatHistory.length > 0) {
-      context += '之前的对话:\n';
-      chatHistory.slice(-6).forEach(function(m) {
-        context += (m.role === 'user' ? '用户: ' : 'AI: ') + m.content.substring(0, 500) + '\n';
-      });
-      context += '\n';
+      userMsg = '（当前任务: ' + selectedTask.text + '）\n' + text;
     }
 
-    var p = context + '用户追问: ' + text + '\n\n请用中文回答，格式清晰，使用 Markdown 格式。';
-
-    callAI(p, function(result, err) {
+    // Send with full chat history for context
+    callAI({
+      messages: [{ role: 'user', content: userMsg }],
+      history: chatHistory.slice(-10),
+      temperature: 0.7
+    }, function(result, err) {
       removeChatLoading();
       if (err) { addChatMessage('ai', T('error') + err); return; }
       addChatMessage('ai', result);
