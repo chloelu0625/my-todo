@@ -501,6 +501,7 @@
           <button class="ai-btn" id="chatBreakdownBtn" disabled>&#127919; 拆解</button>
           <button class="ai-btn" id="chatExecuteBtn" disabled>&#9889; 执行</button>
           <button class="ai-btn" id="chatPlanBtn">&#128197; 每日规划</button>
+          <button class="ai-btn" id="chatWeekReviewBtn">&#128202; 一周回顾</button>
         </div>
       </div>
       <div class="chat-messages" id="chatMessages">
@@ -716,6 +717,7 @@
   var chatBreakdownBtn = document.getElementById('chatBreakdownBtn');
   var chatExecuteBtn = document.getElementById('chatExecuteBtn');
   var chatPlanBtn = document.getElementById('chatPlanBtn');
+  var chatWeekReviewBtn = document.getElementById('chatWeekReviewBtn');
   var exportWordBtn = document.getElementById('exportWordBtn');
   var exportPdfBtn = document.getElementById('exportPdfBtn');
   var selectBar = document.getElementById('selectBar');
@@ -787,7 +789,8 @@
       dateFormat: '{0}年{1}月{2}日 周{3}',
       todayPrefix: '今天 - ',
       noTodosToBreak: '请先勾选要拆解的任务', noTodosToExec: '请先勾选要执行的任务',
-      noTodosPlan: '没有未完成的待办事项',
+      noTodosPlan: '没有未完成的待办事项', weekReview: '一周回顾', reviewing: '回顾中...',
+      noTodosReview: '本周没有任何任务记录',
       inputTask: '请输入要拆解的大任务：',
       execResultTitle: '\u26A1 任务执行结果', planTitle: '\u{1F4CB} 今日规划',
       ttsUnsupported: '您的浏览器不支持语音朗读'
@@ -837,7 +840,8 @@
       dateFormat: '{3} {1}/{2}/{0}',
       todayPrefix: 'Today - ',
       noTodosToBreak: 'Please select tasks to break down', noTodosToExec: 'Please select tasks to execute',
-      noTodosPlan: 'No pending todos',
+      noTodosPlan: 'No pending todos', weekReview: 'Weekly Review', reviewing: 'Reviewing...',
+      noTodosReview: 'No tasks recorded this week',
       inputTask: 'Enter the task to break down:',
       execResultTitle: '\u26A1 Execution Results', planTitle: '\u{1F4CB} Daily Plan',
       ttsUnsupported: 'Your browser does not support text-to-speech'
@@ -1402,6 +1406,75 @@
     callAI({ messages: [{ role: 'user', content: p }], temperature: 0.8 }, function(text, err) {
       chatPlanBtn.disabled = false;
       chatPlanBtn.classList.remove('loading');
+      removeChatLoading();
+
+      if (err) { addChatMessage('ai', T('aiError') + err); return; }
+      addChatMessage('ai', text);
+    });
+  }
+
+  // ===== AI Feature 3: Weekly Review =====
+  function aiWeekReview() {
+    var today = new Date();
+    var weekAgo = new Date(today);
+    weekAgo.setDate(today.getDate() - 7);
+    function fmtD(d) { return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+    var todayS = fmtD(today);
+    var weekAgoS = fmtD(weekAgo);
+
+    // Gather all tasks (done + pending) created or due within the past week
+    var weekTasks = todos.filter(function(t) {
+      var created = t.createdAt ? t.createdAt.substring(0, 10) : '';
+      return created >= weekAgoS || (t.dueDate >= weekAgoS && t.dueDate <= todayS);
+    });
+
+    if (weekTasks.length === 0) { alert(T('noTodosReview')); return; }
+
+    var completed = weekTasks.filter(function(t) { return t.done; });
+    var pending = weekTasks.filter(function(t) { return !t.done; });
+
+    chatWeekReviewBtn.disabled = true;
+    chatWeekReviewBtn.classList.add('loading');
+
+    // Clear chat for review (not tied to a specific task)
+    selectedTask = null;
+    chatTaskTitle.textContent = T('weekReview');
+    chatMessages.innerHTML = '';
+    chatHistory = [];
+    chatInput.disabled = false;
+    chatSendBtn.disabled = false;
+
+    addChatMessage('user', T('weekReview') + ' (' + weekAgoS + ' ~ ' + todayS + ')');
+    addChatLoading();
+
+    var completedList = completed.length > 0
+      ? completed.map(function(t) {
+          return '- [x] ' + t.text + ' [' + (CATEGORIES[t.category]||T('catOther')) + ']' +
+            (t.dueDate ? ' [截止:' + t.dueDate + ']' : '');
+        }).join('\n')
+      : '（无）';
+
+    var pendingList = pending.length > 0
+      ? pending.map(function(t) {
+          return '- [ ] ' + t.text + ' [' + (CATEGORIES[t.category]||T('catOther')) + ']' +
+            (t.dueDate ? ' [截止:' + t.dueDate + ']' : '');
+        }).join('\n')
+      : '（无）';
+
+    var p = '今天日期: ' + todayS + '\n' +
+      '回顾周期: ' + weekAgoS + ' 至 ' + todayS + '\n\n' +
+      '已完成 (' + completed.length + ' 项):\n' + completedList + '\n\n' +
+      '未完成 (' + pending.length + ' 项):\n' + pendingList + '\n\n' +
+      '请生成一份一周工作回顾报告，包含:\n' +
+      '1. 本周成果总结（按分类归纳已完成的任务）\n' +
+      '2. 未完成事项分析（原因推测与建议）\n' +
+      '3. 效率评估（完成率、时间分配等）\n' +
+      '4. 下周改进建议\n' +
+      '5. 一句话总结本周';
+
+    callAI({ messages: [{ role: 'user', content: p }], temperature: 0.8 }, function(text, err) {
+      chatWeekReviewBtn.disabled = false;
+      chatWeekReviewBtn.classList.remove('loading');
       removeChatLoading();
 
       if (err) { addChatMessage('ai', T('aiError') + err); return; }
@@ -2196,6 +2269,7 @@
   chatBreakdownBtn.addEventListener('click', aiBreakdown);
   chatExecuteBtn.addEventListener('click', function() { aiExecuteSelected(); });
   chatPlanBtn.addEventListener('click', aiDailyPlan);
+  chatWeekReviewBtn.addEventListener('click', aiWeekReview);
   chatSendBtn.addEventListener('click', chatSendFollowUp);
   chatInput.addEventListener('keydown', function(e) { if(e.key==='Enter') chatSendFollowUp(); });
   exportWordBtn.addEventListener('click', exportWord);
