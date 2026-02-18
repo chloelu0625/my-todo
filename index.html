@@ -600,21 +600,21 @@
       <div class="chat-header">
         <h2 id="chatTaskTitle">选择一个任务开始...</h2>
         <div class="chat-actions">
-          <button class="ai-btn" id="chatBreakdownBtn" disabled>&#127919; 拆解</button>
-          <button class="ai-btn" id="chatExecuteBtn" disabled>&#9889; 执行</button>
-          <button class="ai-btn" id="chatPlanBtn">&#128197; 每日规划</button>
+          <button class="ai-btn" id="chatBreakdownBtn" disabled>&#127919; <span data-i18n="chatBreakdown">拆解</span></button>
+          <button class="ai-btn" id="chatExecuteBtn" disabled>&#9889; <span data-i18n="chatExecute">执行</span></button>
+          <button class="ai-btn" id="chatPlanBtn">&#128197; <span data-i18n="chatDailyPlan">每日规划</span></button>
           <div class="review-dropdown" id="reviewDropdown">
-            <button class="ai-btn" id="chatWeekReviewBtn">&#128202; 回顾 &#9662;</button>
+            <button class="ai-btn" id="chatWeekReviewBtn">&#128202; <span data-i18n="chatReview">回顾</span> &#9662;</button>
             <div class="review-menu" id="reviewMenu">
-              <button class="review-option" data-days="7">最近一周</button>
-              <button class="review-option" data-days="30">最近一个月</button>
-              <button class="review-option" data-days="365">最近一年</button>
+              <button class="review-option" data-days="7" data-i18n="reviewWeek">最近一周</button>
+              <button class="review-option" data-days="30" data-i18n="reviewMonth">最近一个月</button>
+              <button class="review-option" data-days="365" data-i18n="reviewYear">最近一年</button>
               <div class="review-custom">
-                <label>自定义范围</label>
+                <label data-i18n="reviewCustom">自定义范围</label>
                 <input type="date" id="reviewFrom">
                 <span>~</span>
                 <input type="date" id="reviewTo">
-                <button class="review-custom-btn" id="reviewCustomBtn">生成</button>
+                <button class="review-custom-btn" id="reviewCustomBtn" data-i18n="reviewGenerate">生成</button>
               </div>
             </div>
           </div>
@@ -625,24 +625,24 @@
       </div>
       <div class="chat-input-bar">
         <button class="kb-toggle" id="kbToggle" title="知识库">&#128206; 知识库</button>
-        <input id="chatInput" placeholder="输入追问..." disabled>
-        <button id="chatSendBtn" disabled>发送</button>
+        <input id="chatInput" data-i18n-ph="chatFollowUpPh" placeholder="输入追问..." disabled>
+        <button id="chatSendBtn" data-i18n="chatSend" disabled>发送</button>
       </div>
       <div class="kb-panel" id="kbPanel">
         <div class="kb-toolbar">
-          <button class="kb-action-btn" id="kbUploadBtn">&#128194; 上传文件</button>
-          <button class="kb-action-btn" id="kbPasteToggle">&#128221; 粘贴文本</button>
-          <input type="file" id="kbFileInput" multiple accept=".txt,.md,.csv,.json,.log,.xml,.html,.css,.js,.py,.yaml,.yml,.toml,.pdf,.docx,.doc,.pptx,.ppt">
+          <button class="kb-action-btn" id="kbUploadBtn">&#128194; <span data-i18n="kbUploadFile">上传文件</span></button>
+          <button class="kb-action-btn" id="kbPasteToggle">&#128221; <span data-i18n="kbPasteText">粘贴文本</span></button>
+          <input type="file" id="kbFileInput" multiple accept=".txt,.md,.csv,.json,.log,.xml,.html,.css,.js,.py,.yaml,.yml,.toml,.pdf,.docx,.doc,.pptx,.ppt" style="display:none">
         </div>
         <div class="kb-paste-row hidden" id="kbPasteRow">
-          <textarea id="kbPasteText" placeholder="粘贴笔记、research report 等内容..."></textarea>
-          <button class="kb-paste-btn" id="kbPasteBtn">添加</button>
+          <textarea id="kbPasteText" data-i18n-ph="kbPastePh" placeholder="粘贴笔记、research report 等内容..."></textarea>
+          <button class="kb-paste-btn" id="kbPasteBtn" data-i18n="kbPasteAdd">添加</button>
         </div>
         <div class="kb-folder" id="kbDocList"></div>
       </div>
       <div class="chat-export-bar">
-        <button id="exportWordBtn">&#128196; 导出 Word</button>
-        <button id="exportPdfBtn">&#128196; 导出 PDF</button>
+        <button id="exportWordBtn">&#128196; <span data-i18n="chatExportWord">导出 Word</span></button>
+        <button id="exportPdfBtn">&#128196; <span data-i18n="chatExportPdf">导出 PDF</span></button>
       </div>
     </div>
     <button class="scroll-down-btn" id="rightScrollBtn" title="滚动到底部">&#8595;</button>
@@ -936,7 +936,21 @@
       knowledgeBase: '知识库', kbDocAdded: '已添加', kbEmpty: '请输入内容',
       inputTask: '请输入要拆解的大任务：',
       execResultTitle: '\u26A1 任务执行结果', planTitle: '\u{1F4CB} 今日规划',
-      ttsUnsupported: '您的浏览器不支持语音朗读'
+      ttsUnsupported: '您的浏览器不支持语音朗读',
+      chatSelectTask: '选择一个任务开始...', chatEmptyHint: '\u2728 点击左侧任务，开始 AI 对话',
+      chatStartHint: '\u2728 点击按钮开始 AI 对话',
+      chatFollowUpPh: '输入追问...', chatSend: '发送',
+      chatBreakdown: '拆解', chatExecute: '执行', chatDailyPlan: '每日规划',
+      chatReview: '回顾', chatExportWord: '导出 Word', chatExportPdf: '导出 PDF',
+      kbUploadFile: '上传文件', kbPasteText: '粘贴文本', kbPasteAdd: '添加',
+      kbPastePh: '粘贴笔记、research report 等内容...',
+      kbNoDoc: '暂无文档，点击上方按钮添加',
+      kbParsing: '正在解析 {0}...',
+      kbPdfEmpty: 'PDF 未提取到文字内容', kbPdfFail: 'PDF 解析失败: ',
+      kbWordEmpty: 'Word 文档未提取到文字内容', kbWordFail: 'Word 解析失败: ',
+      kbPptEmpty: 'PPT 未提取到文字内容', kbPptFail: 'PPT 解析失败: ',
+      reviewWeek: '最近一周', reviewMonth: '最近一个月', reviewYear: '最近一年',
+      reviewCustom: '自定义范围', reviewGenerate: '生成'
     },
     en: {
       appTitle: 'Todo List', authSubtitle: 'Sync data to cloud after login, access from any device',
@@ -988,7 +1002,21 @@
       knowledgeBase: 'Knowledge Base', kbDocAdded: 'Added', kbEmpty: 'Please enter content',
       inputTask: 'Enter the task to break down:',
       execResultTitle: '\u26A1 Execution Results', planTitle: '\u{1F4CB} Daily Plan',
-      ttsUnsupported: 'Your browser does not support text-to-speech'
+      ttsUnsupported: 'Your browser does not support text-to-speech',
+      chatSelectTask: 'Select a task to start...', chatEmptyHint: '\u2728 Click a task on the left to start AI chat',
+      chatStartHint: '\u2728 Click a button to start AI chat',
+      chatFollowUpPh: 'Ask a follow-up...', chatSend: 'Send',
+      chatBreakdown: 'Breakdown', chatExecute: 'Execute', chatDailyPlan: 'Daily Plan',
+      chatReview: 'Review', chatExportWord: 'Export Word', chatExportPdf: 'Export PDF',
+      kbUploadFile: 'Upload File', kbPasteText: 'Paste Text', kbPasteAdd: 'Add',
+      kbPastePh: 'Paste notes, research reports, etc...',
+      kbNoDoc: 'No documents yet, click above to add',
+      kbParsing: 'Parsing {0}...',
+      kbPdfEmpty: 'No text extracted from PDF', kbPdfFail: 'PDF parse failed: ',
+      kbWordEmpty: 'No text extracted from Word document', kbWordFail: 'Word parse failed: ',
+      kbPptEmpty: 'No text extracted from PPT', kbPptFail: 'PPT parse failed: ',
+      reviewWeek: 'Past Week', reviewMonth: 'Past Month', reviewYear: 'Past Year',
+      reviewCustom: 'Custom Range', reviewGenerate: 'Generate'
     }
   };
 
@@ -1029,6 +1057,15 @@
     document.title = T('appTitle');
     // Update AI key area
     renderKeyArea();
+    // Update right panel dynamic text
+    if (!selectedTask) {
+      var chatTitle = document.getElementById('chatTaskTitle');
+      if (chatTitle) chatTitle.textContent = T('chatSelectTask');
+    }
+    var emptyHint = document.getElementById('chatEmpty');
+    if (emptyHint) emptyHint.textContent = T('chatEmptyHint');
+    updateKBToggle();
+    renderKBList();
     // Re-render todo list
     if (currentUser) render();
   }
@@ -1156,7 +1193,7 @@
       chatHistory = [];
       var emptyDiv = document.getElementById('chatEmpty');
       if (!emptyDiv) {
-        chatMessages.innerHTML = '<div class="chat-empty" id="chatEmpty">&#x2728; 点击按钮开始 AI 对话</div>';
+        chatMessages.innerHTML = '<div class="chat-empty" id="chatEmpty">' + T('chatStartHint') + '</div>';
       }
     }
     // Show loading if this task is currently executing
@@ -1343,7 +1380,7 @@
     var el = document.getElementById('kbDocList');
     if (!el) return;
     if (contextDocs.length === 0) {
-      el.innerHTML = '<div style="font-size:12px;color:#94a3b8;text-align:center;padding:8px 0">暂无文档，点击上方按钮添加</div>';
+      el.innerHTML = '<div style="font-size:12px;color:#94a3b8;text-align:center;padding:8px 0">' + T('kbNoDoc') + '</div>';
       return;
     }
     el.innerHTML = contextDocs.map(function(d) {
@@ -2663,30 +2700,30 @@
         parsePDF(file).then(function(text) {
           removeKBParsingStatus(statusEl);
           if (text.trim()) addDoc(file.name, text);
-          else alert('PDF 未提取到文字内容');
+          else alert(T('kbPdfEmpty'));
         }).catch(function(err) {
           removeKBParsingStatus(statusEl);
-          alert('PDF 解析失败: ' + err.message);
+          alert(T('kbPdfFail') + err.message);
         });
       } else if (ext === 'docx' || ext === 'doc') {
         var statusEl = showKBParsingStatus(file.name);
         parseDOCX(file).then(function(text) {
           removeKBParsingStatus(statusEl);
           if (text.trim()) addDoc(file.name, text);
-          else alert('Word 文档未提取到文字内容');
+          else alert(T('kbWordEmpty'));
         }).catch(function(err) {
           removeKBParsingStatus(statusEl);
-          alert('Word 解析失败: ' + err.message);
+          alert(T('kbWordFail') + err.message);
         });
       } else if (ext === 'pptx' || ext === 'ppt') {
         var statusEl = showKBParsingStatus(file.name);
         parsePPTX(file).then(function(text) {
           removeKBParsingStatus(statusEl);
           if (text.trim()) addDoc(file.name, text);
-          else alert('PPT 未提取到文字内容');
+          else alert(T('kbPptEmpty'));
         }).catch(function(err) {
           removeKBParsingStatus(statusEl);
-          alert('PPT 解析失败: ' + err.message);
+          alert(T('kbPptFail') + err.message);
         });
       } else {
         // Plain text files
@@ -2702,7 +2739,7 @@
   function showKBParsingStatus(filename) {
     var el = document.createElement('div');
     el.className = 'kb-parsing-status';
-    el.innerHTML = '<span class="kb-parsing-spinner"></span> 正在解析 ' + filename + '...';
+    el.innerHTML = '<span class="kb-parsing-spinner"></span> ' + T('kbParsing', filename);
     var docList = document.getElementById('kbDocList');
     docList.parentNode.insertBefore(el, docList);
     return el;
