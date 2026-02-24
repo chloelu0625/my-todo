@@ -13,6 +13,8 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
+  html { zoom: 0.9; }
+
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     background: linear-gradient(135deg, #e0f2fe 0%, #f0fdf4 50%, #fef9c3 100%);
@@ -20,12 +22,12 @@
     overflow: hidden;
     display: flex;
     justify-content: center;
-    padding: 0;
+    padding: 10px;
   }
 
   .app-layout {
     display: flex; gap: 0; max-width: 100%; width: 100%; align-self: flex-start;
-    height: 100vh;
+    height: calc(100vh - 20px);
   }
   .left-panel { flex: 0 0 25%; position: relative; display: flex; flex-direction: column; }
   .panel-resize-handle {
@@ -47,11 +49,12 @@
 
   .card {
     background: #fff;
-    border-radius: 0;
-    box-shadow: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
     padding: 32px 28px;
   }
-  .left-panel .card { padding: 12px 12px; border-right: 1px solid #e2e8f0; }
+  .left-panel .card { padding: 12px 12px; border-radius: 12px 0 0 12px; }
+  .right-panel .card { border-radius: 0 12px 12px 0; }
 
   h1 { font-size: 26px; font-weight: 700; color: #1e293b; text-align: center; margin-bottom: 24px; }
   .left-panel h1 { font-size: 15px; margin-bottom: 8px; }
