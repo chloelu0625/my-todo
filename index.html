@@ -1498,15 +1498,15 @@
         addChatLoading();
       }
     }
-    persistChatMap();
+    persistChatMap(selectedTask ? selectedTask.id : null);
   }
 
-  function persistChatMap() {
+  function persistChatMap(changedTaskId) {
     if (!currentUser) return;
+    // Save to localStorage
     try {
       localStorage.setItem('todo-chat-' + currentUser.id, JSON.stringify(taskChatMap));
     } catch (e) {
-      // localStorage quota exceeded — prune oldest entries
       var keys = Object.keys(taskChatMap);
       if (keys.length > 5) {
         delete taskChatMap[keys[0]];
@@ -1514,23 +1514,54 @@
         try { localStorage.setItem('todo-chat-' + currentUser.id, JSON.stringify(taskChatMap)); } catch(e2) {}
       }
     }
+    // Async sync to Supabase
+    if (supabaseClient && changedTaskId && taskChatMap[changedTaskId]) {
+      supabaseClient.from('chat_history').upsert({
+        user_id: currentUser.id,
+        task_id: changedTaskId,
+        history: taskChatMap[changedTaskId].history,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id,task_id' });
+    }
   }
 
-  function loadChatMap() {
+  async function loadChatMap() {
     if (!currentUser) return;
+    // Load localStorage immediately
     try {
       var raw = localStorage.getItem('todo-chat-' + currentUser.id);
-      if (raw) taskChatMap = JSON.parse(raw);
-      else taskChatMap = {};
+      taskChatMap = raw ? JSON.parse(raw) : {};
     } catch (e) {
       taskChatMap = {};
     }
+    // Fetch from Supabase and merge (cloud wins)
+    if (!supabaseClient) return;
+    try {
+      var res = await supabaseClient
+        .from('chat_history')
+        .select('task_id, history')
+        .eq('user_id', currentUser.id);
+      if (res.data && res.data.length > 0) {
+        res.data.forEach(function(row) {
+          taskChatMap[row.task_id] = {
+            history: row.history,
+            html: renderChatHistoryHTML(row.history)
+          };
+        });
+        localStorage.setItem('todo-chat-' + currentUser.id, JSON.stringify(taskChatMap));
+      }
+    } catch(e) {}
   }
 
   function deleteChatForTask(taskId) {
     if (taskChatMap[taskId]) {
       delete taskChatMap[taskId];
       persistChatMap();
+      if (supabaseClient && currentUser) {
+        supabaseClient.from('chat_history').delete()
+          .eq('user_id', currentUser.id)
+          .eq('task_id', taskId);
+      }
     }
   }
 
@@ -2391,8 +2422,8 @@
     sel.forEach(function(task) {
       executingTaskIds.add(task.id);
       addChatToTaskMap(task.id, 'user', T('chatExecuteReq') + task.text);
+      persistChatMap(task.id);
     });
-    persistChatMap();
 
     // Show the first task's chat
     selectTask(sel[0]);
@@ -2441,7 +2472,7 @@
         // Write result to taskChatMap (always re-fetch, never use stale ref)
         addChatToTaskMap(task.id, 'ai', result);
         executingTaskIds.delete(task.id);
-        persistChatMap();
+        persistChatMap(task.id);
 
         // Refresh DOM if viewing this task
         syncTaskToDOM(task.id);
